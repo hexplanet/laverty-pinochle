@@ -1,0 +1,58 @@
+.playing-card {
+  position: absolute;
+  width: 100px;
+  height: 140px;
+  .card-container {
+    position: relative;
+    left: -50px;
+    top: -70px;
+    width: 100px;
+    height: 140px;
+    .card-display {
+      height: 100%;
+      .card-body {
+        height: 140px;
+        .top-left-suit {
+          position: absolute;
+          top: 40px;
+          left: 13px;
+          width: 40px;
+          margin: auto;
+        }
+        .bottom-right-suit {
+          position: absolute;
+          bottom: 40px;
+          right: 13px;
+          rotate: 180deg;
+          width: 40px;
+          margin: auto;
+        }
+        .top-left-value {
+          position: absolute;
+          top: 0;
+          left: 5px;
+          width: 40px;
+          text-align: center;
+          font-size: 32px;
+          font-weight: 900;
+        }
+        .bottom-right-value {
+          position: absolute;
+          bottom: 0;
+          right: 5px;
+          rotate: 180deg;
+          width: 40px;
+          text-align: center;
+          font-size: 32px;
+          font-weight: 900;
+        }
+        .value-red {
+          color: #A00;
+        }
+        .value-black {
+          color: #333;
+        }
+      }
+    }
+  }
+}

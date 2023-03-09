@@ -1,0 +1,12 @@
+.lavpin-hand {
+  position: absolute;
+  width: 800px;
+  height: 250px;
+  .hand-container {
+    position: relative;
+    left: -400px;
+    top: -250px;
+    width: 800px;
+    height: 250px;
+  }
+}

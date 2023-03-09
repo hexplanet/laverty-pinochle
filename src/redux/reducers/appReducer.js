@@ -3,7 +3,10 @@ const initialState = {
 };
 
 const appReducer = (state = initialState, action) => {
-  return state;
+  switch(action.type) {
+    default:
+      return state;
+  }
 }
 
 export default appReducer;

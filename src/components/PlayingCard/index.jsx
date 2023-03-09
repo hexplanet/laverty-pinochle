@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import BackOfCard from "./svg/BackOfCard";
 import {Hearts} from "./svg/Hearts";
@@ -15,8 +15,13 @@ function PlayingCard({
   xLocation,
   yLocation,
   zLocation,
-  hidden
+  hidden,
+  rolloverColor,
+  active,
+  clickable,
+  handleClick,
 }) {
+  const [borderColor, setBorderColor] = useState('#aaa');
   if (hidden) {
     return (<div/>);
   }
@@ -27,15 +32,39 @@ function PlayingCard({
     'S': <Spades myWidth={24} myHeight={24}/>,
   };
   const valueColor = (suit === 'H' || suit === 'D') ? 'value-red' : 'value-black';
+  const cardFrontColor = active ? '#eee' : '#afafaf';
+  const cardBodyClass = `card-body${clickable ? ' clickable': '' }`;
+  const cardClicked = () => {
+    if (clickable) {
+      const id = `${suit}${value}`;
+      handleClick(id);
+    }
+  };
+  const enterCard = () => {
+    if (rolloverColor !== '' && borderColor !== rolloverColor) {
+      setBorderColor(rolloverColor);
+    }
+  };
+  const exitCard= () => {
+    if (borderColor === rolloverColor) {
+      setBorderColor('#aaa');
+    }
+  };
   const cardFront = (
-    <div className='card-body'>
-      <BackOfCard color={'#eee'}/>
+    <div
+      className={cardBodyClass}
+      type={"button"}
+      onClick={cardClicked}
+      onMouseEnter={enterCard}
+      onMouseLeave={exitCard}
+    >
+      <BackOfCard color={cardFrontColor} borderColor={borderColor} />
       <div className='top-left-suit'>{suits[suit]}</div>
       <div className='bottom-right-suit'>{suits[suit]}</div>
-      <div className='top-left-value'>
+      <div className='top-left-value unselectableText'>
         <span className={valueColor}>{value}</span>
       </div>
-      <div className='bottom-right-value'>
+      <div className='bottom-right-value unselectableText'>
         <span className={valueColor}>{value}</span>
       </div>
     </div>
@@ -50,7 +79,7 @@ function PlayingCard({
     transform: `scale(${zoom/100})`,
   };
   return (
-    <div className='playing-card' style={location}>
+    <div className='lavpin-playing-card' style={location}>
       <div className='card-container'>
         <div className='card-display' style={displayStyle}>
         {
@@ -72,7 +101,11 @@ PlayingCard.propTypes = {
   xLocation: PropTypes.number,
   yLocation: PropTypes.number,
   zLocation: PropTypes.number,
-  hidden: PropTypes.bool
+  hidden: PropTypes.bool,
+  rolloverColor: PropTypes.string,
+  active: PropTypes.bool,
+  clickable: PropTypes.bool,
+  handleClick: PropTypes.func,
 };
 
 PlayingCard.defaultProps = {
@@ -84,7 +117,11 @@ PlayingCard.defaultProps = {
   xLocation: 0,
   yLocation: 0,
   zLocation: 0,
-  hidden: false
+  hidden: false,
+  rolloverColor: '#0f0',
+  active: true,
+  clickable: true,
+  handleClick: () => {},
 };
 
 export default PlayingCard;

@@ -1,4 +1,4 @@
-.playing-card {
+.lavpin-playing-card {
   position: absolute;
   width: 100px;
   height: 140px;
@@ -12,6 +12,9 @@
       height: 100%;
       .card-body {
         height: 140px;
+        &.clickable {
+          cursor: pointer;
+        }
         .top-left-suit {
           position: absolute;
           top: 40px;
@@ -45,6 +48,11 @@
           text-align: center;
           font-size: 32px;
           font-weight: 900;
+        }
+        .unselectableText {
+          -webkit-user-select: none; /* Safari */
+          -ms-user-select: none; /* IE 10 and IE 11 */
+          user-select: none; /* Standard syntax */
         }
         .value-red {
           color: #A00;

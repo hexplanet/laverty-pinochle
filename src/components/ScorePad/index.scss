@@ -1,0 +1,81 @@
+.lavpin-score-pad {
+  position: absolute;
+  width: 600px;
+  height: 800px;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+  .score-pad-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: 'Brush Script MT', cursive;
+    .score-column{
+      position: absolute;
+      top: 8px;
+      font-weight: 900;
+      .team-name {
+        position: absolute;
+        text-align: center;
+        font-size: 42px;
+        top: -7px;
+      }
+      .bid {
+        position: absolute;
+        text-align: center;
+        font-size: 38px;
+        width: 50px;
+        left: -1px;
+      }
+      .set {
+        position: absolute;
+        text-align: center;
+        font-size: 30px;
+        width: 50px;
+        left: -1px;
+        color: #AA0000;
+        opacity: 0.5;
+        font-family: 'Arial', cursive;
+      }
+      .meb {
+        position: absolute;
+        text-align: right;
+        font-size: 38px;
+        left: 18%;
+        width: 50px;
+      }
+      .plus {
+        position: absolute;
+        text-align: right;
+        font-size: 38px;
+        left: 44%;
+      }
+      .counts {
+        position: absolute;
+        text-align: right;
+        font-size: 38px;
+        left: 46%;
+        width: 50px;
+      }
+      .score {
+        position: absolute;
+        text-align: right;
+        font-size: 38px;
+        right: 5px;
+        width: 75px;
+      }
+    }
+    .score-column.of-2-columns {
+      .counts {
+        position: absolute;
+        text-align: right;
+        font-size: 38px;
+        left: 50%;
+        width: 50px;
+      }
+      .score {
+        right: 15px;
+      }
+    }
+  }
+}

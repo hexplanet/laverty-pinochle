@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import Button from '../Button';
-import Input from '../Input';
 import './index.scss';
 
 function Modal({
@@ -15,6 +14,7 @@ function Modal({
   hasBox,
   boxStyleClass,
   header,
+  hasHeaderSeparator,
   message,
   textInputs,
   buttons,
@@ -32,6 +32,7 @@ function Modal({
   }, []);
   const modalClassNames = `lavpin-modal ${boxStyleClass}}`;
   const boxClassNames = `modal-box${hasBox ? '' : ' transparent-box'}`;
+  const headerClassNames = `header-line${hasHeaderSeparator ? '' : ' without-separator'}`;
   const modalStyle = { height,
     width,
   };
@@ -45,7 +46,7 @@ function Modal({
   if (xLocation === -10000) {
     boxStyle.left = (windowWidth - width) / 2;
   }
-  if (xLocation === -10000) {
+  if (yLocation === -10000) {
     boxStyle.top = (windowHeight - height) / 2;
   }
   const blockAllEvents = (event) => {
@@ -66,10 +67,16 @@ function Modal({
             />
           </div>
         }
-        <div className={'header-line'}>{header}</div>
+        <div className={headerClassNames}>{header}</div>
+        {hasHeaderSeparator &&
+          <div className={'header-separator'}><hr/></div>}
         <div className={'message-area'}>{message}</div>
-        <div className={'text-inputs'}>{textInputs}</div>
-        <div className={'buttons-line'}>{buttons}</div>
+        {
+          textInputs.length > 0 && <div className={'text-inputs'}>{textInputs}</div>
+        }
+        {
+          buttons.length > 0 && <div className={'buttons-line'}>{buttons}</div>
+        }
       </div>
     </div>
   );
@@ -86,6 +93,7 @@ Modal.propTypes = {
   hasBox: PropTypes.bool,
   boxStyleClass: PropTypes.string,
   header: PropTypes.string,
+  hasHeaderSeparator: PropTypes.bool,
   message: PropTypes.string,
   textInputs: PropTypes.array,
   buttons: PropTypes.array,
@@ -103,6 +111,7 @@ Modal.defaultProps = {
   hasBox: true,
   boxStyleClass: '',
   header: '',
+  hasHeaderSeparator: false,
   message: '',
   textInputs: [],
   buttons: [],

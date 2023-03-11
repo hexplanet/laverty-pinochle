@@ -147,9 +147,55 @@ const CardTable = () => {
     console.log(id,value);
   };
 
+  const inputsForModal = [
+    <Input
+      id={'mod1'}
+      label={'Shortener'}
+      handleEnter={changedInput}
+      width={100}
+      labelWidth={160}
+      maxChars={10}
+      handleFocus={handleFocusChange}
+    />,
+    <Input
+      id={'mod2'}
+      label={'Long'}
+      handleEnter={changedInput}
+      labelWidth={160}
+      width={100}
+      maxChars={10}
+      handleFocus={handleFocusChange}
+    />
+  ];
+
+  const modalButtons = [
+    <Button
+      handleClick={clickedButton}
+      label={'No'}
+    />,
+    <Button
+      handleClick={clickedButton}
+      label={'Maybe'}
+    />,
+    <Button
+      handleClick={clickedButton}
+      label={'Yes'}
+    />,
+  ];
+
   return (
     <div className='lavpin-card-table'>
-      <Modal hasBlocker={true}/>
+      <Modal
+        id={'test'}
+        hasBlocker={true}
+        xLocation={80}
+        height={300}
+        header={'Title'}
+        hasHeaderSeparator={true}
+        message={(<div><div>Part 1 of Message</div><div>Part 2 of Message</div></div>)}
+        textInputs={inputsForModal}
+        buttons={modalButtons}
+      />
       <Hand id='player1' xLocation={600} yLocation={700} cards={testHand} cardClicked={cardClicked} />
       <Hand id='player2' xLocation={600} yLocation={1000} cards={testHand2} cardClicked={cardClicked} />
       <PlayingCard xLocation={100} yLocation={100} suit={'H'} value={'9'} />

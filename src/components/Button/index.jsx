@@ -41,7 +41,6 @@ Button.defaultProps = {
   buttonClass: '',
   status: '',
   label: '',
-  buttonStyle: null,
 };
 
 export default Button;

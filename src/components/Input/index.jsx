@@ -9,6 +9,7 @@ function Input({
   width,
   maxChars,
   label,
+  labelWidth,
   value,
   prompt,
   status,
@@ -18,7 +19,7 @@ function Input({
 }) {
   const [currentValue, setCurrentValue] = useState(value);
   const [enterKeyListener, setEnterKeyListener] = useState(false);
-  const inputClassNames = `lavoin-input ${inputCLass}}`;
+  const inputClassNames = `lavpin-input ${inputCLass}}`;
   const inputBoxWidth={width:`${width}px`};
   let focused = false;
   const handleEnterKey = (event) => {
@@ -44,23 +45,26 @@ function Input({
       }
     }
   };
+  const labelStyle = labelWidth === 0 ? {} : { width: labelWidth };
   const onFocus = () => { handleFocus(id, true); };
   const onBlur = () => { handleFocus(id, false); };
   return (
     <div className={inputClassNames}>
-      <span>
-        {label && `${label}: `}
-        <input
-          type={inputType}
-          placeholder={prompt}
-          value={currentValue}
-          disabled={status==='inactive'}
-          style={inputBoxWidth}
-          onChange={textChanged}
-          onFocus={onFocus}
-          onBlur={onBlur}
-        />
-      </span>
+      <div className={'input-container'}>
+        {label && <div className={'input-label'} style={labelStyle}>{label} </div>}
+        <div className={'input-element'}>
+          <input
+            type={inputType}
+            placeholder={prompt}
+            value={currentValue}
+            disabled={status==='inactive'}
+            style={inputBoxWidth}
+            onChange={textChanged}
+            onFocus={onFocus}
+            onBlur={onBlur}
+          />
+        </div>
+      </div>
     </div>
   );
 }
@@ -72,6 +76,7 @@ Input.propTypes = {
   width: PropTypes.number,
   maxChars: PropTypes.number,
   label: PropTypes.string,
+  labelWidth: PropTypes.number,
   value: PropTypes.string,
   prompt: PropTypes.string,
   status: PropTypes.string,
@@ -87,6 +92,7 @@ Input.defaultProps = {
   width: 200,
   maxChars: 15,
   label: '',
+  labelWidth: 0,
   value: '',
   prompt: '',
   status: 'active',

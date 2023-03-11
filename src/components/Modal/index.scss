@@ -18,6 +18,49 @@
       position:absolute;
       right: 1px;
       top: 1px;
+      span {
+        font-size: 14px;
+        vertical-align: 8px;
+      }
+    }
+    .header-line {
+      font-size: 30px;
+      font-weight: 900;
+      width: 100%;
+      margin-left: 10px;
+    }
+    .header-line.without-separator {
+      text-align: center;
+      margin-left: 0;
+    }
+    .header-separator {
+      hr {
+        border-color: #888;
+      }
+    }
+    .message-area {
+      margin-left: 10px;
+      margin-right: 10px;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    .text-inputs {
+      margin-left: 10px;
+      margin-right: 10px;
+      .lavpin-input {
+        .input-label {
+          font-family: Arial, sans-serif;
+        }
+      }
+    }
+    .buttons-line {
+      width: 100%;
+      position: absolute;
+      bottom: 10px;
+      display: inline-flex;
+      .lavpin-button {
+        margin: auto;
+      }
     }
   }
   .modal-box.transparent-box {

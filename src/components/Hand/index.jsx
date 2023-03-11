@@ -11,6 +11,7 @@ function Hand({
   cards,
   shown,
   zoom,
+  rotation,
   hidden,
   cardClicked,
 }) {
@@ -55,13 +56,20 @@ function Hand({
     left: xLocation,
     top: yLocation,
     zIndex: zLocation,
+  };
+  const transformedStyle = {
     transform: `scale(${zoom/100})`,
+  };
+  const handRotation = {
+    rotate: `${rotation}deg`,
   };
   if (hidden) { return (<div />); }
   return (
-    <div className="lavpin-hand" style={location}>
-      <div className='hand-container'>
-        {cardsToDisplay}
+    <div className='lavpin-hand' style={location}>
+      <div className='hand-transformer' style={transformedStyle}>
+        <div className='hand-container' style={handRotation}>
+          {cardsToDisplay}
+        </div>
       </div>
     </div>
   );
@@ -75,6 +83,7 @@ Hand.propTypes = {
   cards: PropTypes.array,
   shown: PropTypes.bool,
   zoom: PropTypes.number,
+  rotation: PropTypes.number,
   hidden: PropTypes.bool,
   cardClicked: PropTypes.func,
 }
@@ -86,6 +95,7 @@ Hand.defaultProps = {
   cards: [],
   shown: true,
   zoom: 100,
+  rotation: 0,
   hidden: false,
   cardClicked: () => {},
 }

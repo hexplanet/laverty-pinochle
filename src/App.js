@@ -1,11 +1,11 @@
 import React from 'react';
-import CardTable from "./containers/CardTable";
+import GamePlay from "./containers/GamePlay";
 import './App.scss';
 
 function App() {
   return (
     <div className="laverty-pinocle-app">
-      <CardTable />
+      <GamePlay />
     </div>
   );
 }

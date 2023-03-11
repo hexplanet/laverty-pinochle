@@ -2,10 +2,15 @@
   position: absolute;
   width: 800px;
   height: 250px;
-  .hand-container {
-    position: relative;
+  .hand-transformer {
+    position: absolute;
     left: -400px;
-    top: -250px;
+    top: -125px;
+    width: 800px;
+    height: 250px;
+  }
+  .hand-container {
+    position: absolute;
     width: 800px;
     height: 250px;
   }

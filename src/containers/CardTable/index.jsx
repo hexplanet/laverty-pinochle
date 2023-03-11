@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import PlayingCard from "../../components/PlayingCard";
 import Hand from "../../components/Hand";
 import Pile from "../../components/Pile";
@@ -9,7 +10,9 @@ import Input from "../../components/Input";
 import Modal from "../../components/Modal";
 import { Hearts } from "../../components/PlayingCard/svg/Hearts";
 import './index.scss';
-const CardTable = () => {
+function CardTable({
+  disaplayHands,
+}) {
   const [showMoveCard, setShowMoveCard] = useState(true);
   const testHand = [
     {suit:"H", value: "10", raised: true},
@@ -182,7 +185,12 @@ const CardTable = () => {
       label={'Yes'}
     />,
   ];
-
+  return (
+    <div className='lavpin-card-table'>
+      {disaplayHands}
+    </div>
+  );
+/*
   return (
     <div className='lavpin-card-table'>
       <Modal
@@ -245,6 +253,15 @@ const CardTable = () => {
       </div>
     </div>
   )
+ */
+}
+
+CardTable.propTypes = {
+  disaplayHands: PropTypes.array,
+};
+
+CardTable.defaultProps = {
+  disaplayHands: [],
 };
 
 export default CardTable;

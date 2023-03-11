@@ -1,0 +1,16 @@
+.lavoin-input {
+  font-size: 24px;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  input {
+    font-size: 24px;
+    border-radius: 3px;
+    padding: 3px;
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+  }
+  input:focus {
+    background-color: #ffc;
+    color: #333;
+  }
+}

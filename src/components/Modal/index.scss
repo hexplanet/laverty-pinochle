@@ -1,0 +1,27 @@
+.lavpin-modal {
+  position: relative;
+  .blocker {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    cursor: default;
+    background-color: #000;
+    opacity: 0.85;
+  }
+  .modal-box {
+    position: absolute;
+    background-color: #ffffaa;
+    border: 3px solid #888;
+    .x-button {
+      position:absolute;
+      right: 1px;
+      top: 1px;
+    }
+  }
+  .modal-box.transparent-box {
+    background-color: transparent;
+    border-color: transparent;
+  }
+}

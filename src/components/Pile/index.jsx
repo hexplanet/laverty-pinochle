@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import PlayingCard from "../PlayingCard";
 import './index.scss';
 
-
 function Pile({
   xLocation,
   yLocation,

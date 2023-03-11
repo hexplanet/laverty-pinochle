@@ -26,6 +26,10 @@ function ScorePad({
     teams.forEach((team, index) => {
       const leftColumn = { left: `${columnWidth * index}px`, width: `${columnWidth}px`};
       const columnSize = { width: `${columnWidth}px`};
+      const totalSize = {
+        width: `${columnWidth}px`,
+        height: `${scores[index].length * 50}px`
+      };
       const scoreLines = [];
       scoreLines.push(<div className='team-name' style={columnSize} key={`teamName${index}`}>{team}</div>);
       const points = scores[index];
@@ -35,15 +39,19 @@ function ScorePad({
         if (point.bid !== "" && point.gotSet) {
           scoreLines.push(<div className='set' style={topRowStyle} key={`set${index}${pointIndex}`}>X</div>);
         }
-        if (!point.gotSet) {
-          scoreLines.push(<div className='meb' style={topRowStyle} key={`meb${index}${pointIndex}`}>{point.meb}</div>);
-          if (point.counts !== "") {
-            scoreLines.push(<div className='plus' style={topRowStyle} key={`plus${index}${pointIndex}`}>+</div>);
-            scoreLines.push(<div className='counts' style={topRowStyle} key={`counts${index}${pointIndex}`}>{point.counts}</div>);
-          }
+        const mebClass = point.gotSet ? 'meb erased': 'meb';
+        scoreLines.push(<div className={mebClass} style={topRowStyle} key={`meb${index}${pointIndex}`}>{point.meb}</div>);
+        if (point.counts !== "") {
+          const plusClass = point.gotSet ? 'plus erased': 'plus';
+          const countsClass = point.gotSet ? 'counts erased': 'counts';
+          scoreLines.push(<div className={plusClass} style={topRowStyle} key={`plus${index}${pointIndex}`}>+</div>);
+          scoreLines.push(<div className={countsClass} style={topRowStyle} key={`counts${index}${pointIndex}`}>{point.counts}</div>);
         }
         scoreLines.push(<div className='score' style={topRowStyle} key={`score${index}${pointIndex}`}>{point.score}</div>);
       });
+      if (team === won) {
+        scoreLines.push(<div className='won-game' style={totalSize} key={`wonGame${index}`}><div className='big-w'>W</div></div>);
+      }
       scoreElements.push(<div className={columnClassName} style={leftColumn} key={`scoreColumn${index}`}>{scoreLines}</div>);
     });
     return scoreElements;

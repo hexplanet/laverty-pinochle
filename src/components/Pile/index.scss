@@ -2,11 +2,16 @@
   position: absolute;
   width: 220px;
   height: 220px;
-  .pile-container {
-    position: relative;
+  .pile-transformer {
+    position: absolute;
     left: -110px;
     top: -110px;
     width: 220px;
     height: 220px;
+    .pile-container {
+      position: absolute;
+      width: 220px;
+      height: 220px;
+    }
   }
 }

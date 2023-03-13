@@ -71,7 +71,7 @@ function MoveCard({
 }
 
 MoveCard.propTypes = {
-  id: PropTypes.number,
+  id: PropTypes.string,
   suit: PropTypes.string,
   value: PropTypes.string,
   shown: PropTypes.bool,

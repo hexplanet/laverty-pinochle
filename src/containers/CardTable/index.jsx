@@ -11,7 +11,13 @@ import Modal from "../../components/Modal";
 import { Hearts } from "../../components/PlayingCard/svg/Hearts";
 import './index.scss';
 function CardTable({
-  disaplayHands,
+  displayHands,
+  displayDiscards,
+  displayMebs,
+  displayGameArea,
+  displayScorePad,
+  displayPlayerModal,
+  displayMovingCards
 }) {
   const [showMoveCard, setShowMoveCard] = useState(true);
   const testHand = [
@@ -187,7 +193,13 @@ function CardTable({
   ];
   return (
     <div className='lavpin-card-table'>
-      {disaplayHands}
+      {displayDiscards}
+      {displayMebs}
+      {displayGameArea}
+      {displayScorePad}
+      {displayPlayerModal}
+      {displayHands}
+      {displayMovingCards}
     </div>
   );
 /*
@@ -257,11 +269,23 @@ function CardTable({
 }
 
 CardTable.propTypes = {
-  disaplayHands: PropTypes.array,
+  displayHands: PropTypes.array,
+  displayDiscards: PropTypes.array,
+  displayMebs: PropTypes.array,
+  displayGameArea: PropTypes.array,
+  displayScorePad: PropTypes.array,
+  displayPlayerModal: PropTypes.array,
+  displayMovingCards: PropTypes.array,
 };
 
 CardTable.defaultProps = {
-  disaplayHands: [],
+  displayHands: [],
+  displayDiscards: [],
+  displayMebs: [],
+  displayGameArea: [],
+  displayScorePad: [],
+  displayPlayerModal: [],
+  displayMovingCards: [],
 };
 
 export default CardTable;

@@ -12,12 +12,6 @@ function ScorePad({
   won,
   scores,
 }) {
-  const location = {
-    left: `${xLocation}px`,
-    top: `${yLocation}px`,
-    zIndex: zLocation,
-    transform: `scale(${zoom/100})`,
-  };
   const scoreElements = [];
   useMemo(() => {
     const columnWidth = 600 / teams.length;
@@ -56,12 +50,24 @@ function ScorePad({
     });
     return scoreElements;
   }, [teams, won, scores, scoreElements]);
-  return (<div className='lavpin-score-pad' style={location}>
-    <RuledPaper columns = { teams.length } />
-    <div className='score-pad-container'>
-      {scoreElements}
+  const location = {
+    left: `${xLocation}px`,
+    top: `${yLocation}px`,
+    zIndex: zLocation,
+  };
+  const transformStyle = {
+    transform: `scale(${zoom/100})`,
+  };
+  return (
+    <div className='lavpin-score-pad' style={location}>
+      <div className={'score-pad-transform'} style={transformStyle}>
+        <RuledPaper columns = { teams.length } />
+        <div className='score-pad-container'>
+          {scoreElements}
+        </div>
+      </div>
     </div>
-  </div>);
+  );
 }
 
 ScorePad.propTypes = {
@@ -75,8 +81,8 @@ ScorePad.propTypes = {
 };
 
 ScorePad.defaultProps = {
-  xLocation: 100,
-  yLocation: 100,
+  xLocation: 0,
+  yLocation: 0,
   zLocation: 0,
   zoom: 100,
   won: '',

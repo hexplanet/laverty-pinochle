@@ -7,6 +7,7 @@ function Modal({
   xLocation,
   yLocation,
   zLocation,
+  zoom,
   width,
   height,
   hasBlocker,
@@ -37,18 +38,27 @@ function Modal({
     width,
   };
   const blockerStyle = { zIndex: zLocation };
-  const boxStyle = { zIndex: zLocation,
+  const containerStyle = { zIndex: zLocation,
     height,
     width,
     left: `${xLocation}px`,
     top: `${yLocation}px`,
   };
   if (xLocation === -10000) {
-    boxStyle.left = (windowWidth - width) / 2;
+    containerStyle.left = windowWidth / 2;
   }
   if (yLocation === -10000) {
-    boxStyle.top = (windowHeight - height) / 2;
+    containerStyle.top = windowHeight / 2;
   }
+  const transitionStyle = {
+    transform: `scale(${zoom/100})`,
+  };
+  const boxStyle = {
+    left: `${-width / 2}px`,
+    top: `${-height / 2}px`,
+    height,
+    width,
+  };
   const blockAllEvents = (event) => {
     event.stopPropagation();
   }
@@ -57,26 +67,30 @@ function Modal({
       {
         hasBlocker && <div className={'blocker'} onClick={blockAllEvents} style={blockerStyle}></div>
       }
-      <div className={boxClassNames} style={boxStyle}>
-        {hasCloseButton &&
-          <div className={'x-button'}>
-            <Button
-              label={'X'}
-              status={'transparent'}
-              handleClick={handleCloseModal}
-            />
+      <div className={'box-container'} style={containerStyle}>
+        <div className={'box-transition'} style={transitionStyle}>
+          <div className={boxClassNames} style={boxStyle}>
+            {hasCloseButton &&
+              <div className={'x-button'}>
+                <Button
+                  label={'X'}
+                  status={'transparent'}
+                  handleClick={handleCloseModal}
+                />
+              </div>
+            }
+            <div className={headerClassNames}>{header}</div>
+            {hasHeaderSeparator &&
+              <div className={'header-separator'}><hr/></div>}
+            <div className={'message-area'}>{message}</div>
+            {
+              textInputs.length > 0 && <div className={'text-inputs'}>{textInputs}</div>
+            }
+            {
+              buttons.length > 0 && <div className={'buttons-line'}>{buttons}</div>
+            }
           </div>
-        }
-        <div className={headerClassNames}>{header}</div>
-        {hasHeaderSeparator &&
-          <div className={'header-separator'}><hr/></div>}
-        <div className={'message-area'}>{message}</div>
-        {
-          textInputs.length > 0 && <div className={'text-inputs'}>{textInputs}</div>
-        }
-        {
-          buttons.length > 0 && <div className={'buttons-line'}>{buttons}</div>
-        }
+        </div>
       </div>
     </div>
   );
@@ -86,6 +100,7 @@ Modal.propTypes = {
   xLocation: PropTypes.number,
   yLocation: PropTypes.number,
   zLocation: PropTypes.number,
+  zoom: PropTypes.number,
   width: PropTypes.number,
   height: PropTypes.number,
   hasBlocker: PropTypes.bool,
@@ -104,6 +119,7 @@ Modal.defaultProps = {
   xLocation: -10000,
   yLocation: -10000,
   zLocation: 1000,
+  zoom: 50,
   width: 400,
   height: 200,
   hasBlocker: false,

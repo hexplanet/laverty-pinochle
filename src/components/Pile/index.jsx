@@ -9,6 +9,7 @@ function Pile({
   zLocation,
   cards,
   shown,
+  rotation,
   zoom,
   hidden,
   hasHeight,
@@ -38,12 +39,19 @@ function Pile({
     left: xLocation,
     top: yLocation,
     zIndex: zLocation,
+  };
+  const transformerStyle = {
     transform: `scale(${zoom/100})`,
   };
+  const pileStyle = {
+    rotate: `${rotation}deg`,
+  };
   return (
-    <div className="lavpin-pile" style={location}>
-      <div className='pile-container'>
-        {cardsToDisplay}
+    <div className='lavpin-pile' style={location}>
+      <div className='pile-transformer' style={transformerStyle}>
+        <div className='pile-container' style={pileStyle}>
+          {cardsToDisplay}
+        </div>
       </div>
     </div>
   );
@@ -55,6 +63,7 @@ Pile.propTypes = {
   zLocation: PropTypes.number,
   cards: PropTypes.array,
   shown: PropTypes.bool,
+  rotation: PropTypes.number,
   zoom: PropTypes.number,
   hidden: PropTypes.bool,
   hasHeight: PropTypes.bool,
@@ -66,6 +75,7 @@ Pile.defaultProps = {
   zLocation: 0,
   cards: [],
   shown: false,
+  rotation: 0,
   zoom: 100,
   hidden: false,
   hasHeight: true,

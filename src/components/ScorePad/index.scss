@@ -5,97 +5,117 @@
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10 and IE 11 */
   user-select: none; /* Standard syntax */
-  .score-pad-container {
+  .score-pad-transform {
     position: absolute;
-    left: 0;
-    top: 0;
-    font-family: 'Brush Script MT', cursive;
-    .score-column{
-      text-shadow: 1px 1px 3px #888;
+    width: 600px;
+    height: 800px;
+    left: -300px;
+    top: -400px;
+    .score-pad-container {
       position: absolute;
-      top: 8px;
-      font-weight: 900;
-      .team-name {
+      left: 0;
+      top: 0;
+      font-family: 'Brush Script MT', cursive;
+      .score-column {
+        text-shadow: 1px 1px 3px #888;
         position: absolute;
-        text-align: center;
-        font-size: 42px;
-        top: -7px;
-      }
-      .bid {
-        position: absolute;
-        text-align: center;
-        font-size: 38px;
-        width: 50px;
-        left: -1px;
-      }
-      .set {
-        position: absolute;
-        text-align: center;
-        font-size: 40px;
-        width: 50px;
-        left: -1px;
-        opacity: 0.5;
-        font-family: 'Arial', cursive;
-        font-weight: 300;
-      }
-      .meb {
-        position: absolute;
-        text-align: right;
-        font-size: 38px;
-        left: 18%;
-        width: 50px;
-      }
-      .plus {
-        position: absolute;
-        text-align: right;
-        font-size: 38px;
-        left: 44%;
-      }
-      .counts {
-        position: absolute;
-        text-align: right;
-        font-size: 38px;
-        left: 46%;
-        width: 50px;
-      }
-      .score {
-        position: absolute;
-        text-align: right;
-        font-size: 38px;
-        right: 5px;
-        width: 75px;
-      }
-      .meb.erased, .plus.erased, .counts.erased,  {
-        font-weight: 300;
-        color: #bb6;
-      }
-      .won-game {
-        position: absolute;
-        top: 15px;
-        .big-w {
+        top: 8px;
+        font-weight: 900;
+
+        .team-name {
           position: absolute;
-          left: calc(50% - 50px);
-          top: calc(50% - 50px);
-          font-size: 128px;
-          width: 100px;
-          height: 100px;
+          text-align: center;
+          font-size: 42px;
+          top: -7px;
+        }
+
+        .bid {
+          position: absolute;
+          text-align: center;
+          font-size: 38px;
+          width: 50px;
+          left: -1px;
+        }
+
+        .set {
+          position: absolute;
+          text-align: center;
+          font-size: 40px;
+          width: 50px;
+          left: -1px;
+          opacity: 0.5;
+          font-family: 'Arial', cursive;
           font-weight: 300;
         }
+
+        .meb {
+          position: absolute;
+          text-align: right;
+          font-size: 38px;
+          left: 18%;
+          width: 50px;
+        }
+
+        .plus {
+          position: absolute;
+          text-align: right;
+          font-size: 38px;
+          left: 44%;
+        }
+
+        .counts {
+          position: absolute;
+          text-align: right;
+          font-size: 38px;
+          left: 46%;
+          width: 50px;
+        }
+
+        .score {
+          position: absolute;
+          text-align: right;
+          font-size: 38px;
+          right: 5px;
+          width: 75px;
+        }
+
+        .meb.erased, .plus.erased, .counts.erased, {
+          font-weight: 300;
+          color: #bb6;
+        }
+
+        .won-game {
+          position: absolute;
+          top: 15px;
+
+          .big-w {
+            position: absolute;
+            left: calc(50% - 50px);
+            top: calc(50% - 50px);
+            font-size: 128px;
+            width: 100px;
+            height: 100px;
+            font-weight: 300;
+          }
+        }
       }
-    }
-    .score-column.of-2-columns {
-      .counts {
-        position: absolute;
-        text-align: right;
-        font-size: 38px;
-        left: 50%;
-        width: 50px;
-      }
-      .plus {
-        left: 42%;
-      }
-      .score {
-        right: 15px;
+
+      .score-column.of-2-columns {
+        .counts {
+          position: absolute;
+          text-align: right;
+          font-size: 38px;
+          left: 50%;
+          width: 50px;
+        }
+
+        .plus {
+          left: 42%;
+        }
+
+        .score {
+          right: 15px;
+        }
       }
     }
   }

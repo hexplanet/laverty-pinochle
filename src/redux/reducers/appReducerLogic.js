@@ -1,4 +1,10 @@
-import { generateShuffledDeck, generatePromptModal }  from '../../utils/helpers';
+import {
+  generateShuffledDeck,
+  generatePromptModal,
+  getCardLocation,
+  getRandomRange,
+  createLandingCard,
+}  from '../../utils/helpers';
 export const playerDisplaySettingsLogic = (width, height, players) => {
   const playerHandLocations = [];
   const playerDiscardLocations = [];
@@ -143,12 +149,58 @@ export const playerDisplaySettingsLogic = (width, height, players) => {
     playerDiscardLocations,
     playerMebLocations,
     miscLocations,
+    zoomRatio: ratio,
   };
+};
+
+export const resolveCardMovement = (
+  id,
+  movingCards,
+  hands,
+  mebs,
+  discardPiles,
+  playPile
+) => {
+  const changedValues = {};
+  const moveCardIndex = movingCards.findIndex((moveCard) => moveCard.id === id);
+  if (moveCardIndex > -1) {
+    const stoppedCard = {...movingCards[moveCardIndex]};
+    const landingSpot = id.split('to')[1];
+    const objectType = landingSpot[0];
+    const playerIndex = landingSpot.length > 1 ? Number(landingSpot[1]) : -1;
+    const subIndex = landingSpot.length > 2 ? Number(landingSpot.substring(2)) : -1;
+    const newMovingCards = [...movingCards];
+    changedValues.movingCards = newMovingCards;
+    newMovingCards.splice(moveCardIndex, 1);
+    changedValues.movingCards = newMovingCards;
+    const landingCard = createLandingCard(stoppedCard, objectType, playerIndex, subIndex);
+    switch(objectType) {
+      case 'H':
+        const newHands = [...hands];
+        newHands[playerIndex] = [...hands[playerIndex], landingCard];
+        changedValues.hands = newHands;
+        break;
+      case 'M':
+        const newMebs = [...mebs];
+        newMebs[playerIndex] = [...mebs[playerIndex], landingCard];
+        changedValues.mebs = newMebs;
+        break;
+      case 'D':
+        const newDiscardPiles = [...discardPiles];
+        newDiscardPiles[playerIndex] = [...discardPiles[playerIndex], landingCard];
+        changedValues.discardPiles = newDiscardPiles;
+        break;
+      default:
+        const newPlayPile = [...playPile, landingCard];
+        changedValues.playPile = newPlayPile;
+    }
+  }
+  return changedValues;
 };
 
 export const setGameValuesForNewGame = (teams, players) => {
   const throwAcesForDealerModal =
-    generatePromptModal('Dealer is choosen by the first player to get an ace');
+    generatePromptModal('Dealer is chosen by the first player to get an ace');
   const initedValues = {
     gameState: 'choseDealer',
     discardPiles: [],
@@ -172,4 +224,51 @@ export const setGameValuesForNewGame = (teams, players) => {
   }
   initedValues.discardPiles[0] = generateShuffledDeck();
   return initedValues;
+};
+
+export const throwCardForDeal = (state) => {
+  const sourceCardId = `D0${state.discardPiles[0].length}`;
+  const sourceCard = getCardLocation(sourceCardId, state);
+  sourceCard.zoom = sourceCard.zoom * 2;
+  const newDealer = (state.dealer + 1) % state.players.length;
+  const targetCardId = `M${newDealer}`;
+  const targetCard = getCardLocation(targetCardId, state);
+  targetCard.rotation = targetCard.rotation + getRandomRange(-10, 10, 1);
+  const dealtCard = state.discardPiles[0][state.discardPiles[0].length -1];
+  const newDiscard0 = state.discardPiles[0];
+  newDiscard0.pop();
+  const newDiscards = state.discardPiles;
+  newDiscards[0] = [...newDiscard0];
+  const newMovingCard = {
+    id: `${sourceCardId}to${targetCardId}`,
+    suit: dealtCard.suit,
+    value: dealtCard.value,
+    shown: false,
+    speed: 1,
+    source: sourceCard,
+    target: targetCard,
+  };
+  return {
+    newDiscards,
+    newDealer,
+    newMovingCard
+  };
+}
+
+
+
+
+export const passDeckToDealer = (
+  discardPiles,
+  mebs,
+  players,
+  dealer
+) => {
+  const dealerPromptModal =
+    generatePromptModal((<div>The dealer is<br/><b>{players[dealer]}</b></div>));
+  const moveCardsToDealer = [];
+  return {
+    dealerPromptModal,
+    moveCardsToDealer
+  };
 };

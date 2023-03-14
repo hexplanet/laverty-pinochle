@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
+/*
 import PlayingCard from "../../components/PlayingCard";
 import Hand from "../../components/Hand";
 import Pile from "../../components/Pile";
@@ -9,6 +10,7 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import Modal from "../../components/Modal";
 import { Hearts } from "../../components/PlayingCard/svg/Hearts";
+ */
 import './index.scss';
 function CardTable({
   displayHands,
@@ -19,6 +21,7 @@ function CardTable({
   displayPlayerModal,
   displayMovingCards
 }) {
+  /*
   const [showMoveCard, setShowMoveCard] = useState(true);
   const testHand = [
     {suit:"H", value: "10", raised: true},
@@ -191,6 +194,7 @@ function CardTable({
       label={'Yes'}
     />,
   ];
+  */
   return (
     <div className='lavpin-card-table'>
       {displayDiscards}

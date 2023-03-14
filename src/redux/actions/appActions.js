@@ -1,5 +1,4 @@
 import * as actionTypes from './appActionTypes';
-import {SETUP_FOR_NEW_GAME} from "./appActionTypes";
 
 export const setCardTableLayout = (width, height, players) => {
   return {
@@ -7,6 +6,13 @@ export const setCardTableLayout = (width, height, players) => {
     width,
     height,
     players,
+  };
+};
+
+export const resolveCardMovement = (id) => {
+  return {
+    type: actionTypes.RESOLVE_CARD_MOVEMENT,
+    id
   };
 };
 
@@ -22,8 +28,8 @@ export const throwForAce = () => {
   };
 };
 
-export const resolveCardMovement = () => {
+export const selectedDealer = () => {
   return {
-    type: actionTypes.RESOLVE_CARD_MOVEMENT,
+    type: actionTypes.SELECTED_DEALER,
   };
 };

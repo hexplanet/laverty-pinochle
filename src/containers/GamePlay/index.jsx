@@ -27,7 +27,8 @@ function GamePlay() {
     playerModal,
     promptModal,
     gameState,
-    movingCards
+    movingCards,
+    dealer
   } = useSelector((state) => state.app);
   const [windowWidth, setWindowWidth]   = useState(window.innerWidth);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
@@ -64,8 +65,17 @@ function GamePlay() {
       case 'choseDealer':
         dispatch(appActions.throwForAce());
         break;
+      case 'waitForAce:complete':
+        if (mebs[dealer][mebs[dealer].length -1].value === "A") {
+          dispatch(appActions.selectedDealer());
+        } else {
+          dispatch(appActions.throwForAce());
+        }
+        break;
+      default:
+        console.log('uncovered gameState: ', gameState);
     }
-  }, [gameState]);
+  }, [gameState, mebs, dealer]);
   const HandleClickedCard = (id, card) => {
     console.log(id, card);
   };
@@ -133,7 +143,7 @@ function GamePlay() {
       if (mebDisplaySettings[index]) {
         newGameMebs.push(
           <Pile
-            key={`discard${index}`}
+            key={`meb${index}`}
             xLocation={mebDisplaySettings[index].x}
             yLocation={mebDisplaySettings[index].y}
             rotation={mebDisplaySettings[index].rotation}
@@ -203,7 +213,6 @@ function GamePlay() {
     promptModal,
   ]);
   const cardFinishedMovement = (id) => {
-    console.log(id);
     dispatch(appActions.resolveCardMovement(id));
   };
   useEffect(() => {

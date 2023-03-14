@@ -130,6 +130,7 @@ const initialState = {
     promptModal: {},
   },
   movingCards: [],
+  zoomRatio: 1,
   dealer: 0,
   playPile: mockPlayArea,
   playPileShown: true,
@@ -146,7 +147,8 @@ const appReducer = (state = initialState, action) => {
           playerHandLocations,
           playerDiscardLocations,
           playerMebLocations,
-          miscLocations
+          miscLocations,
+          zoomRatio
         } = reducerLogic.playerDisplaySettingsLogic(
           action.width,
           action.height,
@@ -158,7 +160,23 @@ const appReducer = (state = initialState, action) => {
         discardDisplaySettings: playerDiscardLocations,
         mebDisplaySettings: playerMebLocations,
         miscDisplaySettings: miscLocations,
+        zoomRatio
+      };
+    case actionTypes.RESOLVE_CARD_MOVEMENT:
+      const modifiedValues = reducerLogic.resolveCardMovement(
+        action.id,
+        state.movingCards,
+        state.hands,
+        state.mebs,
+        state.discardPiles,
+        state.playPile);
+      if (modifiedValues.movingCards.length === 0) {
+        modifiedValues.gameState = `${state.gameState}:complete`;
       }
+      return {
+        ...state,
+        ...modifiedValues,
+      };
     case actionTypes.SETUP_FOR_NEW_GAME:
       const clearedValues = reducerLogic.setGameValuesForNewGame(state.teams, state.players);
       return {
@@ -166,30 +184,34 @@ const appReducer = (state = initialState, action) => {
         ...clearedValues
       };
     case actionTypes.THROW_FOR_ACE:
-      console.log('throw card for ace');
-      const dealtCard = state.discardPiles[0][state.discardPiles[0].length -1];
-      const newDiscard0 = state.discardPiles[0];
-      newDiscard0.pop();
-      const newDiscards = state.discardPiles;
-      newDiscards[0] = newDiscard0;
-      const newDealer = (state.dealer + 1) % state.players.length;
-      const newMovingCards = [...state.movingCards,
-        {
-          id: `D0${state.discardPiles[0].length}toM${newDealer}`,
-          suit: dealtCard.suit,
-          value: dealtCard.value,
-          shown: false,
-          speed: 1,
-          source:{x: 1000, y: 1000, rotation: 0, zoom: 100 },
-          target:{x: 100, y: 800, rotation: -720, zoom: 200 },
-        }
-      ];
+      const {
+        newDealer,
+        newDiscards,
+        newMovingCard
+      } = reducerLogic.throwCardForDeal(state);
+      const newMovingCards = [...state.movingCards, newMovingCard];
       return {
         ...state,
         dealer: newDealer,
         gameState: 'waitForAce',
         discardPiles: newDiscards,
         movingCards: newMovingCards
+      };
+    case actionTypes.SELECTED_DEALER:
+      const {
+        dealerPromptModal,
+        moveCardsToDealer
+      } = reducerLogic.passDeckToDealer(
+        state.discardPiles,
+        state.mebs,
+        state.players,
+        state.dealer
+      );
+      return {
+        ...state,
+        promptModal: dealerPromptModal,
+        movingCards: moveCardsToDealer,
+        gameState: 'moveDeckToDealer',
       };
     default:
       return state;

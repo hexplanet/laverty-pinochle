@@ -155,6 +155,7 @@ export const playerDisplaySettingsLogic = (width, height, players) => {
 
 export const resolveCardMovement = (
   id,
+  keyId,
   movingCards,
   hands,
   mebs,
@@ -162,9 +163,9 @@ export const resolveCardMovement = (
   playPile
 ) => {
   const changedValues = {};
-  const moveCardIndex = movingCards.findIndex((moveCard) => moveCard.id === id);
+  const moveCardIndex = movingCards.findIndex((moveCard) => moveCard.keyId === keyId);
   if (moveCardIndex > -1) {
-    const stoppedCard = {...movingCards[moveCardIndex]};
+    const stoppedCard = movingCards[moveCardIndex];
     const landingSpot = id.split('to')[1];
     const objectType = landingSpot[0];
     const playerIndex = landingSpot.length > 1 ? Number(landingSpot[1]) : -1;
@@ -172,7 +173,7 @@ export const resolveCardMovement = (
     const newMovingCards = [...movingCards];
     changedValues.movingCards = newMovingCards;
     newMovingCards.splice(moveCardIndex, 1);
-    changedValues.movingCards = newMovingCards;
+    changedValues.movingCards = [...newMovingCards];
     const landingCard = createLandingCard(stoppedCard, objectType, playerIndex, subIndex);
     switch(objectType) {
       case 'H':
@@ -204,6 +205,7 @@ export const setGameValuesForNewGame = (teams, players) => {
   const initedValues = {
     gameState: 'choseDealer',
     discardPiles: [],
+    showHands: [],
     hands: [],
     mebs: [],
     playPile: [],
@@ -218,6 +220,7 @@ export const setGameValuesForNewGame = (teams, players) => {
     initedValues.discardPiles.push([]);
     initedValues.hands.push([]);
     initedValues.mebs.push([]);
+    initedValues.showHands.push(i === 0);
   }
   for(let i = 0; i < teams.length; i++) {
     initedValues.playScore.push([]);
@@ -227,7 +230,7 @@ export const setGameValuesForNewGame = (teams, players) => {
 };
 
 export const throwCardForDeal = (state) => {
-  const sourceCardId = `D0${state.discardPiles[0].length}`;
+  const sourceCardId = `D0${state.discardPiles[0].length - 1}`;
   const sourceCard = getCardLocation(sourceCardId, state);
   sourceCard.zoom = sourceCard.zoom * 2;
   const newDealer = (state.dealer + 1) % state.players.length;
@@ -237,10 +240,11 @@ export const throwCardForDeal = (state) => {
   const dealtCard = state.discardPiles[0][state.discardPiles[0].length -1];
   const newDiscard0 = state.discardPiles[0];
   newDiscard0.pop();
-  const newDiscards = state.discardPiles;
+  const newDiscards = [...state.discardPiles];
   newDiscards[0] = [...newDiscard0];
   const newMovingCard = {
     id: `${sourceCardId}to${targetCardId}`,
+    keyId: `${sourceCardId}to${targetCardId}${Date.now()}`,
     suit: dealtCard.suit,
     value: dealtCard.value,
     shown: false,
@@ -254,21 +258,126 @@ export const throwCardForDeal = (state) => {
     newMovingCard
   };
 }
-
-
-
-
-export const passDeckToDealer = (
-  discardPiles,
-  mebs,
+export const declareDealer = (
   players,
   dealer
 ) => {
   const dealerPromptModal =
     generatePromptModal((<div>The dealer is<br/><b>{players[dealer]}</b></div>));
-  const moveCardsToDealer = [];
   return {
     dealerPromptModal,
-    moveCardsToDealer
+  };
+};
+export const passDeckToDealer = (state) => {
+  let sourceCard;
+  let newMovingCard;
+  let cardsToMove = [];
+  let toDealerMovingCards = state.movingCards;
+  const toDealerDiscards = [...state.discardPiles];
+  const toDealerMebs = [...state.mebs];
+  const toDealerHands = [...state.hands];
+  let toDealerPlayPile = [...state.playPile];
+  const targetCardId = `D${state.dealer}`;
+  const targetCard = getCardLocation(targetCardId, state);
+  for(let i = 0 ; i < state.players.length; i++) {
+    if (i !== state.dealer && state.discardPiles[i].length > 0) {
+      cardsToMove.push(`D${i}${state.discardPiles[i].length - 1}`);
+      const newDiscard = state.discardPiles[i];
+      newDiscard.pop();
+      toDealerDiscards[i] = [...newDiscard];
+    }
+    if (state.mebs[i].length > 0) {
+      cardsToMove.push(`M${i}${state.mebs[i].length - 1}`);
+      const newMeb = state.mebs[i];
+      newMeb.pop();
+      toDealerMebs[i] = [...newMeb];
+    }
+    if (state.hands[i].length > 0) {
+      cardsToMove.push(`H${i}${state.hands[i].length - 1}`);
+      const newHand = state.hands[i];
+      newHand.pop();
+      toDealerHands[i] = [...newHand];
+    }
+  }
+  if (state.playPile.length > 0) {
+    cardsToMove.push(`P`);
+    toDealerPlayPile.pop();
+    toDealerPlayPile=[...toDealerPlayPile];
+  }
+  cardsToMove.forEach(cardToMove => {
+    sourceCard = getCardLocation(cardToMove, state);
+    newMovingCard = {
+      id: `${cardToMove}to${targetCardId}`,
+      keyId: `${cardToMove}to${targetCardId}${Date.now()}`,
+      shown: false,
+      speed: 1,
+      source: sourceCard,
+      target: targetCard,
+    };
+    toDealerMovingCards = [...toDealerMovingCards, newMovingCard];
+  });
+  return ({
+    toDealerMovingCards,
+    toDealerMebs,
+    toDealerDiscards,
+    toDealerHands,
+    toDealerPlayPile,
+  });
+};
+
+export const preDealing = (discards, dealer) => {
+  const shuffledCards = [...discards];
+  shuffledCards[dealer] = generateShuffledDeck();
+  return { shuffledCards };
+};
+
+export const dealing = (state) => {
+  const dealDeck = [...state.discardPiles];
+  let dealCards = [...state.movingCards];
+  const newDiscardDeck = state.discardPiles[state.dealer];
+  if (newDiscardDeck.length > 0) {
+    const cardsToThrow = (state.hands[state.dealToPlayer].length === 0) ? 3 : 4;
+    const targets = [];
+    if (state.dealer === state.dealToPlayer) {
+      if (state.players === 3 || state.hands[state.dealer].length > 3) {
+        targets.push("P-1");
+      }
+      if (state.players.length === 4) {
+        targets.push("P-1");
+        if (state.hands[state.dealer].length === 0) {
+          targets.push("P-1");
+        }
+      }
+    }
+    for (let i = 0; i < cardsToThrow; i++) {
+      targets.push(`H${state.dealToPlayer}`);
+    }
+    targets.forEach(target => {
+      console.log(target);
+      const sourceCardId = `D${state.dealer}${newDiscardDeck.length - 1}`;
+      const sourceCard = getCardLocation(sourceCardId, state);
+      sourceCard.zoom = sourceCard.zoom * 2;
+      const targetCard = getCardLocation(target, state);
+      const targetCardId = target;
+      targetCard.rotation = targetCard.rotation + getRandomRange(-10, 10, 1);
+      const dealtCard = newDiscardDeck[newDiscardDeck.length -1];
+      newDiscardDeck.pop();
+      const newMovingCard = {
+        id: `${sourceCardId}to${targetCardId}`,
+        keyId: `${sourceCardId}to${targetCardId}${Date.now()}`,
+        suit: dealtCard.suit,
+        value: dealtCard.value,
+        shown: false,
+        speed: 1,
+        source: sourceCard,
+        target: targetCard,
+      };
+      dealCards = [...dealCards, newMovingCard];
+    });
+    dealDeck[state.dealer] = [...newDiscardDeck];
+  }
+  return {
+    dealDeck,
+    dealCards,
   };
 };

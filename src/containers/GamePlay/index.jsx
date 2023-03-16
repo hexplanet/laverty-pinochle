@@ -28,7 +28,8 @@ function GamePlay() {
     promptModal,
     gameState,
     movingCards,
-    dealer
+    dealer,
+    showHands
   } = useSelector((state) => state.app);
   const [windowWidth, setWindowWidth]   = useState(window.innerWidth);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
@@ -39,6 +40,7 @@ function GamePlay() {
   const [gameScorePad, setScorePad] = useState([]);
   const [gamePlayerModal, setGamePlayerModal] = useState([]);
   const [gameMovingCard, setGameMovingCard] = useState([]);
+  const [actionTimer, setActionTimer] = useState(null);
   const updateDimensions = () => {
     if (window.innerWidth !== windowWidth || window.innerHeight !== windowHeight) {
       setWindowWidth(window.innerWidth);
@@ -56,7 +58,7 @@ function GamePlay() {
       window.innerHeight,
     ));
     return () => window.removeEventListener("resize", updateDimensions);
-  }, []);
+  }, [dispatch]);
   useEffect(() => {
     switch(gameState) {
       case 'init':
@@ -66,16 +68,50 @@ function GamePlay() {
         dispatch(appActions.throwForAce());
         break;
       case 'waitForAce:complete':
-        if (mebs[dealer][mebs[dealer].length -1].value === "A") {
+        if (mebs[dealer][mebs[dealer].length - 1].value === "A") {
           dispatch(appActions.selectedDealer());
         } else {
           dispatch(appActions.throwForAce());
         }
         break;
+      case 'preMoveDeckToDealer':
+        dispatch(appActions.storeGameState('waiting'));
+        setTimeout(() => {
+          dispatch(appActions.storeGameState('moveDeckToDealer'));
+        }, 500);
+        break;
+      case 'moveDeckToDealer':
+        dispatch(appActions.moveCardsToDealer());
+        const cardsToDealer = () => { dispatch(appActions.moveCardsToDealer()); };
+        setActionTimer(
+          setInterval(
+            cardsToDealer,
+            50
+          )
+        );
+        break;
+      case 'moveDeckToDealer:complete':
+        clearInterval(actionTimer);
+        setActionTimer(null);
+        dispatch(appActions.preDeal());
+        setTimeout(() => {
+          dispatch(appActions.storeGameState('deal'));
+        }, 500);
+        break;
+      case 'deal':
+        dispatch(appActions.moveCardsToDealer());
+        const dealingCards = () => { dispatch(appActions.dealCards()); };
+        setActionTimer(
+          setInterval(
+            dealingCards,
+            250
+          )
+        );
+        break;
       default:
         console.log('uncovered gameState: ', gameState);
     }
-  }, [gameState, mebs, dealer]);
+  }, [gameState]);
   const HandleClickedCard = (id, card) => {
     console.log(id, card);
   };
@@ -104,11 +140,6 @@ function GamePlay() {
   }
   useEffect(() => {
     const newGameHands = [];
-    const newGameDiscards = [];
-    const newGameMebs = [];
-    const newGamePlayArea = [];
-    const newGameScorePad = [];
-    const newGamePlayerModal = [];
     hands.forEach((hand, index) => {
       if (playerDisplaySettings[index]) {
         newGameHands.push(
@@ -120,11 +151,17 @@ function GamePlay() {
             rotation={playerDisplaySettings[index].rotation}
             zoom={playerDisplaySettings[index].zoom}
             cards={hand}
+            shown={showHands[index]}
             cardClicked={HandleClickedCard}
           />
         );
       }
     });
+    setGameHands(newGameHands);
+  }, [hands, playerDisplaySettings, showHands]);
+
+  useEffect(() => {
+    const newGameDiscards = [];
     discardPiles.forEach((discard, index) => {
       if (discardDisplaySettings[index]) {
         newGameDiscards.push(
@@ -139,6 +176,10 @@ function GamePlay() {
         );
       }
     });
+    setGameDiscards(newGameDiscards);
+  }, [discardPiles, discardDisplaySettings]);
+  useEffect(() => {
+    const newGameMebs = [];
     mebs.forEach((meb, index) => {
       if (mebDisplaySettings[index]) {
         newGameMebs.push(
@@ -154,6 +195,11 @@ function GamePlay() {
         );
       }
     });
+    setGameMebs(newGameMebs);
+  }, [mebs, mebDisplaySettings]);
+
+  useEffect(() => {
+    const newGamePlayArea = [];
     if (miscDisplaySettings.playArea.x !== undefined) {
       newGamePlayArea.push(
         <Pile
@@ -166,6 +212,10 @@ function GamePlay() {
         />
       );
     }
+    setGamePlayArea(newGamePlayArea);
+  }, [miscDisplaySettings, playPile]);
+  useEffect(() => {
+    const newGameScorePad = [];
     if (miscDisplaySettings.scorePad.x !== undefined) {
       newGameScorePad.push(
         <ScorePad
@@ -179,6 +229,10 @@ function GamePlay() {
         />
       );
     }
+    setScorePad(newGameScorePad);
+  }, [teams, playScore, gameWon, miscDisplaySettings]);
+  useEffect(() => {
+    const newGamePlayerModal = [];
     if (miscDisplaySettings.playerModal.x !== undefined) {
       if (playerModal.shown) {
         newGamePlayerModal.push(applyObjectToModal(miscDisplaySettings.playerModal, playerModal, 'PlayerModal'));
@@ -190,38 +244,23 @@ function GamePlay() {
       }
     }
     setGamePlayerModal(newGamePlayerModal);
-    setScorePad(newGameScorePad);
-    setGameHands(newGameHands);
-    setGameDiscards(newGameDiscards);
-    setGameMebs(newGameMebs);
-    setGamePlayArea(newGamePlayArea);
   }, [
-    hands,
-    playerDisplaySettings,
-    setGameHands,
-    discardPiles,
-    discardDisplaySettings,
-    mebs,
-    mebDisplaySettings,
-    playPile,
-    playPileShown,
-    miscDisplaySettings,
-    teams,
-    playScore,
-    gameWon,
     playerModal,
     promptModal,
   ]);
-  const cardFinishedMovement = (id) => {
-    dispatch(appActions.resolveCardMovement(id));
+  const cardFinishedMovement = (id, keyId) => {
+    dispatch(appActions.resolveCardMovement(id, keyId));
   };
   useEffect(() => {
     const newGameMovingCards = [];
+    let uniqueKey;
     movingCards.forEach((movingCard) => {
+      uniqueKey = `${movingCard.id}${Date.now()}`;
       newGameMovingCards.push(
         <MoveCard
           id={movingCard.id}
-          key={movingCard.id}
+          key={uniqueKey}
+          keyId={movingCard.keyId}
           suit={movingCard.suit}
           value={movingCard.value}
           shown={movingCard.shown}

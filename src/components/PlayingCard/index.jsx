@@ -54,7 +54,7 @@ function PlayingCard({
     <div
       className={cardBodyClass}
       type={"button"}
-      onClick={cardClicked}
+      onClick={() => cardClicked()}
       onMouseEnter={enterCard}
       onMouseLeave={exitCard}
     >

@@ -110,6 +110,7 @@ const initialState = {
     deckOfCards,
   ],
   discardDisplaySettings: [],
+  showHands: [],
   hands: [
     mockHand,
     mockHand,
@@ -132,6 +133,7 @@ const initialState = {
   movingCards: [],
   zoomRatio: 1,
   dealer: 0,
+  dealToPlayer: 0,
   playPile: mockPlayArea,
   playPileShown: true,
   playScore: mockScore,
@@ -141,19 +143,19 @@ const initialState = {
 };
 
 const appReducer = (state = initialState, action) => {
-  switch(action.type) {
+  switch (action.type) {
     case actionTypes.SET_CARD_TABLE_LAYOUT:
-        const {
-          playerHandLocations,
-          playerDiscardLocations,
-          playerMebLocations,
-          miscLocations,
-          zoomRatio
-        } = reducerLogic.playerDisplaySettingsLogic(
-          action.width,
-          action.height,
-          state.players.length,
-        );
+      const {
+        playerHandLocations,
+        playerDiscardLocations,
+        playerMebLocations,
+        miscLocations,
+        zoomRatio
+      } = reducerLogic.playerDisplaySettingsLogic(
+        action.width,
+        action.height,
+        state.players.length,
+      );
       return {
         ...state,
         playerDisplaySettings: playerHandLocations,
@@ -162,15 +164,22 @@ const appReducer = (state = initialState, action) => {
         miscDisplaySettings: miscLocations,
         zoomRatio
       };
+    case actionTypes.STORE_GAME_STATE:
+      return {
+        ...state,
+        gameState: action.gameState,
+      };
+      break;
     case actionTypes.RESOLVE_CARD_MOVEMENT:
       const modifiedValues = reducerLogic.resolveCardMovement(
         action.id,
+        action.keyId,
         state.movingCards,
         state.hands,
         state.mebs,
         state.discardPiles,
         state.playPile);
-      if (modifiedValues.movingCards.length === 0) {
+      if (modifiedValues.movingCards?.length === 0) {
         modifiedValues.gameState = `${state.gameState}:complete`;
       }
       return {
@@ -200,22 +209,61 @@ const appReducer = (state = initialState, action) => {
     case actionTypes.SELECTED_DEALER:
       const {
         dealerPromptModal,
-        moveCardsToDealer
-      } = reducerLogic.passDeckToDealer(
-        state.discardPiles,
-        state.mebs,
+      } = reducerLogic.declareDealer(
         state.players,
         state.dealer
       );
       return {
         ...state,
         promptModal: dealerPromptModal,
-        movingCards: moveCardsToDealer,
-        gameState: 'moveDeckToDealer',
+        gameState: 'preMoveDeckToDealer',
+      };
+    case actionTypes.MOVE_CARD_TO_DEALER:
+      const {
+        toDealerMovingCards,
+        toDealerMebs,
+        toDealerDiscards,
+        toDealerHands,
+        toDealerPlayPile
+      } = reducerLogic.passDeckToDealer(state);
+      return {
+        ...state,
+        movingCards: toDealerMovingCards,
+        mebs: toDealerMebs,
+        discardPiles: toDealerDiscards,
+        hands: toDealerHands,
+        playPile: toDealerPlayPile,
+      };
+    case actionTypes.PRE_DEAL:
+      const {
+        shuffledCards,
+      } = reducerLogic.preDealing(
+          state.discardPiles,
+          state.dealer
+      );
+      const newShowHands = [];
+      for(let i = 0; i < state.players.length; i++) {
+        newShowHands.push(i === 0);
+      }
+      return {
+        ...state,
+        discardPiles: shuffledCards,
+        dealToPlayer: (state.dealer + 1) % (state.players.length),
+        showHands: newShowHands,
+      };
+    case actionTypes.DEAL_CARDS:
+      const {
+        dealDeck,
+        dealCards,
+      } = reducerLogic.dealing(state);
+      return {
+        ...state,
+        discardPiles: dealDeck,
+        movingCards: dealCards,
+        dealToPlayer: (state.dealToPlayer + 1) % (state.players.length),
       };
     default:
-      return state;
+        return state;
   }
-}
-
+};
 export default appReducer;

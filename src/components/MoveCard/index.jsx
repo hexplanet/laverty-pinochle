@@ -3,8 +3,10 @@ import PropTypes from 'prop-types';
 import './index.scss';
 import PlayingCard from "../PlayingCard";
 
+const keyTimes = {};
 function MoveCard({
   id,
+  keyId,
   suit,
   value,
   shown,
@@ -21,7 +23,9 @@ function MoveCard({
   });
   const [rotationNow, setRotationNow] = useState(source.rotation);
   const [zoomNow, setZoomNow] = useState(source.zoom);
-  const timeStart = Date.now();
+  if (!keyTimes[keyId]) {
+    keyTimes[keyId] = Date.now();
+  }
   const xDifference = target.x - source.x;
   const yDifference = target.y - source.y;
   let timeEnd = travelTime;
@@ -33,7 +37,7 @@ function MoveCard({
   const zoomDifference = target.zoom - source.zoom;
   const calculateCardMovement = () => {
     const timeNow = Date.now();
-    const timeDifference = timeNow - timeStart;
+    const timeDifference = timeNow - keyTimes[keyId];
     const timeRatio = (timeDifference > timeEnd) ? 1 : (timeDifference / timeEnd);
     const xNow = source.x + (xDifference * timeRatio);
     const yNow = source.y + (yDifference * timeRatio);
@@ -45,10 +49,11 @@ function MoveCard({
       zIndex: zLocation,
     });
     if (timeRatio >= 1) {
-      movementDone(id);
+      movementDone(id, keyId);
     }
   };
   useEffect(() => {
+    calculateCardMovement();
     const movementInterval = setInterval(calculateCardMovement, 20);
     return () => clearInterval(movementInterval);
   }, []);
@@ -72,6 +77,7 @@ function MoveCard({
 
 MoveCard.propTypes = {
   id: PropTypes.string,
+  keyId: PropTypes.string,
   suit: PropTypes.string,
   value: PropTypes.string,
   shown: PropTypes.bool,
@@ -84,9 +90,10 @@ MoveCard.propTypes = {
 };
 
 MoveCard.defaultProps = {
-  id: 0,
-  suit: "H",
-  value: "8",
+  id: '',
+  keyId: '',
+  suit: 'H',
+  value: '8',
   shown: false,
   speed: 1,
   travelTime: 0,

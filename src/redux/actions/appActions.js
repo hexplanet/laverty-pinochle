@@ -58,3 +58,22 @@ export const dealCards = () => {
     type: actionTypes.DEAL_CARDS,
   }
 };
+
+export const setHandFanOut = (fanOut) => {
+  return {
+    type: actionTypes.SET_HAND_FAN_OUT,
+    fanOut
+  };
+}
+
+export const openBidding = () => {
+  return {
+    type: actionTypes.OPEN_BIDDING,
+  };
+}
+
+export const resolveComputerBid = () => {
+  return {
+    type: actionTypes.RESOLVE_COMPUTER_BID,
+  };
+};

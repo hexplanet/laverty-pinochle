@@ -7,6 +7,7 @@ import MoveCard from "../../components/MoveCard";
 import Pile from "../../components/Pile";
 import ScorePad from "../../components/ScorePad";
 import Modal from "../../components/Modal";
+import { getRandomRange }  from "../../utils/helpers";
 import './index.scss';
 
 function GamePlay() {
@@ -29,7 +30,8 @@ function GamePlay() {
     gameState,
     movingCards,
     dealer,
-    showHands
+    showHands,
+    handFanOut
   } = useSelector((state) => state.app);
   const [windowWidth, setWindowWidth]   = useState(window.innerWidth);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
@@ -108,6 +110,23 @@ function GamePlay() {
           )
         );
         break;
+      case 'deal:complete':
+        dispatch(appActions.storeGameState('fanningOut'));
+        for (let i = 0; i < 3.25; i = i + 0.25) {
+          setTimeout(() => {
+            dispatch(appActions.setHandFanOut(i));
+          }, 125 * i);
+        }
+        setTimeout(() => {
+          dispatch(appActions.openBidding());
+        }, 500);
+        break;
+      case 'computerBid':
+        dispatch(appActions.storeGameState('waitingOnBid'));
+        setTimeout(() => {
+          dispatch(appActions.resolveComputerBid());
+        }, 200); // getRandomRange(250, 2000, 10));
+        break;
       default:
         console.log('uncovered gameState: ', gameState);
     }
@@ -151,6 +170,7 @@ function GamePlay() {
             rotation={playerDisplaySettings[index].rotation}
             zoom={playerDisplaySettings[index].zoom}
             cards={hand}
+            fanOut={handFanOut}
             shown={showHands[index]}
             cardClicked={HandleClickedCard}
           />
@@ -158,7 +178,7 @@ function GamePlay() {
       }
     });
     setGameHands(newGameHands);
-  }, [hands, playerDisplaySettings, showHands]);
+  }, [hands, playerDisplaySettings, showHands, handFanOut]);
 
   useEffect(() => {
     const newGameDiscards = [];
@@ -240,7 +260,7 @@ function GamePlay() {
     }
     if (miscDisplaySettings.promptModal.x !== undefined) {
       if (promptModal.shown) {
-        newGamePlayerModal.push(applyObjectToModal(miscDisplaySettings.promptModal, promptModal, 'PlayerModal'));
+        newGamePlayerModal.push(applyObjectToModal(miscDisplaySettings.promptModal, promptModal, 'PromptModal'));
       }
     }
     setGamePlayerModal(newGamePlayerModal);

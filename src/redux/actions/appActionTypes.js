@@ -7,3 +7,6 @@ export const MOVE_CARD_TO_DEALER = 'MOVE_CARD_TO_DEALER';
 export const STORE_GAME_STATE = 'STORE_GAME_STATE';
 export const PRE_DEAL = 'PRE_DEAL';
 export const DEAL_CARDS = 'DEAL_CARDS';
+export const SET_HAND_FAN_OUT = 'SET_HAND_FAN_OUT';
+export const OPEN_BIDDING = 'OPEN_BIDDING';
+export const RESOLVE_COMPUTER_BID = 'RESOLVE_COMPUTER_BID';

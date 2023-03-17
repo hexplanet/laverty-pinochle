@@ -1,6 +1,7 @@
 import * as actionTypes from '../actions/appActionTypes';
 import * as reducerLogic from './appReducerLogic';
 import Button from '../../components/Button';
+import {SET_HAND_FAN_OUT} from "../actions/appActionTypes";
 
 //////////////////////////////////// start mocks ///////////////////////////////////////////
 
@@ -111,12 +112,16 @@ const initialState = {
   ],
   discardDisplaySettings: [],
   showHands: [],
+  handFanOut: -1,
   hands: [
     mockHand,
     mockHand,
     mockHand,
     mockHand,
   ],
+  bids: [],
+  bidOffset: 21,
+  trumpSuit: '',
   mebDisplaySettings: [],
   mebs: [
     mockMeb,
@@ -169,7 +174,6 @@ const appReducer = (state = initialState, action) => {
         ...state,
         gameState: action.gameState,
       };
-      break;
     case actionTypes.RESOLVE_CARD_MOVEMENT:
       const modifiedValues = reducerLogic.resolveCardMovement(
         action.id,
@@ -237,6 +241,7 @@ const appReducer = (state = initialState, action) => {
     case actionTypes.PRE_DEAL:
       const {
         shuffledCards,
+        clearPlayerPrompt
       } = reducerLogic.preDealing(
           state.discardPiles,
           state.dealer
@@ -250,6 +255,8 @@ const appReducer = (state = initialState, action) => {
         discardPiles: shuffledCards,
         dealToPlayer: (state.dealer + 1) % (state.players.length),
         showHands: newShowHands,
+        promptModal: clearPlayerPrompt,
+        handFanOut: -1,
       };
     case actionTypes.DEAL_CARDS:
       const {
@@ -261,6 +268,40 @@ const appReducer = (state = initialState, action) => {
         discardPiles: dealDeck,
         movingCards: dealCards,
         dealToPlayer: (state.dealToPlayer + 1) % (state.players.length),
+        bidOffset: 21,
+      };
+    case actionTypes.SET_HAND_FAN_OUT:
+      return {
+        ...state,
+        handFanOut: action.fanOut,
+      };
+    case actionTypes.OPEN_BIDDING:
+      const firstBid = (state.dealer + 1) % (state.players.length);
+      const {
+        sortedHands,
+        firstBidPrompt
+      } = reducerLogic.openBidding(
+        state.hands,
+        state.players,
+        firstBid,
+        state.playerModal,
+        state.bidOffset,
+      );
+      return {
+        ...state,
+        hands: sortedHands,
+        dealToPlayer: firstBid,
+        promptModal: firstBidPrompt,
+        gameState: (firstBid === 0) ? 'userBid' : 'computerBid',
+      };
+    case actionTypes.RESOLVE_COMPUTER_BID:
+      const { newComputerBid } = reducerLogic.computerBid(
+        state.hands,
+        state.dealToPlayer,
+      );
+      console.log(state.hands[state.dealToPlayer], newComputerBid);
+      return {
+        ...state,
       };
     default:
         return state;

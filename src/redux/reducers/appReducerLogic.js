@@ -1,9 +1,11 @@
 import {
   generateShuffledDeck,
-  generatePromptModal,
+  generalModalData,
   getCardLocation,
   getRandomRange,
   createLandingCard,
+  sortCardHand,
+  getHandMeb,
 }  from '../../utils/helpers';
 export const playerDisplaySettingsLogic = (width, height, players) => {
   const playerHandLocations = [];
@@ -201,7 +203,7 @@ export const resolveCardMovement = (
 
 export const setGameValuesForNewGame = (teams, players) => {
   const throwAcesForDealerModal =
-    generatePromptModal('Dealer is chosen by the first player to get an ace');
+    generalModalData('Dealer is chosen by the first player to get an ace');
   const initedValues = {
     gameState: 'choseDealer',
     discardPiles: [],
@@ -215,12 +217,14 @@ export const setGameValuesForNewGame = (teams, players) => {
     gameWon: '',
     playerModal: {shown: false},
     promptModal: throwAcesForDealerModal,
+    bids: [],
   };
   for(let i = 0; i < players.length; i++) {
     initedValues.discardPiles.push([]);
     initedValues.hands.push([]);
     initedValues.mebs.push([]);
     initedValues.showHands.push(i === 0);
+    initedValues.bids.push(0);
   }
   for(let i = 0; i < teams.length; i++) {
     initedValues.playScore.push([]);
@@ -263,7 +267,7 @@ export const declareDealer = (
   dealer
 ) => {
   const dealerPromptModal =
-    generatePromptModal((<div>The dealer is<br/><b>{players[dealer]}</b></div>));
+    generalModalData((<div>The dealer is<br/><b>{players[dealer]}</b></div>));
   return {
     dealerPromptModal,
   };
@@ -328,7 +332,9 @@ export const passDeckToDealer = (state) => {
 export const preDealing = (discards, dealer) => {
   const shuffledCards = [...discards];
   shuffledCards[dealer] = generateShuffledDeck();
-  return { shuffledCards };
+  const clearPlayerPrompt =
+    generalModalData("");
+  return { shuffledCards, clearPlayerPrompt };
 };
 
 export const dealing = (state) => {
@@ -339,7 +345,7 @@ export const dealing = (state) => {
     const cardsToThrow = (state.hands[state.dealToPlayer].length === 0) ? 3 : 4;
     const targets = [];
     if (state.dealer === state.dealToPlayer) {
-      if (state.players === 3 || state.hands[state.dealer].length > 3) {
+      if (state.players.length === 3 && state.hands[state.dealer].length > 0) {
         targets.push("P-1");
       }
       if (state.players.length === 4) {
@@ -353,7 +359,6 @@ export const dealing = (state) => {
       targets.push(`H${state.dealToPlayer}`);
     }
     targets.forEach(target => {
-      console.log(target);
       const sourceCardId = `D${state.dealer}${newDiscardDeck.length - 1}`;
       const sourceCard = getCardLocation(sourceCardId, state);
       sourceCard.zoom = sourceCard.zoom * 2;
@@ -381,3 +386,39 @@ export const dealing = (state) => {
     dealCards,
   };
 };
+export const openBidding = (hands, players, firstBid, playerModal, bidOffset) => {
+  const sortedHands = [];
+  let bidPlayerPrompt = playerModal;
+  for (let i = 0; i < players.length; i++) {
+    sortedHands.push(sortCardHand(hands[i]));
+  }
+  const centeredStyle = {textAlign: 'center'};
+  const secondLine = firstBid === 0
+    ? (<span>Please make your bid.</span>) : (<span><b>{players[firstBid]}</b> is now bidding</span>);
+  const firstBidPrompt =
+    generalModalData(<div >Players now make their bids.<br/>{secondLine}</div>);
+  return {
+    sortedHands,
+    firstBidPrompt,
+    bidPlayerPrompt,
+  };
+};
+
+export const computerBid = (hands, dealToPlayer,) => {
+  let highPoints = 0;
+  let highSuit = '';
+  const suits = ['H', 'S', 'D', 'C'];
+  suits.forEach(suit => {
+    const { points, textDisplay } = getHandMeb(hands[dealToPlayer], suit);
+    console.log(suit, points, textDisplay);
+    if (points > highPoints) {
+      highPoints = points;
+      highSuit = suit;
+    }
+  });
+
+
+  return {
+    newComputerBid: highPoints,
+  };
+}

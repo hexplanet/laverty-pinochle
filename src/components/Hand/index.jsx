@@ -9,6 +9,7 @@ function Hand({
   yLocation,
   zLocation,
   cards,
+  fanOut,
   shown,
   zoom,
   rotation,
@@ -29,11 +30,22 @@ function Hand({
     let distance;
     const newCards = [];
     cards.forEach((card, index) => {
-      distance = 750 + (card.raised ? 20 : 0);
-      spinCard = (index - midCard) * 3;
-      rads = ((spinCard - 90) * Math.PI) / 180;
-      xCard = 400 + (distance * Math.cos(rads));
-      yCard = 840 + (distance * Math.sin(rads));
+      xCard = 400;
+      yCard = 90;
+      if (fanOut > -1) {
+        distance = 750 + (card.raised ? 20 : 0);
+        spinCard = (index - midCard) * fanOut;
+        rads = ((spinCard - 90) * Math.PI) / 180;
+        xCard = 400 + (distance * Math.cos(rads));
+        yCard = 840 + (distance * Math.sin(rads));
+      } else {
+        spinCard = 0;
+        if (card.xOffset !== undefined) {
+          xCard += card.xOffset;
+          yCard += card.yOffset;
+          spinCard = card.rotation;
+        }
+      }
       newCards.push(
         <PlayingCard
           key={`Card${index}`}
@@ -51,7 +63,7 @@ function Hand({
       );
     });
     setCardsToDisplay(newCards);
-  }, [cards, shown]);
+  }, [cards, shown, fanOut]);
   const location = {
     left: xLocation,
     top: yLocation,
@@ -81,6 +93,7 @@ Hand.propTypes = {
   yLocation: PropTypes.number,
   zLocation: PropTypes.number,
   cards: PropTypes.array,
+  fanOut: PropTypes.number,
   shown: PropTypes.bool,
   zoom: PropTypes.number,
   rotation: PropTypes.number,
@@ -93,6 +106,7 @@ Hand.defaultProps = {
   yLocation: 1000,
   zLocation: 0,
   cards: [],
+  fanOut: 3,
   shown: true,
   zoom: 100,
   rotation: 0,

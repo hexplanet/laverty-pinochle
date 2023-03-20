@@ -22,10 +22,15 @@ export const generateShuffledDeck = () => {
       cards[cut2].suit = holdCard.suit;
     }
   }
+  // for testing
+  for (let i = 26; i < 48; i++) {
+    cards[i].value = '9';
+  }
+  // end testing code
   return cards;
 };
 
-export const generalModalData = (lines, buttons) => {
+export const generalModalData = (lines, props) => {
   let displayed;
   if (Array.isArray(lines)) {
     let displayedLines = '';
@@ -45,6 +50,7 @@ export const generalModalData = (lines, buttons) => {
     hasCloseButton: false,
     header: false,
     hasHeaderSeparator: false,
+    ...props
   };
   return promptModal;
 };
@@ -155,11 +161,6 @@ export const sortCardHand = (hand) => {
   });
   return sortedHand;
 };
-
-export const createBidButtons = (bidOffset) => {
-
-};
-
 export const getHandMeb = (hand, trump) => {
   const fullSuit = {
     'H': 'Hearts',
@@ -180,6 +181,9 @@ export const getHandMeb = (hand, trump) => {
     { cards: ['CK', 'CQ'], value: 2,title: 'Marriage in Clubs'},
     { cards: ['SK', 'SQ'], value: 2,title: 'Marriage in Spades'},
   ];
+  const cardsUsed = [];
+  let nearMiss = 0;
+  let cardsRequired;
   let runs = 0;
   let textDisplay = '';
   let points = 0;
@@ -188,6 +192,7 @@ export const getHandMeb = (hand, trump) => {
   let handCard;
   let totalMatches;
   let displayLine;
+  let misses;
   mebCombinations.forEach((mebCombination, mebIndex) => {
     matches = [];
     mebCards = mebCombination.cards.length;
@@ -202,29 +207,124 @@ export const getHandMeb = (hand, trump) => {
         }
       });
     });
-    totalMatches =
-      Math.floor(matches.reduce((accumulator, currentValue) => accumulator + currentValue, 0) / mebCards);
+    totalMatches = 2;
+    misses = 0;
+    matches.forEach(match => {
+      if (match === 0) {
+        misses++;
+      }
+      if (match < totalMatches) {
+        totalMatches = match;
+      }
+    });
+    if (totalMatches === 0 && misses === 1 && (mebIndex < 6 || mebIndex !== 1)) {
+      nearMiss = nearMiss + (mebCombination.value * .125);
+    }
     if (mebIndex === 0) {
       runs = totalMatches;
     }
     if (totalMatches > 0) {
+      cardsRequired = [];
       if (mebIndex > 6 && mebCombination.cards[0][0] === trump) {
-        if (totalMatches - runs > 0) {
+        totalMatches = totalMatches - runs;
+        if (totalMatches > 0) {
           points = points + ((totalMatches - runs) * 4);
           displayLine = (totalMatches - runs > 1)
             ? `2 Royal Marriages in ${fullSuit[trump]}` : `Royal Marriage in ${fullSuit[trump]}`;
           textDisplay = `${textDisplay}<br/>${displayLine}`;
         }
-
       } else {
         displayLine = (totalMatches > 1) ? `2 ${mebCombination.title}` : mebCombination.title;
         points = points + (totalMatches * mebCombination.value);
         textDisplay = `${textDisplay}<br/>${displayLine}`;
       }
+      if (totalMatches > 0) {
+        mebCombination.cards.forEach(card => {
+          cardsRequired = cardsUsed.filter(usedCard => usedCard === card);
+          for (let c = 0; c < totalMatches - cardsRequired; c++) {
+            cardsUsed.push(card);
+          }
+        });
+      }
     }
   });
+  nearMiss = Math.round(nearMiss);
   return {
     points,
+    nearMiss,
+    cardsUsed,
     textDisplay
   };
+};
+
+export const getProjectedCount = (hand, trump, players, preWidow = true) => {
+  const numPlayers = players.length;
+  const killWeightLimit = (numPlayers === 3) ?  4 : 3;
+  const winAdjustment = (25 / ((numPlayers === 3) ?  15 : 11));
+  const suits = ['H', 'C', 'D', 'S'];
+  const valueStrength = ['A','10','K','Q','J','9'];
+  let isTrump;
+  let projectedCounts = 0;
+  let lostCounts = 0;
+  let howMany
+  let wins;
+  let losses;
+  let whichCards;
+  let howManyTrump;
+  let totalWins = 0;
+  suits.forEach(suit => {
+    isTrump = (suit === trump);
+    wins = 0;
+    howMany = 0;
+    whichCards = {'A': 0, '10': 0, 'K': 0, 'Q': 0, 'J': 0, '9': 0};
+    hand.forEach(card => {
+      if (suit === card.suit) {
+        whichCards[card.value] = whichCards[card.value] + 1;
+        howMany++;
+      }
+    });
+    losses = 0;
+    if (suit === trump) {
+      howManyTrump = howMany;
+    }
+    if (howMany > 0) {
+      valueStrength.forEach((strength, valueIndex) => {
+        losses = losses + (2 - whichCards[strength]);
+        if (whichCards[strength] > 0 && howMany > losses) {
+          wins = wins + whichCards[strength];
+        } else {
+          if (strength === '10' || strength === 'K') {
+            lostCounts = lostCounts + whichCards[strength];
+          }
+        }
+      });
+      projectedCounts = projectedCounts + (wins * winAdjustment * (isTrump ? 1.5 : 1));
+    } else {
+      projectedCounts = projectedCounts + 2;
+    }
+    totalWins = totalWins + wins;
+  })
+  if (preWidow) {
+    lostCounts = lostCounts < numPlayers ? 0 : lostCounts - numPlayers;
+  }
+  projectedCounts = Math.round(projectedCounts - lostCounts);
+  return {
+    projectedCounts,
+    howManyTrump,
+    totalWins,
+  };
+};
+
+export const getHandBid = (hand, players) => {
+  const suits = ['S','D','C','H']
+  let highBid = 0;
+  suits.forEach(suit => {
+    const { points, nearMiss } = getHandMeb(hand, suit);
+    const { projectedCounts } = getProjectedCount(hand, suit, players);
+    const currentBid = Math.round((points / 2) + nearMiss + projectedCounts);
+    if (currentBid > highBid) {
+      highBid = currentBid;
+    }
+  });
+  return highBid;
 };

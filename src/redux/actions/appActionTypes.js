@@ -10,3 +10,4 @@ export const DEAL_CARDS = 'DEAL_CARDS';
 export const SET_HAND_FAN_OUT = 'SET_HAND_FAN_OUT';
 export const OPEN_BIDDING = 'OPEN_BIDDING';
 export const RESOLVE_COMPUTER_BID = 'RESOLVE_COMPUTER_BID';
+export const CHECK_FOR_NINES = 'CHECK_FOR_NINES';

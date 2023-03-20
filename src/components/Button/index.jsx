@@ -7,13 +7,14 @@ function Button({
   buttonClass,
   status,
   label,
+  returnMessage,
   handleClick
 }) {
   const buttonName = `lavpin-button ${buttonClass}`;
   const innerButtonNames = `inner-button ${status}`;
   const relayClick = () => {
     if (status.indexOf('inactive') === -1) {
-      handleClick();
+      handleClick(returnMessage);
     }
   };
   return (
@@ -33,6 +34,7 @@ Button.propTypes = {
   buttonClass: PropTypes.string,
   status: PropTypes.string,
   label: PropTypes.string,
+  returnMessage: PropTypes.string,
   handleClick: PropTypes.func.isRequired,
 };
 
@@ -41,6 +43,7 @@ Button.defaultProps = {
   buttonClass: '',
   status: '',
   label: '',
+  returnMessage: '',
 };
 
 export default Button;

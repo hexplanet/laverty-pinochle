@@ -1,7 +1,6 @@
 import * as actionTypes from '../actions/appActionTypes';
 import * as reducerLogic from './appReducerLogic';
 import Button from '../../components/Button';
-import {SET_HAND_FAN_OUT} from "../actions/appActionTypes";
 
 //////////////////////////////////// start mocks ///////////////////////////////////////////
 
@@ -248,7 +247,7 @@ const appReducer = (state = initialState, action) => {
       );
       const newShowHands = [];
       for(let i = 0; i < state.players.length; i++) {
-        newShowHands.push(i === 0);
+        newShowHands.push(true); // (i === 0);
       }
       return {
         ...state,
@@ -275,6 +274,28 @@ const appReducer = (state = initialState, action) => {
         ...state,
         handFanOut: action.fanOut,
       };
+    case actionTypes.CHECK_FOR_NINES:
+      const {
+        ninesPromptModal,
+        ninesPlayerModal,
+        ninesGameState
+      } = reducerLogic.checkForNines(
+        state.hands,
+        state.players,
+        state.promptModal,
+        state.playerModal
+      );
+      const ninesState = {
+        ...state,
+        gameState: ninesGameState,
+      };
+      if (ninesPromptModal) {
+        ninesState.promptModal = ninesPromptModal;
+      }
+      if (ninesPlayerModal) {
+        ninesState.playerModal = ninesPlayerModal;
+      }
+      return ninesState;
     case actionTypes.OPEN_BIDDING:
       const firstBid = (state.dealer + 1) % (state.players.length);
       const {
@@ -298,8 +319,8 @@ const appReducer = (state = initialState, action) => {
       const { newComputerBid } = reducerLogic.computerBid(
         state.hands,
         state.dealToPlayer,
+        state.players
       );
-      console.log(state.hands[state.dealToPlayer], newComputerBid);
       return {
         ...state,
       };

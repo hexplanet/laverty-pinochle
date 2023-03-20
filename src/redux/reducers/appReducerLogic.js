@@ -6,7 +6,8 @@ import {
   createLandingCard,
   sortCardHand,
   getHandMeb,
-}  from '../../utils/helpers';
+  getProjectedCount, getHandBid,
+} from '../../utils/helpers';
 export const playerDisplaySettingsLogic = (width, height, players) => {
   const playerHandLocations = [];
   const playerDiscardLocations = [];
@@ -331,7 +332,7 @@ export const passDeckToDealer = (state) => {
 
 export const preDealing = (discards, dealer) => {
   const shuffledCards = [...discards];
-  shuffledCards[dealer] = generateShuffledDeck();
+  shuffledCards[dealer] = [...generateShuffledDeck()];
   const clearPlayerPrompt =
     generalModalData("");
   return { shuffledCards, clearPlayerPrompt };
@@ -386,14 +387,120 @@ export const dealing = (state) => {
     dealCards,
   };
 };
+export const checkForNines = (hands, players, promptModal, playerModal) => {
+  let ninesPromptModal;
+  let ninesPlayerModal;
+  let ninesGameState = 'startBidding';
+  let ninesPlayer = -1;
+  let promptWording;
+  let playerWording;
+  let playerButtons = {};
+  hands.forEach((hand, index) => {
+    let nines = 0;
+    hand.forEach(card => {
+      if (card.value === '9') {
+        nines++;
+      }
+    });
+    if (nines > 9 - players.length) {
+      ninesPlayer = index;
+    }
+  });
+  if (ninesPlayer > -1) {
+    const playerWordingChange = ninesPlayer === 0 ? 'have' : 'has';
+    if (ninesPlayer > 0) {
+      const bid = getHandBid(hands[ninesPlayer], players);
+      ninesGameState = 'ninesContinue';
+      if (bid < 21) {
+        if (players.length === 4) {
+          if (ninesPlayer === 2) {
+            promptWording = (<div><b>{players[2]}</b> {playerWordingChange} nines for re-deal</div>);
+            playerWording = (<div>Do you agree to a re-deal?</div>);
+            playerButtons = { buttons: [{
+                label: 'No',
+                returnMessage: 'ninesContinue'
+              },
+                {
+                  label: 'Yes',
+                  status: 'warning',
+                  returnMessage: 'ninesRedeal'
+                }
+              ]};
+            ninesGameState = 'ninesUserAgree';
+          } else {
+            const ninesPartner = (ninesPlayer + 2) % 4;
+            const partnerBid = getHandBid(hands[ninesPartner], players);
+            if (partnerBid < 21) {
+              promptWording = (
+                <div>
+                  <b>{players[ninesPlayer]}</b> {playerWordingChange} nines for re-deal<br/>
+                  <b>{players[ninesPartner]}</b> agrees.
+                </div>
+              );
+              playerButtons = { buttons: [{
+                  label: 'Re-deal',
+                  status: 'warning',
+                  returnMessage: 'ninesRedeal'
+                }]};
+              ninesGameState = 'waitRedeal';
+            } else {
+              promptWording = (
+                <div>
+                  <b>{players[ninesPlayer]}</b> {playerWordingChange} nines for re-deal<br/>
+                  <b>{players[ninesPartner]}</b> disagrees with re-deal.
+                </div>
+              );
+              ninesGameState = 'waitNinesContinue';
+              playerButtons = { buttons: [{
+                  label: 'Continue',
+                  returnMessage: 'ninesContinue'
+              }]};
+            }
+          }
+        } else {
+          promptWording = (<div><b>{players[2]}</b> has enough nines for the re-deal</div>);
+          playerButtons = { buttons: [{
+              label: 'Re-deal',
+              status: 'warning',
+              returnMessage: 'ninesRedeal'
+            }]};
+          ninesGameState = 'waitRedeal';
+        }
+      }
+    } else {
+      promptWording = (<div><b>{players[2]}</b> {playerWordingChange} enough nines for a re-deal</div>);
+      playerWording = (<div>Do you want a re-deal?</div>);
+      playerButtons = { buttons: [{
+          label: 'No',
+          returnMessage: 'ninesContinue'
+        },
+        {
+          label: 'Yes',
+          status: 'warning',
+          returnMessage: 'ninesUserRedeal'
+        }
+      ]};
+    }
+    if (promptWording) {
+      ninesPromptModal = generalModalData(promptWording);
+    }
+    if (playerWording || playerButtons !== {}) {
+      ninesPlayerModal = generalModalData(playerWording, playerButtons);
+    }
+  }
+  return {
+    ninesPromptModal,
+    ninesPlayerModal,
+    ninesGameState
+  };
+};
 export const openBidding = (hands, players, firstBid, playerModal, bidOffset) => {
   const sortedHands = [];
   let bidPlayerPrompt = playerModal;
   for (let i = 0; i < players.length; i++) {
     sortedHands.push(sortCardHand(hands[i]));
   }
-  const centeredStyle = {textAlign: 'center'};
-  const secondLine = firstBid === 0
+  const secondLine = (firstBid === 0)
     ? (<span>Please make your bid.</span>) : (<span><b>{players[firstBid]}</b> is now bidding</span>);
   const firstBidPrompt =
     generalModalData(<div >Players now make their bids.<br/>{secondLine}</div>);
@@ -404,20 +511,19 @@ export const openBidding = (hands, players, firstBid, playerModal, bidOffset) =>
   };
 };
 
-export const computerBid = (hands, dealToPlayer,) => {
+export const computerBid = (hands, dealToPlayer, players) => {
   let highPoints = 0;
   let highSuit = '';
   const suits = ['H', 'S', 'D', 'C'];
   suits.forEach(suit => {
-    const { points, textDisplay } = getHandMeb(hands[dealToPlayer], suit);
-    console.log(suit, points, textDisplay);
+    const { points, textDisplay, cardsUsed, nearMiss } = getHandMeb(hands[dealToPlayer], suit);
+    const { projectedCounts, howManyTrump, totalWins } = getProjectedCount(hands[dealToPlayer], suit, players);
+    console.log(suit, points, projectedCounts, nearMiss, '|',  totalWins, howManyTrump, cardsUsed, textDisplay);
     if (points > highPoints) {
       highPoints = points;
       highSuit = suit;
     }
   });
-
-
   return {
     newComputerBid: highPoints,
   };

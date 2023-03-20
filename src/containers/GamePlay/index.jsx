@@ -9,6 +9,7 @@ import ScorePad from "../../components/ScorePad";
 import Modal from "../../components/Modal";
 import { getRandomRange }  from "../../utils/helpers";
 import './index.scss';
+import {openBidding} from "../../redux/actions/appActions";
 
 function GamePlay() {
   const dispatch = useDispatch();
@@ -111,6 +112,8 @@ function GamePlay() {
         );
         break;
       case 'deal:complete':
+        clearInterval(actionTimer);
+        setActionTimer(null);
         dispatch(appActions.storeGameState('fanningOut'));
         for (let i = 0; i < 3.25; i = i + 0.25) {
           setTimeout(() => {
@@ -118,8 +121,11 @@ function GamePlay() {
           }, 125 * i);
         }
         setTimeout(() => {
-          dispatch(appActions.openBidding());
+          dispatch(appActions.checkForNines());
         }, 500);
+        break;
+      case 'startBidding':
+        dispatch(appActions.openBidding());
         break;
       case 'computerBid':
         dispatch(appActions.storeGameState('waitingOnBid'));
@@ -131,8 +137,11 @@ function GamePlay() {
         console.log('uncovered gameState: ', gameState);
     }
   }, [gameState]);
-  const HandleClickedCard = (id, card) => {
+  const handleClickedCard = (id, card) => {
     console.log(id, card);
+  };
+  const handleModalUI = (type, event, message) => {
+    console.log(type, event, message);
   };
   const applyObjectToModal = (location, data, key) => {
     return (
@@ -154,6 +163,7 @@ function GamePlay() {
         textInputs={data.textInputs}
         buttons={data.buttons}
         handleCloseModal={data.handleCloseModal}
+        handleModalUI={handleModalUI}
       />
     );
   }
@@ -172,7 +182,7 @@ function GamePlay() {
             cards={hand}
             fanOut={handFanOut}
             shown={showHands[index]}
-            cardClicked={HandleClickedCard}
+            cardClicked={handleClickedCard}
           />
         );
       }

@@ -66,6 +66,12 @@ export const setHandFanOut = (fanOut) => {
   };
 }
 
+export const checkForNines = () => {
+  return {
+    type: actionTypes.CHECK_FOR_NINES,
+  };
+};
+
 export const openBidding = () => {
   return {
     type: actionTypes.OPEN_BIDDING,

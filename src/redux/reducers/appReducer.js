@@ -101,7 +101,7 @@ const mockPromptModal = {
 const initialState = {
   gameState: 'init',
   teams: ['Us', 'Them'],
-  players: ['You', 'Steven', 'Ellen', 'Jessica'],
+  players: ['You', 'Steven', 'Ellen'],
   playerDisplaySettings: [],
   discardPiles: [
     deckOfCards,
@@ -172,6 +172,32 @@ const appReducer = (state = initialState, action) => {
       return {
         ...state,
         gameState: action.gameState,
+      };
+    case actionTypes.CLEAR_PLAYER_MODAL:
+      if (!action.hide) {
+        return {
+          ...state,
+          playerModal: {...state.playerModal, shown: false},
+        };
+      }
+      const blankedPlayerModal = {
+        message: '',
+        textInputs: [],
+        buttons: [],
+      };
+      return {
+        ...state,
+        playerModal: {...state.playerModal, ...blankedPlayerModal},
+      };
+    case actionTypes.CLEAR_PROMPT_MODAL:
+      const blankedPromptModal = {
+        message: '',
+        textInputs: [],
+        buttons: [],
+      };
+      return {
+        ...state,
+        playerModal: {...state.playerModal, ...blankedPromptModal},
       };
     case actionTypes.RESOLVE_CARD_MOVEMENT:
       const modifiedValues = reducerLogic.resolveCardMovement(
@@ -285,17 +311,40 @@ const appReducer = (state = initialState, action) => {
         state.promptModal,
         state.playerModal
       );
-      const ninesState = {
+      let ninesState = {
         ...state,
         gameState: ninesGameState,
       };
       if (ninesPromptModal) {
-        ninesState.promptModal = ninesPromptModal;
+        ninesState = {
+          ...ninesState,
+          promptModal: ninesPromptModal,
+        };
       }
       if (ninesPlayerModal) {
-        ninesState.playerModal = ninesPlayerModal;
+        ninesState = {
+          ...ninesState,
+          playerModal: ninesPlayerModal,
+        };
       }
       return ninesState;
+    case actionTypes.PARTNER_CONFIRM_NINES_REDEAL:
+      const {
+        postNinesPromptModal,
+        postNinesPlayerModal,
+        postNinesGameState
+      } = reducerLogic.checkPostNines(
+        state.hands,
+        state.players,
+        state.promptModal,
+        state.playerModal
+      );
+      return {
+        ...state,
+        gameState: postNinesGameState,
+        promptModal: postNinesPromptModal,
+        playerModal: postNinesPlayerModal
+      }
     case actionTypes.OPEN_BIDDING:
       const firstBid = (state.dealer + 1) % (state.players.length);
       const {

@@ -22,15 +22,10 @@ export const generateShuffledDeck = () => {
       cards[cut2].suit = holdCard.suit;
     }
   }
-  // for testing
-  for (let i = 26; i < 48; i++) {
-    cards[i].value = '9';
-  }
-  // end testing code
   return cards;
 };
 
-export const generalModalData = (lines, props) => {
+export const generalModalData = (lines, props = {}) => {
   let displayed;
   if (Array.isArray(lines)) {
     let displayedLines = '';

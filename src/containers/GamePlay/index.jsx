@@ -9,7 +9,7 @@ import ScorePad from "../../components/ScorePad";
 import Modal from "../../components/Modal";
 import { getRandomRange }  from "../../utils/helpers";
 import './index.scss';
-import {openBidding} from "../../redux/actions/appActions";
+import {moveCardsToDealer, openBidding} from "../../redux/actions/appActions";
 
 function GamePlay() {
   const dispatch = useDispatch();
@@ -124,6 +124,7 @@ function GamePlay() {
           dispatch(appActions.checkForNines());
         }, 500);
         break;
+      case 'ninesContinue':
       case 'startBidding':
         dispatch(appActions.openBidding());
         break;
@@ -142,6 +143,27 @@ function GamePlay() {
   };
   const handleModalUI = (type, event, message) => {
     console.log(type, event, message);
+    switch(message) {
+      case 'ninesUserRedeal':
+        if (hands.length === 4) {
+          dispatch(appActions.partnerConfirmNinesRedeal());
+        } else {
+          dispatch(appActions.clearPlayerModal());
+          dispatch(appActions.clearPromptModal());
+          dispatch(appActions.storeGameState('preMoveDeckToDealer'));
+        }
+        break;
+      case 'ninesContinue':
+        dispatch(appActions.clearPlayerModal());
+        dispatch(appActions.storeGameState('startBidding'));
+        break;
+      case 'ninesRedeal':
+        dispatch(appActions.clearPlayerModal());
+        dispatch(appActions.clearPromptModal());
+        dispatch(appActions.storeGameState('preMoveDeckToDealer'));
+      default:
+        console.log(type, event, message);
+    }
   };
   const applyObjectToModal = (location, data, key) => {
     return (
@@ -277,6 +299,7 @@ function GamePlay() {
   }, [
     playerModal,
     promptModal,
+    miscDisplaySettings,
   ]);
   const cardFinishedMovement = (id, keyId) => {
     dispatch(appActions.resolveCardMovement(id, keyId));

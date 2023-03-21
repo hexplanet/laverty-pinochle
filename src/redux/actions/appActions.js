@@ -83,3 +83,23 @@ export const resolveComputerBid = () => {
     type: actionTypes.RESOLVE_COMPUTER_BID,
   };
 };
+
+export const partnerConfirmNinesRedeal = () => {
+  return {
+    type: actionTypes.PARTNER_CONFIRM_NINES_REDEAL,
+  };
+};
+
+export const clearPlayerModal = (hide) => {
+  return {
+    type: actionTypes.CLEAR_PLAYER_MODAL,
+    hide
+  };
+};
+
+export const clearPromptModal = (hide = true) => {
+  return {
+    type: actionTypes.CLEAR_PROMPT_MODAL,
+    hide
+  };
+};

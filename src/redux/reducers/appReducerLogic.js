@@ -387,7 +387,7 @@ export const dealing = (state) => {
     dealCards,
   };
 };
-export const checkForNines = (hands, players, promptModal, playerModal) => {
+export const checkForNines = (hands, players) => {
   let ninesPromptModal;
   let ninesPlayerModal;
   let ninesGameState = 'startBidding';
@@ -406,6 +406,10 @@ export const checkForNines = (hands, players, promptModal, playerModal) => {
       ninesPlayer = index;
     }
   });
+
+  // Testing
+  ninesPlayer = 0;
+
   if (ninesPlayer > -1) {
     const playerWordingChange = ninesPlayer === 0 ? 'have' : 'has';
     if (ninesPlayer > 0) {
@@ -437,11 +441,14 @@ export const checkForNines = (hands, players, promptModal, playerModal) => {
                   <b>{players[ninesPartner]}</b> agrees.
                 </div>
               );
-              playerButtons = { buttons: [{
+              playerButtons = {
+                hasBox: false,
+                buttons: [{
                   label: 'Re-deal',
                   status: 'warning',
                   returnMessage: 'ninesRedeal'
-                }]};
+                }],
+              };
               ninesGameState = 'waitRedeal';
             } else {
               promptWording = (
@@ -451,25 +458,31 @@ export const checkForNines = (hands, players, promptModal, playerModal) => {
                 </div>
               );
               ninesGameState = 'waitNinesContinue';
-              playerButtons = { buttons: [{
+              playerButtons = {
+                hasBox: false,
+                buttons: [{
                   label: 'Continue',
                   returnMessage: 'ninesContinue'
-              }]};
+                }],
+              };
             }
           }
         } else {
-          promptWording = (<div><b>{players[2]}</b> has enough nines for the re-deal</div>);
-          playerButtons = { buttons: [{
+          promptWording = (<div><b>{players[ninesPlayer]}</b> has enough nines for the re-deal</div>);
+          playerButtons = {
+            hasBox: false,
+            buttons: [{
               label: 'Re-deal',
               status: 'warning',
               returnMessage: 'ninesRedeal'
-            }]};
+            }],
+          };
           ninesGameState = 'waitRedeal';
         }
       }
     } else {
-      promptWording = (<div><b>{players[2]}</b> {playerWordingChange} enough nines for a re-deal</div>);
-      playerWording = (<div>Do you want a re-deal?</div>);
+      promptWording = (<div><b>{players[0]}</b> {playerWordingChange} enough nines for<br/>a re-deal.</div>);
+      playerWording = (<div>Do you want a re-deal for 9s?</div>);
       playerButtons = { buttons: [{
           label: 'No',
           returnMessage: 'ninesContinue'
@@ -480,11 +493,12 @@ export const checkForNines = (hands, players, promptModal, playerModal) => {
           returnMessage: 'ninesUserRedeal'
         }
       ]};
+      ninesGameState = 'ninesUserRedealWait';
     }
     if (promptWording) {
-      ninesPromptModal = generalModalData(promptWording);
+      ninesPromptModal = generalModalData(promptWording, {});
     }
-    if (playerWording || playerButtons !== {}) {
+    if (playerWording || Object.keys(playerButtons).length > 0) {
       ninesPlayerModal = generalModalData(playerWording, playerButtons);
     }
   }
@@ -494,6 +508,45 @@ export const checkForNines = (hands, players, promptModal, playerModal) => {
     ninesGameState
   };
 };
+
+export const checkPostNines = (
+  hands,
+  players,
+  promptModal,
+  playerModal
+) => {
+  const bid = getHandBid(hands[2], players);
+  let promptWording =
+    (<div><b>{players[0]}</b> have enough nines for<br/>a re-deal.<br/><b>{players[2]}</b> agrees.</div>);
+  let playerButtons = {
+    hasBox: false,
+    buttons: [{
+      label: 'Re-deal',
+      status: 'warning',
+      returnMessage: 'ninesRedeal'
+    }],
+  };
+  if (bid > 20) {
+    promptWording =
+      (<div><b>{players[0]}</b> have enough nines for<br/>a re-deal.<br/><b>{players[2]}</b> disagrees.</div>);
+    playerButtons = {
+      hasBox: false,
+      buttons: [{
+        label: 'Continue',
+        returnMessage: 'ninesContinue'
+      }],
+    };
+  }
+  const postNinesGameState = 'postNinesWait';
+  const postNinesPromptModal = generalModalData(promptWording, {});
+  const postNinesPlayerModal = generalModalData('', playerButtons);
+  return {
+    postNinesPromptModal,
+    postNinesPlayerModal,
+    postNinesGameState
+  };
+};
+
 export const openBidding = (hands, players, firstBid, playerModal, bidOffset) => {
   const sortedHands = [];
   let bidPlayerPrompt = playerModal;

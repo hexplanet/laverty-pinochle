@@ -101,7 +101,7 @@ const mockPromptModal = {
 const initialState = {
   gameState: 'init',
   teams: ['Us', 'Them'],
-  players: ['You', 'Steven', 'Ellen'],
+  players: ['You', 'Steven', 'Ellen', 'Jessica'],
   playerDisplaySettings: [],
   discardPiles: [
     deckOfCards,
@@ -273,7 +273,7 @@ const appReducer = (state = initialState, action) => {
       );
       const newShowHands = [];
       for(let i = 0; i < state.players.length; i++) {
-        newShowHands.push(true); // (i === 0);
+        newShowHands.push(false);
       }
       return {
         ...state,
@@ -304,16 +304,22 @@ const appReducer = (state = initialState, action) => {
       const {
         ninesPromptModal,
         ninesPlayerModal,
-        ninesGameState
+        ninesGameState,
+        sortedHands
       } = reducerLogic.checkForNines(
         state.hands,
         state.players,
-        state.promptModal,
-        state.playerModal
       );
+      const ninesShowHands = [];
+      for(let i = 0; i < state.players.length; i++) {
+        ninesShowHands.push(i === 0);
+      }
       let ninesState = {
         ...state,
+        hands: sortedHands,
+        showHands: ninesShowHands,
         gameState: ninesGameState,
+        dealToPlayer: ((state.dealer + 1 ) % state.players.length)
       };
       if (ninesPromptModal) {
         ninesState = {
@@ -336,8 +342,6 @@ const appReducer = (state = initialState, action) => {
       } = reducerLogic.checkPostNines(
         state.hands,
         state.players,
-        state.promptModal,
-        state.playerModal
       );
       return {
         ...state,
@@ -345,33 +349,80 @@ const appReducer = (state = initialState, action) => {
         promptModal: postNinesPromptModal,
         playerModal: postNinesPlayerModal
       }
-    case actionTypes.OPEN_BIDDING:
-      const firstBid = (state.dealer + 1) % (state.players.length);
+    case actionTypes.NEXT_BID:
+      const nextBid = (state.dealToPlayer + 1) % (state.players.length);
+      const allBids = state.bids.reduce((a, b) => a + b, 0);
+      if (nextBid === state.dealer && allBids === 0)  {
+        const forcedBid = [...state.bids];
+        forcedBid[nextBid] = 20;
+        return {
+          ...state,
+          gameState: 'biddingComplete',
+          bids: [...forcedBid],
+        };
+      }
       const {
-        sortedHands,
-        firstBidPrompt
-      } = reducerLogic.openBidding(
-        state.hands,
+        nextBidPrompt
+      } = reducerLogic.nextBid(
         state.players,
-        firstBid,
-        state.playerModal,
-        state.bidOffset,
+        nextBid,
       );
       return {
         ...state,
-        hands: sortedHands,
-        dealToPlayer: firstBid,
-        promptModal: firstBidPrompt,
-        gameState: (firstBid === 0) ? 'userBid' : 'computerBid',
+        dealToPlayer: nextBid,
+        promptModal: nextBidPrompt,
+        gameState: (nextBid === 0) ? 'userBid' : 'computerBid',
+      };
+    case actionTypes.GET_USER_BID:
+      let initialBidOffset = state.bidOffset;
+      if (action.selection !== '') {
+        const splitBid = action.selection.split('bid_')[1];
+        if (splitBid !== 'left' && splitBid !== 'right') {
+          const userBids = state.bids;
+          userBids[0] = Number(splitBid);
+          const userBidGameState = (state.dealToPlayer === state.dealer)
+            ? 'biddingComplete' : 'nextBid';
+          const userBidPlayerModal = state.playerModal;
+          userBidPlayerModal.shown = false;
+          return {
+            ...state,
+            gameState: userBidGameState,
+            bids: [...userBids],
+            playModal: {...userBidPlayerModal}
+          };
+        }
+        initialBidOffset = initialBidOffset + (splitBid === 'left' ? -5 : 5);
+      }
+      const {
+        bidPlayerModal,
+        maxedBidOffset
+      } = reducerLogic.configureUserBidModal(
+        state.bids,
+        initialBidOffset,
+        state.dealToPlayer,
+        state.dealer,
+      );
+      return {
+        ...state,
+        gameState: 'waitForUserBid',
+        bidOffset: maxedBidOffset,
+        playerModal: bidPlayerModal,
       };
     case actionTypes.RESOLVE_COMPUTER_BID:
-      const { newComputerBid } = reducerLogic.computerBid(
+      const computerBid = reducerLogic.computerBid(
         state.hands,
         state.dealToPlayer,
-        state.players
+        state.players,
+        state.bids
       );
+      const newBids = [...state.bids];
+      newBids[state.dealToPlayer] = computerBid;
+      const bidGameState = (state.dealToPlayer === state.dealer)
+        ? 'biddingComplete' : 'nextBid';
       return {
         ...state,
+        bids: newBids,
+        gameState: bidGameState,
       };
     default:
         return state;

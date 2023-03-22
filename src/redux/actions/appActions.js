@@ -72,9 +72,9 @@ export const checkForNines = () => {
   };
 };
 
-export const openBidding = () => {
+export const nextBid = () => {
   return {
-    type: actionTypes.OPEN_BIDDING,
+    type: actionTypes.NEXT_BID,
   };
 }
 
@@ -83,6 +83,14 @@ export const resolveComputerBid = () => {
     type: actionTypes.RESOLVE_COMPUTER_BID,
   };
 };
+
+export const getUserBid = (selection = '') => {
+  return {
+    type: actionTypes.GET_USER_BID,
+    selection
+  }
+};
+
 
 export const partnerConfirmNinesRedeal = () => {
   return {

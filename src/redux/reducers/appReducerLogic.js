@@ -390,11 +390,15 @@ export const dealing = (state) => {
 export const checkForNines = (hands, players) => {
   let ninesPromptModal;
   let ninesPlayerModal;
-  let ninesGameState = 'startBidding';
+  let ninesGameState = 'ninesContinue';
   let ninesPlayer = -1;
   let promptWording;
   let playerWording;
   let playerButtons = {};
+  const sortedHands = [];
+  for (let i = 0; i < players.length; i++) {
+    sortedHands.push(sortCardHand(hands[i]));
+  }
   hands.forEach((hand, index) => {
     let nines = 0;
     hand.forEach(card => {
@@ -406,10 +410,6 @@ export const checkForNines = (hands, players) => {
       ninesPlayer = index;
     }
   });
-
-  // Testing
-  ninesPlayer = 0;
-
   if (ninesPlayer > -1) {
     const playerWordingChange = ninesPlayer === 0 ? 'have' : 'has';
     if (ninesPlayer > 0) {
@@ -503,6 +503,7 @@ export const checkForNines = (hands, players) => {
     }
   }
   return {
+    sortedHands,
     ninesPromptModal,
     ninesPlayerModal,
     ninesGameState
@@ -512,8 +513,6 @@ export const checkForNines = (hands, players) => {
 export const checkPostNines = (
   hands,
   players,
-  promptModal,
-  playerModal
 ) => {
   const bid = getHandBid(hands[2], players);
   let promptWording =
@@ -547,37 +546,97 @@ export const checkPostNines = (
   };
 };
 
-export const openBidding = (hands, players, firstBid, playerModal, bidOffset) => {
-  const sortedHands = [];
-  let bidPlayerPrompt = playerModal;
-  for (let i = 0; i < players.length; i++) {
-    sortedHands.push(sortCardHand(hands[i]));
-  }
+export const nextBid = (players, firstBid) => {
   const secondLine = (firstBid === 0)
     ? (<span>Please make your bid.</span>) : (<span><b>{players[firstBid]}</b> is now bidding</span>);
-  const firstBidPrompt =
+  const nextBidPrompt =
     generalModalData(<div >Players now make their bids.<br/>{secondLine}</div>);
   return {
-    sortedHands,
-    firstBidPrompt,
-    bidPlayerPrompt,
+    nextBidPrompt,
   };
 };
 
-export const computerBid = (hands, dealToPlayer, players) => {
-  let highPoints = 0;
-  let highSuit = '';
-  const suits = ['H', 'S', 'D', 'C'];
-  suits.forEach(suit => {
-    const { points, textDisplay, cardsUsed, nearMiss } = getHandMeb(hands[dealToPlayer], suit);
-    const { projectedCounts, howManyTrump, totalWins } = getProjectedCount(hands[dealToPlayer], suit, players);
-    console.log(suit, points, projectedCounts, nearMiss, '|',  totalWins, howManyTrump, cardsUsed, textDisplay);
-    if (points > highPoints) {
-      highPoints = points;
-      highSuit = suit;
+export const computerBid = (hands, dealToPlayer, players, bids) => {
+  let maxBid = 0;
+  bids.forEach(highBid => {
+    if (highBid > maxBid) {
+      maxBid = highBid;
     }
   });
-  return {
-    newComputerBid: highPoints,
-  };
+  let bid = 0;
+  const suits = ['H', 'S', 'D', 'C'];
+  let suitBid;
+  suits.forEach(suit => {
+    const { points, nearMiss } = getHandMeb(hands[dealToPlayer], suit);
+    const { projectedCounts } = getProjectedCount(hands[dealToPlayer], suit, players);
+    suitBid = Math.round((points / 2) + projectedCounts + nearMiss);
+    if (suitBid < 21) {
+      suitBid = Math.round((points * .75) + projectedCounts + nearMiss);
+    }
+    if (suitBid > bid) {
+      bid = suitBid;
+    }
+  });
+  if (bid < 21 || bid <= maxBid) {
+    bid = 0;
+  }
+  return bid;
 }
+
+export const configureUserBidModal = (bids, bidOffset, dealToPlayer, dealer) => {
+  let maxBid = 0;
+  let maxedBidOffset = bidOffset;
+  let bidButtons;
+  bids.forEach(bid => {
+    if (bid > maxBid) {
+      maxBid = bid;
+    }
+  });
+  if (dealer === dealToPlayer) {
+    bidButtons = [
+      { label: 'Pass', returnMessage: 'bid_0' },
+      { label: String(maxBid + 1), returnMessage: `bid_${maxBid + 1}` }
+    ];
+  } else {
+    if (maxedBidOffset <= maxBid) {
+      maxedBidOffset = maxBid + 1;
+    }
+    bidButtons = [
+      {
+        label: 'Pass',
+        returnMessage: 'bid_0',
+      },
+      {
+        label: '<',
+        returnMessage: 'bid_left',
+        status: (bidOffset === 21) ? 'inactive' : '',
+      }
+    ];
+    for(let i = maxedBidOffset; i < maxedBidOffset + 5; i++) {
+      if (i < 51) {
+        bidButtons.push({
+          label: String(i),
+          returnMessage: `bid_${i}`
+        });
+      }
+    }
+    bidButtons.push({
+      label: '>',
+      returnMessage: 'bid_right',
+      status: (maxedBidOffset < 46) ? '' : 'inactive',
+    });
+  }
+   console.log(bidButtons);
+  const bidPlayerModal = generalModalData(
+    '',
+    {
+      hasBox: false,
+      width: 500,
+      buttons: bidButtons
+    }
+  );
+  return {
+    bidPlayerModal,
+    maxedBidOffset
+  };
+};

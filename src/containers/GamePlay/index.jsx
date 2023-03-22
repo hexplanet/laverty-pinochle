@@ -9,7 +9,6 @@ import ScorePad from "../../components/ScorePad";
 import Modal from "../../components/Modal";
 import { getRandomRange }  from "../../utils/helpers";
 import './index.scss';
-import {moveCardsToDealer, openBidding} from "../../redux/actions/appActions";
 
 function GamePlay() {
   const dispatch = useDispatch();
@@ -125,14 +124,18 @@ function GamePlay() {
         }, 500);
         break;
       case 'ninesContinue':
-      case 'startBidding':
-        dispatch(appActions.openBidding());
+      case 'nextBid':
+        dispatch(appActions.nextBid());
         break;
       case 'computerBid':
         dispatch(appActions.storeGameState('waitingOnBid'));
         setTimeout(() => {
+          console.log('resolveComputerBid');
           dispatch(appActions.resolveComputerBid());
-        }, 200); // getRandomRange(250, 2000, 10));
+        }, getRandomRange(250, 2000, 1));
+        break;
+      case 'userBid':
+        dispatch(appActions.getUserBid());
         break;
       default:
         console.log('uncovered gameState: ', gameState);
@@ -155,14 +158,16 @@ function GamePlay() {
         break;
       case 'ninesContinue':
         dispatch(appActions.clearPlayerModal());
-        dispatch(appActions.storeGameState('startBidding'));
+        dispatch(appActions.storeGameState('nextBid'));
         break;
       case 'ninesRedeal':
         dispatch(appActions.clearPlayerModal());
         dispatch(appActions.clearPromptModal());
         dispatch(appActions.storeGameState('preMoveDeckToDealer'));
       default:
-        console.log(type, event, message);
+        if (message.substr(0,4) === 'bid_') {
+          dispatch(appActions.getUserBid(message));
+        }
     }
   };
   const applyObjectToModal = (location, data, key) => {

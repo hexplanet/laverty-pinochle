@@ -9,6 +9,7 @@ import ScorePad from "../../components/ScorePad";
 import Modal from "../../components/Modal";
 import { getRandomRange }  from "../../utils/helpers";
 import './index.scss';
+import {decideBidWinner} from "../../redux/actions/appActions";
 
 function GamePlay() {
   const dispatch = useDispatch();
@@ -31,7 +32,8 @@ function GamePlay() {
     movingCards,
     dealer,
     showHands,
-    handFanOut
+    handFanOut,
+    bidModals
   } = useSelector((state) => state.app);
   const [windowWidth, setWindowWidth]   = useState(window.innerWidth);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
@@ -130,12 +132,16 @@ function GamePlay() {
       case 'computerBid':
         dispatch(appActions.storeGameState('waitingOnBid'));
         setTimeout(() => {
-          console.log('resolveComputerBid');
           dispatch(appActions.resolveComputerBid());
         }, getRandomRange(250, 2000, 1));
         break;
       case 'userBid':
         dispatch(appActions.getUserBid());
+        break;
+      case 'biddingComplete':
+        setTimeout(() => {
+          dispatch(appActions.decideBidWinner());
+        }, 1000);
         break;
       default:
         console.log('uncovered gameState: ', gameState);
@@ -144,7 +150,7 @@ function GamePlay() {
   const handleClickedCard = (id, card) => {
     console.log(id, card);
   };
-  const handleModalUI = (type, event, message) => {
+  const handleModalInput = (type, event, message) => {
     console.log(type, event, message);
     switch(message) {
       case 'ninesUserRedeal':
@@ -164,6 +170,7 @@ function GamePlay() {
         dispatch(appActions.clearPlayerModal());
         dispatch(appActions.clearPromptModal());
         dispatch(appActions.storeGameState('preMoveDeckToDealer'));
+        break;
       default:
         if (message.substr(0,4) === 'bid_') {
           dispatch(appActions.getUserBid(message));
@@ -190,7 +197,7 @@ function GamePlay() {
         textInputs={data.textInputs}
         buttons={data.buttons}
         handleCloseModal={data.handleCloseModal}
-        handleModalUI={handleModalUI}
+        handleModalInput={handleModalInput}
       />
     );
   }
@@ -300,10 +307,20 @@ function GamePlay() {
         newGamePlayerModal.push(applyObjectToModal(miscDisplaySettings.promptModal, promptModal, 'PromptModal'));
       }
     }
+    for (let i = 0; i < hands.length; i++) {
+      if (miscDisplaySettings.gameBidModals[i]?.x !== undefined) {
+        if (bidModals[i].shown) {
+          newGamePlayerModal.push(
+            applyObjectToModal(miscDisplaySettings.gameBidModals[i], bidModals[i], `bidModal_${i}`)
+          );
+        }
+      }
+    }
     setGamePlayerModal(newGamePlayerModal);
   }, [
     playerModal,
     promptModal,
+    bidModals,
     miscDisplaySettings,
   ]);
   const cardFinishedMovement = (id, keyId) => {

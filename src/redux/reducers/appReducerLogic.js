@@ -6,7 +6,8 @@ import {
   createLandingCard,
   sortCardHand,
   getHandMeb,
-  getProjectedCount, getHandBid,
+  getProjectedCount,
+  getHandBid,
 } from '../../utils/helpers';
 export const playerDisplaySettingsLogic = (width, height, players) => {
   const playerHandLocations = [];
@@ -147,6 +148,33 @@ export const playerDisplaySettingsLogic = (width, height, players) => {
     y: height - (90 * ratio),
     zoom: zoomFactor,
   };
+  let newBidLocations = [];
+  let newBidLocation;
+  for(let i = 0; i < players; i++) {
+    if (players === 4) {
+      newBidLocation = { x: width / 2, y: height / 2, zoom: zoomFactor };
+      if (i % 2 === 0) {
+        newBidLocation.y = (i === 0) ? height - (135 * ratio) : (52 * ratio);
+      } else {
+        newBidLocation.x = (i === 3) ? width - (52 * ratio) : (44 * ratio);
+      }
+      newBidLocations = [...newBidLocations, newBidLocation];
+    } else {
+      newBidLocation = { x: width / 2, y: (110 * ratio), zoom: zoomFactor };
+      switch (i) {
+        case 1:
+          newBidLocation.x = (110 * ratio);
+          break;
+        case 2:
+          newBidLocation.x = width - (110 * ratio);
+          break;
+        default:
+          newBidLocation.y = height - (135 * ratio);
+      }
+      newBidLocations = [...newBidLocations, newBidLocation];
+    }
+  }
+  miscLocations.gameBidModals = newBidLocations;
   return {
     playerHandLocations,
     playerDiscardLocations,
@@ -219,6 +247,7 @@ export const setGameValuesForNewGame = (teams, players) => {
     playerModal: {shown: false},
     promptModal: throwAcesForDealerModal,
     bids: [],
+    bidModals: [],
   };
   for(let i = 0; i < players.length; i++) {
     initedValues.discardPiles.push([]);
@@ -226,6 +255,7 @@ export const setGameValuesForNewGame = (teams, players) => {
     initedValues.mebs.push([]);
     initedValues.showHands.push(i === 0);
     initedValues.bids.push(0);
+    initedValues.bidModals.push({shown: false})
   }
   for(let i = 0; i < teams.length; i++) {
     initedValues.playScore.push([]);
@@ -343,7 +373,7 @@ export const dealing = (state) => {
   let dealCards = [...state.movingCards];
   const newDiscardDeck = state.discardPiles[state.dealer];
   if (newDiscardDeck.length > 0) {
-    const cardsToThrow = (state.hands[state.dealToPlayer].length === 0) ? 3 : 4;
+    const cardsToThrow = (newDiscardDeck.length > 48 - state.players.length * 3) ? 3 : 4;
     const targets = [];
     if (state.dealer === state.dealToPlayer) {
       if (state.players.length === 3 && state.hands[state.dealer].length > 0) {
@@ -626,7 +656,6 @@ export const configureUserBidModal = (bids, bidOffset, dealToPlayer, dealer) => 
       status: (maxedBidOffset < 46) ? '' : 'inactive',
     });
   }
-   console.log(bidButtons);
   const bidPlayerModal = generalModalData(
     '',
     {
@@ -638,5 +667,52 @@ export const configureUserBidModal = (bids, bidOffset, dealToPlayer, dealer) => 
   return {
     bidPlayerModal,
     maxedBidOffset
+  };
+};
+
+export const resolveBidding = (
+  bids,
+  players,
+  teams,
+  playScore
+) => {
+  let wonTheBid = 0;
+  let wonBidWith = 0;
+  bids.forEach((bid, bidIndex) => {
+    if (bid > wonBidWith) {
+      wonBidWith = bid;
+      wonTheBid = bidIndex;
+    }
+  });
+  const tookBidPlayerModal = generalModalData('',{
+    hasBox: false,
+    buttons: [{
+      label: 'Continue',
+      returnMessage: 'postBidContinue',
+    }]
+  });
+  let bidColumn = wonTheBid;
+  if (teams.length === 4) {
+    bidColumn = wonTheBid % 2;
+  }
+  const updatedBidScore = [...playScore];
+  for(let i = 0; i < teams.length; i++) {
+    updatedBidScore[i].push({
+      bid: (bidColumn === i) ? String(wonBidWith) : '',
+      gotSet: false,
+      meb: '',
+      counts: '',
+      score: '',
+    });
+  }
+  const howWon = wonBidWith === 20 ? 'was forced to take the bid' : 'won the bid';
+  const tookBidPromptModal =
+    generalModalData((<div><b>{players[wonTheBid]}</b> {howWon} with <b>{wonBidWith}</b></div>),{});
+  return {
+    tookBidPlayerModal,
+    tookBidPromptModal,
+    wonTheBid,
+    updatedBidScore,
+    wonBidWith,
   };
 };

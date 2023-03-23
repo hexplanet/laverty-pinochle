@@ -111,3 +111,9 @@ export const clearPromptModal = (hide = true) => {
     hide
   };
 };
+
+export const decideBidWinner = () => {
+  return {
+    type: actionTypes.DECIDE_BID_WINNER,
+  };
+};

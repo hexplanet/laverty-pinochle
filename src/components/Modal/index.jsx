@@ -20,7 +20,7 @@ function Modal({
   textInputs,
   buttons,
   handleCloseModal,
-  handleModalUI
+  handleModalInput
 }) {
   const [windowWidth, setWindowWidth]   = useState(window.innerWidth);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
@@ -64,7 +64,7 @@ function Modal({
     event.stopPropagation();
   }
   const handleModalButton = (message) => {
-    handleModalUI('button', 'click', message);
+    handleModalInput('button', 'click', message);
   };
   const generatedButtons = [];
   buttons.forEach(modalButton => {
@@ -130,7 +130,7 @@ Modal.propTypes = {
   textInputs: PropTypes.array,
   buttons: PropTypes.array,
   handleCloseModal: PropTypes.func,
-  handleModalUI: PropTypes.func,
+  handleModalInput: PropTypes.func,
 };
 
 Modal.defaultProps = {
@@ -150,7 +150,7 @@ Modal.defaultProps = {
   textInputs: [],
   buttons: [],
   handleCloseModal: () => {},
-  handleModalUI: PropTypes.func,
+  handleModalInput: PropTypes.func,
 };
 
 export default Modal;

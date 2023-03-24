@@ -3,7 +3,7 @@ import * as reducerLogic from './appReducerLogic';
 import {
   generalModalData,
 } from '../../utils/helpers';
-import {resolveBidding} from "./appReducerLogic";
+import {shouldUserThrowHand} from "./appReducerLogic";
 
 const initialState = {
   gameState: 'init',
@@ -202,8 +202,7 @@ const appReducer = (state = initialState, action) => {
       const {
         ninesPromptModal,
         ninesPlayerModal,
-        ninesGameState,
-        sortedHands
+        ninesGameState
       } = reducerLogic.checkForNines(
         state.hands,
         state.players,
@@ -214,7 +213,6 @@ const appReducer = (state = initialState, action) => {
       }
       let ninesState = {
         ...state,
-        hands: sortedHands,
         showHands: ninesShowHands,
         gameState: ninesGameState,
         dealToPlayer: state.dealer,
@@ -374,7 +372,98 @@ const appReducer = (state = initialState, action) => {
         tookBid: wonTheBid,
         tookHand: wonTheBid,
         bidAmount: wonBidWith,
-        gameState: 'displayWidow'
+        gameState: 'waitDisplayWidow'
+      };
+    case 'SHOW_THE_WIDOW':
+      if (action.widowCardIndex === state.players.length) {
+        const widowContinueModal = generalModalData('', {
+          hasBox: false,
+          buttons: [{
+            label: 'Continue',
+            returnMessage: 'widowContinue'
+          }],
+        });
+        return {
+          ...state,
+          playerModal: widowContinueModal,
+          gameState: 'waitMoveWidowToHand',
+        }
+      }
+      const widowGameState = action.widowCardIndex === -1 ? 'showWidow' : 'widowWait';
+      const widowBidModels = [];
+      for(let i = 0; i <state.players.length; i++) {
+        widowBidModels.push({shown:false});
+      }
+      const widowPlayerPrompt = {shown:false};
+      const widowPlayPile = reducerLogic.displayWidow(
+        state.playPile,
+        action.widowCardIndex,
+        state.players
+      );
+      return {
+        ...state,
+        playerModal: widowPlayerPrompt,
+        bidModals: widowBidModels,
+        gameState: widowGameState,
+        playPile: widowPlayPile,
+        playPileShown: true,
+      };
+    case 'MOVE_WIDOW_TO_HAND':
+      const widowMovingCards = reducerLogic.movingWidow(state);
+      return {
+        ...state,
+        gameState: 'widowMoving',
+        movingCards: [...widowMovingCards],
+        playPile: [],
+      };
+    case 'DECIDE_THROW_HAND':
+      if (state.tookBid === 0) {
+        const {
+          throwPlayerModal,
+          throwGameState
+        } = reducerLogic.shouldUserThrowHand(
+          state.hands,
+          state.bidAmount,
+          state.players
+        );
+        return {
+          ...state,
+          gameState: throwGameState,
+          playerModal: throwPlayerModal,
+          movingCards: [],
+        };
+      }
+      return {
+        ...state,
+      };
+    case 'AGREE_THROW_HAND':
+      if (state.players === 4 && state.tookBid === 2) {
+        const throwModal = generalModalData(
+          (<span><b>{state.players[2]}</b> wants to throw the hand</span>) ,
+          {
+            width: 500,
+            height: 155,
+            buttons: [
+              {
+                label: 'Play Hand',
+                returnMessage: 'throwHandContinue',
+              },
+              {
+                label: 'Throw Hand',
+                returnMessage: 'throwHand',
+              }
+            ]
+          }
+        );
+        return {
+          ...state,
+          gameState: 'waitAgreeThrowHand',
+          playerModal: throwModal,
+        };
+      }
+
+      return {
+        ...state,
       };
     default:
         return state;

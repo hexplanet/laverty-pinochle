@@ -210,6 +210,7 @@ export const resolveCardMovement = (
       case 'H':
         const newHands = [...hands];
         newHands[playerIndex] = [...hands[playerIndex], landingCard];
+        newHands[playerIndex] = sortCardHand(newHands[playerIndex]);
         changedValues.hands = newHands;
         break;
       case 'M':
@@ -282,7 +283,7 @@ export const throwCardForDeal = (state) => {
     keyId: `${sourceCardId}to${targetCardId}${Date.now()}`,
     suit: dealtCard.suit,
     value: dealtCard.value,
-    shown: false,
+    shown: true,
     speed: 1,
     source: sourceCard,
     target: targetCard,
@@ -425,10 +426,6 @@ export const checkForNines = (hands, players) => {
   let promptWording;
   let playerWording;
   let playerButtons = {};
-  const sortedHands = [];
-  for (let i = 0; i < players.length; i++) {
-    sortedHands.push(sortCardHand(hands[i]));
-  }
   hands.forEach((hand, index) => {
     let nines = 0;
     hand.forEach(card => {
@@ -533,7 +530,6 @@ export const checkForNines = (hands, players) => {
     }
   }
   return {
-    sortedHands,
     ninesPromptModal,
     ninesPlayerModal,
     ninesGameState
@@ -715,4 +711,105 @@ export const resolveBidding = (
     updatedBidScore,
     wonBidWith,
   };
+};
+
+export const displayWidow = (
+  playPile,
+  widowCardIndex,
+  players
+) => {
+  const newPlayPile = playPile;
+  if (widowCardIndex > -1) {
+    const adjustedCard = newPlayPile[widowCardIndex];
+    adjustedCard.shown = true;
+    adjustedCard.rotation = 0;
+    adjustedCard.xOffset = -(60 * (players.length - 1)) + (120 * widowCardIndex) + 10;
+    adjustedCard.yOffset = 150;
+    newPlayPile[widowCardIndex] = {...adjustedCard};
+  }
+  return [...newPlayPile];
+};
+
+export const movingWidow = (state) => {
+  let widowCards = [];
+  state.playPile.forEach(card => {
+    const sourceCardId = 'P-1';
+    const sourceCard = getCardLocation(sourceCardId, state);
+    const targetCardId = `H${state.tookBid}`;
+    const targetCard = getCardLocation(targetCardId, state);
+    targetCard.zoom = targetCard.zoom * 2;
+    targetCard.rotation = targetCard.rotation + getRandomRange(-5, 5, 1);
+    const newMovingCard = {
+      id: `${sourceCardId}to${targetCardId}`,
+      keyId: `${sourceCardId}to${targetCardId}${Date.now()}`,
+      suit: card.suit,
+      value: card.value,
+      shown: false,
+      speed: 1,
+      source: sourceCard,
+      target: targetCard,
+    };
+    widowCards = [...widowCards, newMovingCard];
+  });
+  return widowCards;
+};
+
+export const shouldComputerThrowHand = (hands, tookBid, bidAmount, players) => {
+
+};
+
+export const shouldComputerAgreeThrowHand = (hands, tookBid, players) => {
+
+};
+
+export const shouldUserThrowHand = (hands, bidAmount, players) => {
+  let throwPlayerModal = {shown: false};
+  const suits = ['D', 'S', 'C', 'H'];
+  let high = 0;
+  let meb = 0;
+  suits.forEach(suit => {
+    const { points } = getHandMeb(hands[0], suit);
+    const { projectedCounts } = getProjectedCount(hands[0], suit, players, false);
+    if (points + projectedCounts > high) {
+      high = points + projectedCounts;
+      meb = points;
+    }
+  });
+  const willFail = (hands.length === 3 && meb + 25 < bidAmount);
+  let mayFail;
+  if (hands.length === 3) {
+    mayFail = (high < bidAmount - 4);
+  } else {
+    mayFail = (high < bidAmount - 8);
+  }
+  let prompt = '';
+  if (willFail) {
+    prompt = "You can't make the bid. Throw hand?";
+  } else if (mayFail) {
+    prompt = "You might not make the bid. Throw hand?";
+  }
+  if (prompt !== '') {
+    throwPlayerModal = generalModalData(
+      prompt,
+      {
+        width: 500,
+        height: 105,
+        buttons: [
+          {
+            label: 'Play Hand',
+            returnMessage: 'throwHandContinue',
+          },
+          {
+            label: 'Throw Hand',
+            returnMessage: (players.length === 4) ? 'userThrowHand' : 'throwHand',
+          }
+        ]
+      }
+    );
+  }
+  const throwGameState = (mayFail || willFail) ? 'waitUserThrowHand' : 'throwHandContinue';
+  return {
+    throwPlayerModal,
+    throwGameState
+  }
 };

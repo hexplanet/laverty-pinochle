@@ -9,7 +9,7 @@ import ScorePad from "../../components/ScorePad";
 import Modal from "../../components/Modal";
 import { getRandomRange }  from "../../utils/helpers";
 import './index.scss';
-import {decideBidWinner} from "../../redux/actions/appActions";
+import {decideBidWinner, decideThrowHand, moveWidowToHand, startDiscards} from "../../redux/actions/appActions";
 
 function GamePlay() {
   const dispatch = useDispatch();
@@ -143,6 +143,19 @@ function GamePlay() {
           dispatch(appActions.decideBidWinner());
         }, 1000);
         break;
+      case 'showWidow':
+        for(let i = 0; i < hands.length + 1; i++) {
+          setTimeout(() => {
+            dispatch(appActions.showTheWidow(i));
+          }, 1000 * i);
+        }
+        break;
+      case 'widowMoving:complete':
+        dispatch(appActions.decideThrowHand());
+        break;
+      case 'computerWantsToThrowHand':
+        dispatch(appActions.agreeThrowHand());
+        break;
       default:
         console.log('uncovered gameState: ', gameState);
     }
@@ -170,6 +183,22 @@ function GamePlay() {
         dispatch(appActions.clearPlayerModal());
         dispatch(appActions.clearPromptModal());
         dispatch(appActions.storeGameState('preMoveDeckToDealer'));
+        break;
+      case 'postBidContinue':
+        dispatch(appActions.showTheWidow());
+        break;
+      case 'widowContinue':
+        dispatch(appActions.clearPlayerModal());
+        dispatch(appActions.clearPromptModal());
+        dispatch(appActions.moveWidowToHand());
+        break;
+      case 'throwHandContinue':
+        dispatch(appActions.clearPlayerModal());
+        dispatch(appActions.startDiscards());
+        break;
+      case 'userThrowHand':
+        dispatch(appActions.clearPlayerModal());
+        dispatch(appActions.agreeThrowHand());
         break;
       default:
         if (message.substr(0,4) === 'bid_') {
@@ -297,6 +326,15 @@ function GamePlay() {
   }, [teams, playScore, gameWon, miscDisplaySettings]);
   useEffect(() => {
     const newGamePlayerModal = [];
+    for (let i = 0; i < hands.length; i++) {
+      if (miscDisplaySettings.gameBidModals[i]?.x !== undefined) {
+        if (bidModals[i].shown) {
+          newGamePlayerModal.push(
+            applyObjectToModal(miscDisplaySettings.gameBidModals[i], bidModals[i], `bidModal_${i}`)
+          );
+        }
+      }
+    }
     if (miscDisplaySettings.playerModal.x !== undefined) {
       if (playerModal.shown) {
         newGamePlayerModal.push(applyObjectToModal(miscDisplaySettings.playerModal, playerModal, 'PlayerModal'));
@@ -305,15 +343,6 @@ function GamePlay() {
     if (miscDisplaySettings.promptModal.x !== undefined) {
       if (promptModal.shown) {
         newGamePlayerModal.push(applyObjectToModal(miscDisplaySettings.promptModal, promptModal, 'PromptModal'));
-      }
-    }
-    for (let i = 0; i < hands.length; i++) {
-      if (miscDisplaySettings.gameBidModals[i]?.x !== undefined) {
-        if (bidModals[i].shown) {
-          newGamePlayerModal.push(
-            applyObjectToModal(miscDisplaySettings.gameBidModals[i], bidModals[i], `bidModal_${i}`)
-          );
-        }
       }
     }
     setGamePlayerModal(newGamePlayerModal);

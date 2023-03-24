@@ -18,6 +18,7 @@ function Pile({
   useEffect(() => {
     const newCards = [];
     cards.forEach((card, index) => {
+      const cardShown = (card.shown === undefined) ? shown : shown && card.shown;
       newCards.push(
         <PlayingCard
           key={`Pile${index}`}
@@ -25,7 +26,7 @@ function Pile({
           yLocation={110 - (hasHeight ? (index * 0.5) : 0) + (card.yOffset ? card.yOffset : 0)}
           suit={card.suit}
           value={card.value}
-          shown={shown}
+          shown={cardShown}
           rotation={card.rotation}
           rolloverColor=''
           clickable={false}

@@ -254,7 +254,6 @@ export const getHandMeb = (hand, trump) => {
 
 export const getProjectedCount = (hand, trump, players, preWidow = true) => {
   const numPlayers = players.length;
-  const killWeightLimit = (numPlayers === 3) ?  4 : 3;
   const winAdjustment = (25 / ((numPlayers === 3) ?  15 : 11));
   const suits = ['H', 'C', 'D', 'S'];
   const valueStrength = ['A','10','K','Q','J','9'];
@@ -303,6 +302,7 @@ export const getProjectedCount = (hand, trump, players, preWidow = true) => {
     lostCounts = lostCounts < numPlayers ? 0 : lostCounts - numPlayers;
   }
   projectedCounts = Math.round(projectedCounts - lostCounts);
+  projectedCounts = projectedCounts > 25 ? 25 : projectedCounts;
   return {
     projectedCounts,
     howManyTrump,

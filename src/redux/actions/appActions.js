@@ -117,3 +117,34 @@ export const decideBidWinner = () => {
     type: actionTypes.DECIDE_BID_WINNER,
   };
 };
+
+export const showTheWidow = (widowCardIndex = -1) => {
+  return {
+    type: actionTypes.SHOW_THE_WIDOW,
+    widowCardIndex
+  };
+};
+
+export const moveWidowToHand = () => {
+  return {
+    type: actionTypes.MOVE_WIDOW_TO_HAND,
+  };
+};
+
+export const decideThrowHand = () => {
+  return {
+    type: actionTypes.DECIDE_THROW_HAND,
+  };
+};
+
+export const startDiscards = () => {
+  return {
+    type: actionTypes.START_DISCARDS,
+  };
+};
+
+export const agreeThrowHand = () => {
+  return {
+    type: actionTypes.AGREE_THROW_HAND,
+  };
+};

@@ -3,7 +3,7 @@ import * as reducerLogic from './appReducerLogic';
 import {
   generalModalData,
 } from '../../utils/helpers';
-import {shouldUserThrowHand} from "./appReducerLogic";
+import {shouldComputerAgreeThrowHand, shouldComputerThrowHand, shouldUserThrowHand} from "./appReducerLogic";
 
 const initialState = {
   gameState: 'init',
@@ -18,6 +18,7 @@ const initialState = {
   bids: [],
   tookBid: 0,
   bidAmount: 0,
+  thrownHand: false,
   tookHand: 0,
   bidModals: [],
   bidOffset: 21,
@@ -351,7 +352,7 @@ const appReducer = (state = initialState, action) => {
         gameState: bidGameState,
         bidModals: [...shownComputerBid],
       };
-    case 'DECIDE_BID_WINNER':
+    case actionTypes.DECIDE_BID_WINNER:
       const {
         tookBidPlayerModal,
         tookBidPromptModal,
@@ -372,9 +373,10 @@ const appReducer = (state = initialState, action) => {
         tookBid: wonTheBid,
         tookHand: wonTheBid,
         bidAmount: wonBidWith,
-        gameState: 'waitDisplayWidow'
+        gameState: 'waitDisplayWidow',
+        thrownHand: false,
       };
-    case 'SHOW_THE_WIDOW':
+    case actionTypes.SHOW_THE_WIDOW:
       if (action.widowCardIndex === state.players.length) {
         const widowContinueModal = generalModalData('', {
           hasBox: false,
@@ -408,7 +410,7 @@ const appReducer = (state = initialState, action) => {
         playPile: widowPlayPile,
         playPileShown: true,
       };
-    case 'MOVE_WIDOW_TO_HAND':
+    case actionTypes.MOVE_WIDOW_TO_HAND:
       const widowMovingCards = reducerLogic.movingWidow(state);
       return {
         ...state,
@@ -416,7 +418,7 @@ const appReducer = (state = initialState, action) => {
         movingCards: [...widowMovingCards],
         playPile: [],
       };
-    case 'DECIDE_THROW_HAND':
+    case actionTypes.DECIDE_THROW_HAND:
       if (state.tookBid === 0) {
         const {
           throwPlayerModal,
@@ -433,20 +435,29 @@ const appReducer = (state = initialState, action) => {
           movingCards: [],
         };
       }
+      const {
+        computerThrowGameState
+      } = reducerLogic.shouldComputerThrowHand(
+        state.hands,
+        state.tookBid,
+        state.bidAmount,
+        state.players
+      );
       return {
         ...state,
+        gameState: computerThrowGameState,
       };
-    case 'AGREE_THROW_HAND':
-      if (state.players === 4 && state.tookBid === 2) {
+    case actionTypes.AGREE_THROW_HAND:
+      if (state.players.length === 4 && state.tookBid === 2) {
         const throwModal = generalModalData(
           (<span><b>{state.players[2]}</b> wants to throw the hand</span>) ,
           {
             width: 500,
-            height: 155,
+            height: 105,
             buttons: [
               {
                 label: 'Play Hand',
-                returnMessage: 'throwHandContinue',
+                returnMessage: 'throwHandDisagree',
               },
               {
                 label: 'Throw Hand',
@@ -461,9 +472,83 @@ const appReducer = (state = initialState, action) => {
           playerModal: throwModal,
         };
       }
-
+      const {
+        computerAgreeThrowHand
+      } = reducerLogic.shouldComputerAgreeThrowHand(
+        state.hands,
+        state.tookBid,
+        state.players
+      );
       return {
         ...state,
+        gameState: computerAgreeThrowHand,
+      };
+    case actionTypes.DISAGREE_THROW_HAND:
+      let disagreeGameState = 'waitAfterThrowDisagree';
+      const bidder = state.players[state.tookBid];
+      const disagrees = state.players[(state.tookBid + 2) % 4];
+      const throwText = (
+        <span><b>{bidder}</b> wanted to thrown the hand, but <b>{disagrees}</b> disagreed</span>
+      );
+      const disagreeThrowPromptModal = generalModalData(throwText, {});
+      let disagreeThrowPlayerModal = {shown:false};
+      if (state.tookBid !== 2) {
+        disagreeThrowPlayerModal = generalModalData('', {
+          hasBox: false,
+          buttons: [{
+            label: 'Continue',
+            returnMessage: 'throwHandContinue'
+          }],
+        });
+      } else {
+        disagreeGameState = 'startDiscards';
+      }
+      return {
+        ...state,
+        gameState: disagreeGameState,
+        promptModal: disagreeThrowPromptModal,
+        playerModal: disagreeThrowPlayerModal
+      };
+    case actionTypes.THROW_HAND:
+      let throwGameState = 'waitAfterThrowHand';
+      const throwHandText = (
+        <span><b>{state.players[state.tookBid]}</b> throws the hand</span>
+      );
+      const throwPromptModal = generalModalData(throwHandText, {});
+      let throwPlayerModal = {shown: false};
+      if (state.tookBid !== 2) {
+        throwPlayerModal = generalModalData('', {
+          hasBox: false,
+          buttons: [{
+            label: 'Continue',
+            returnMessage: 'nameTrumpSuit'
+          }],
+        });
+      } else {
+        throwGameState = 'selectTrumpSuit';
+      }
+      return {
+        ...state,
+        gameState: throwGameState,
+        thrownHand: true,
+        promptModal: throwPromptModal,
+        playerModal: throwPlayerModal,
+      };
+    case actionTypes.START_DISCARDS:
+      const {
+        discardGameState,
+        discardPlayerModal,
+        discardPromptModal,
+      } = reducerLogic.setUpDiscards(
+        state.hands,
+        state.tookBid,
+        state.players
+      );
+      return {
+        ...state,
+        gameState: discardGameState,
+        playerModal: discardPlayerModal,
+        promptModal: discardPromptModal,
       };
     default:
         return state;

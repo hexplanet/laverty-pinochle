@@ -154,7 +154,19 @@ function GamePlay() {
         dispatch(appActions.decideThrowHand());
         break;
       case 'computerWantsToThrowHand':
+
         dispatch(appActions.agreeThrowHand());
+        break;
+      case 'throwHandDisagree':
+        dispatch(appActions.disagreeThrowHand());
+        break;
+      case 'throwHand':
+        dispatch(appActions.throwHand());
+        break;
+      case 'throwHandContinue':
+      case 'startDiscards':
+        dispatch(appActions.clearPlayerModal());
+        dispatch(appActions.startDiscards());
         break;
       default:
         console.log('uncovered gameState: ', gameState);
@@ -199,6 +211,13 @@ function GamePlay() {
       case 'userThrowHand':
         dispatch(appActions.clearPlayerModal());
         dispatch(appActions.agreeThrowHand());
+        break;
+      case 'throwHandDisagree':
+        dispatch(appActions.clearPlayerModal());
+        dispatch(appActions.disagreeThrowHand());
+        break;
+      case 'throwHand':
+        dispatch(appActions.throwHand());
         break;
       default:
         if (message.substr(0,4) === 'bid_') {

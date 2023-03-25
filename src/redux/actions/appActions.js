@@ -148,3 +148,15 @@ export const agreeThrowHand = () => {
     type: actionTypes.AGREE_THROW_HAND,
   };
 };
+
+export const disagreeThrowHand = () => {
+  return {
+    type: actionTypes.DISAGREE_THROW_HAND,
+  };
+};
+
+export const throwHand = () => {
+  return {
+    type: actionTypes.THROW_HAND,
+  };
+};

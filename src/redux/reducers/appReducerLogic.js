@@ -755,11 +755,40 @@ export const movingWidow = (state) => {
 };
 
 export const shouldComputerThrowHand = (hands, tookBid, bidAmount, players) => {
-
+  let computerThrowGameState = 'throwHandContinue';
+  const suits = ['D', 'S', 'C', 'H'];
+  let high = 0;
+  let meb = 0;
+  suits.forEach(suit => {
+    const { points } = getHandMeb(hands[tookBid], suit);
+    const { projectedCounts } = getProjectedCount(hands[tookBid], suit, players, false);
+    if (points + projectedCounts > high) {
+      high = points + projectedCounts;
+      meb = points;
+    }
+  });
+  const willFail = (hands.length === 3 && meb + 25 < bidAmount);
+  let mayFail;
+  if (hands.length === 3) {
+    mayFail = (high < bidAmount - 4);
+  } else {
+    mayFail = (high < bidAmount - 8);
+  }
+  if (mayFail || willFail) {
+    computerThrowGameState =
+      (hands.length === 4) ? 'computerWantsToThrowHand' : 'throwHand';
+  }
+  return { computerThrowGameState };
 };
 
 export const shouldComputerAgreeThrowHand = (hands, tookBid, players) => {
-
+  let computerAgreeThrowHand = 'throwHand';
+  const { points } = getHandMeb(hands[tookBid], '');
+  const { totalWins } = getProjectedCount(hands[tookBid], '', players, false);
+  if (points >= 8 || totalWins >= 4) {
+    computerAgreeThrowHand = 'throwHandDisagree';
+  }
+  return { computerAgreeThrowHand };
 };
 
 export const shouldUserThrowHand = (hands, bidAmount, players) => {
@@ -812,4 +841,26 @@ export const shouldUserThrowHand = (hands, bidAmount, players) => {
     throwPlayerModal,
     throwGameState
   }
+};
+
+export const setUpDiscards = (hands, tookBid, players) => {
+  let discardGameState = 'computerDiscard';
+  let discardPlayerModal = {shown: false};
+  const flexWord = (tookBid === 0) ? 'have' : 'has';
+  const discardMessage = (<span><b>{players[tookBid]}</b> {flexWord} to discard {players.length} cards</span>);
+  const discardPromptModal = generalModalData(discardMessage, {});
+  if (tookBid === 0) {
+    const userDiscardMessage = (<span>Discard {players.length} cards. Meb cards are yellowed.</span>)
+    discardPlayerModal = generalModalData(userDiscardMessage, {
+      width: 500,
+      height: 105,
+      buttons: [{ label: 'Discard', status: 'inactive', returnMessage: 'userDiscard' }],
+    });
+    discardGameState = 'waitUserDiscard';
+  }
+  return {
+    discardGameState,
+    discardPlayerModal,
+    discardPromptModal
+  };
 };

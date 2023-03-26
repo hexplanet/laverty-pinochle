@@ -3,7 +3,6 @@ import * as reducerLogic from './appReducerLogic';
 import {
   generalModalData,
 } from '../../utils/helpers';
-import {shouldComputerAgreeThrowHand, shouldComputerThrowHand, shouldUserThrowHand} from "./appReducerLogic";
 
 const initialState = {
   gameState: 'init',
@@ -23,8 +22,8 @@ const initialState = {
   bidModals: [],
   bidOffset: 21,
   trumpSuit: '',
-  mebDisplaySettings: [],
-  mebs: [],
+  meldDisplaySettings: [],
+  melds: [],
   miscDisplaySettings: {
     scorePad: {},
     playArea: {},
@@ -50,7 +49,7 @@ const appReducer = (state = initialState, action) => {
       const {
         playerHandLocations,
         playerDiscardLocations,
-        playerMebLocations,
+        playerMeldLocations,
         miscLocations,
         zoomRatio
       } = reducerLogic.playerDisplaySettingsLogic(
@@ -62,7 +61,7 @@ const appReducer = (state = initialState, action) => {
         ...state,
         playerDisplaySettings: playerHandLocations,
         discardDisplaySettings: playerDiscardLocations,
-        mebDisplaySettings: playerMebLocations,
+        meldDisplaySettings: playerMeldLocations,
         miscDisplaySettings: miscLocations,
         zoomRatio
       };
@@ -103,7 +102,7 @@ const appReducer = (state = initialState, action) => {
         action.keyId,
         state.movingCards,
         state.hands,
-        state.mebs,
+        state.melds,
         state.discardPiles,
         state.playPile
       );
@@ -149,7 +148,7 @@ const appReducer = (state = initialState, action) => {
     case actionTypes.MOVE_CARD_TO_DEALER:
       const {
         toDealerMovingCards,
-        toDealerMebs,
+        toDealerMelds,
         toDealerDiscards,
         toDealerHands,
         toDealerPlayPile
@@ -157,7 +156,7 @@ const appReducer = (state = initialState, action) => {
       return {
         ...state,
         movingCards: toDealerMovingCards,
-        mebs: toDealerMebs,
+        melds: toDealerMelds,
         discardPiles: toDealerDiscards,
         hands: toDealerHands,
         playPile: toDealerPlayPile,
@@ -432,7 +431,6 @@ const appReducer = (state = initialState, action) => {
           ...state,
           gameState: throwGameState,
           playerModal: throwPlayerModal,
-          movingCards: [],
         };
       }
       const {
@@ -539,6 +537,7 @@ const appReducer = (state = initialState, action) => {
         discardGameState,
         discardPlayerModal,
         discardPromptModal,
+        discardHands,
       } = reducerLogic.setUpDiscards(
         state.hands,
         state.tookBid,
@@ -549,6 +548,79 @@ const appReducer = (state = initialState, action) => {
         gameState: discardGameState,
         playerModal: discardPlayerModal,
         promptModal: discardPromptModal,
+        hands: [...discardHands],
+      };
+    case actionTypes.USER_SELECT_DISCARD:
+      const {
+        discardUserHands,
+        discardUserModal
+      } = reducerLogic.userSelectDiscard(
+        state.hands,
+        state.playerModal,
+        action.index
+      );
+      return {
+        ...state,
+        playerModal: discardUserModal,
+        hands: [...discardUserHands],
+      };
+    case actionTypes.REMOVE_USER_DISCARDS:
+      const {
+        removeUserHands,
+        removeUserMovingCards,
+        removeUserPrompt,
+      } = reducerLogic.removeUserDiscard(state);
+      return {
+        ...state,
+        gameState: 'waitRemoveDiscards',
+        hands: [...removeUserHands],
+        movingCards: removeUserMovingCards,
+        promptModal: removeUserPrompt
+      };
+    case actionTypes.COMPUTER_DISCARDS:
+      const {
+        removeComputerHands,
+        removeComputerMovingCards,
+        removeComputerPrompt,
+      } = reducerLogic.calculateComputerDiscard(state);
+      return {
+        ...state,
+        gameState: 'waitRemoveDiscards',
+        hands: [...removeComputerHands],
+        movingCards: removeComputerMovingCards,
+        promptModal: removeComputerPrompt
+      };
+    case actionTypes.DECLARE_TRUMP_SUIT:
+      if (state.tookBid === 0) {
+        const {
+          userTrumpPrompt,
+          userTrumpPlayer
+        } = reducerLogic.userSelectTrump(
+          state.hands,
+          state.players
+        );
+        return {
+          ...state,
+          gameState: 'userTrumpWait',
+          playerModal: userTrumpPlayer,
+          promptModal: userTrumpPrompt
+        };
+      }
+      return {
+        ...state
+      };
+    case actionTypes.SET_TRUMP_SUIT:
+      const trumpPrompt = reducerLogic.showTrumpPrompt(
+        action.suit,
+        state.tookBid,
+        state.bidAmount,
+        state.players
+      );
+      return {
+        ...state,
+        gameState: 'startMeld',
+        trumpSuit: action.suit,
+        promptModal: trumpPrompt,
       };
     default:
         return state;

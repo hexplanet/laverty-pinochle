@@ -18,8 +18,8 @@ function GamePlay() {
     playerDisplaySettings,
     discardPiles,
     discardDisplaySettings,
-    mebs,
-    mebDisplaySettings,
+    melds,
+    meldDisplaySettings,
     playPile,
     miscDisplaySettings,
     playPileShown,
@@ -39,7 +39,7 @@ function GamePlay() {
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
   const [gameHands, setGameHands] = useState([]);
   const [gameDiscards, setGameDiscards] = useState([]);
-  const [gameMebs, setGameMebs] = useState([]);
+  const [gameMelds, setGameMelds] = useState([]);
   const [gamePlayArea, setGamePlayArea] = useState([]);
   const [gameScorePad, setScorePad] = useState([]);
   const [gamePlayerModal, setGamePlayerModal] = useState([]);
@@ -72,7 +72,7 @@ function GamePlay() {
         dispatch(appActions.throwForAce());
         break;
       case 'waitForAce:complete':
-        if (mebs[dealer][mebs[dealer].length - 1].value === "A") {
+        if (melds[dealer][melds[dealer].length - 1].value === "A") {
           dispatch(appActions.selectedDealer());
         } else {
           dispatch(appActions.throwForAce());
@@ -168,13 +168,17 @@ function GamePlay() {
         dispatch(appActions.clearPlayerModal());
         dispatch(appActions.startDiscards());
         break;
+      case 'computerDiscard':
+        dispatch(appActions.computerDiscards());
+        break;
+      case 'waitRemoveDiscards:complete':
+      case 'selectTrumpSuit':
+        dispatch(appActions.declareTrumpSuit());
+        break;
       default:
         console.log('uncovered gameState: ', gameState);
     }
   }, [gameState]);
-  const handleClickedCard = (id, card) => {
-    console.log(id, card);
-  };
   const handleModalInput = (type, event, message) => {
     console.log(type, event, message);
     switch(message) {
@@ -219,10 +223,26 @@ function GamePlay() {
       case 'throwHand':
         dispatch(appActions.throwHand());
         break;
+      case 'userDiscard':
+        dispatch(appActions.clearPlayerModal());
+        dispatch(appActions.removeUserDiscards());
+        break;
+      case 'nameTrumpSuit':
+        dispatch(appActions.storeGameState('selectTrumpSuit'));
+        break;
       default:
         if (message.substr(0,4) === 'bid_') {
           dispatch(appActions.getUserBid(message));
         }
+        if (message.substr(0,8) === 'trumpIs_') {
+          dispatch(appActions.clearPlayerModal());
+          dispatch(appActions.setTrumpSuit(message.split('trumpIs_')[1]));
+        }
+    }
+  };
+  const handleClickedCard = (id, index, suitValue) => {
+    if (gameState === 'waitUserDiscard') {
+      dispatch(appActions.userSelectDiscard(index));
     }
   };
   const applyObjectToModal = (location, data, key) => {
@@ -252,6 +272,7 @@ function GamePlay() {
   useEffect(() => {
     const newGameHands = [];
     hands.forEach((hand, index) => {
+      const newHand = [...hand];
       if (playerDisplaySettings[index]) {
         newGameHands.push(
           <Hand
@@ -261,7 +282,7 @@ function GamePlay() {
             yLocation={playerDisplaySettings[index].y}
             rotation={playerDisplaySettings[index].rotation}
             zoom={playerDisplaySettings[index].zoom}
-            cards={hand}
+            cards={newHand}
             fanOut={handFanOut}
             shown={showHands[index]}
             cardClicked={handleClickedCard}
@@ -269,7 +290,7 @@ function GamePlay() {
         );
       }
     });
-    setGameHands(newGameHands);
+    setGameHands([...newGameHands]);
   }, [hands, playerDisplaySettings, showHands, handFanOut]);
 
   useEffect(() => {
@@ -291,24 +312,24 @@ function GamePlay() {
     setGameDiscards(newGameDiscards);
   }, [discardPiles, discardDisplaySettings]);
   useEffect(() => {
-    const newGameMebs = [];
-    mebs.forEach((meb, index) => {
-      if (mebDisplaySettings[index]) {
-        newGameMebs.push(
+    const newGameMelds = [];
+    melds.forEach((meld, index) => {
+      if (meldDisplaySettings[index]) {
+        newGameMelds.push(
           <Pile
-            key={`meb${index}`}
-            xLocation={mebDisplaySettings[index].x}
-            yLocation={mebDisplaySettings[index].y}
-            rotation={mebDisplaySettings[index].rotation}
-            zoom={mebDisplaySettings[index].zoom}
-            cards={meb}
+            key={`meld${index}`}
+            xLocation={meldDisplaySettings[index].x}
+            yLocation={meldDisplaySettings[index].y}
+            rotation={meldDisplaySettings[index].rotation}
+            zoom={meldDisplaySettings[index].zoom}
+            cards={meld}
             shown={true}
           />
         );
       }
     });
-    setGameMebs(newGameMebs);
-  }, [mebs, mebDisplaySettings]);
+    setGameMelds(newGameMelds);
+  }, [melds, meldDisplaySettings]);
 
   useEffect(() => {
     const newGamePlayArea = [];
@@ -395,14 +416,14 @@ function GamePlay() {
         />
       );
     });
-    setGameMovingCard(newGameMovingCards);
+    setGameMovingCard([...newGameMovingCards]);
   }, [movingCards]);
   return (
     <div>
       <CardTable
         displayDiscards={gameDiscards}
         displayHands={gameHands}
-        displayMebs={gameMebs}
+        displayMelds={gameMelds}
         displayGameArea={gamePlayArea}
         displayScorePad={gameScorePad}
         displayMovingCards={gameMovingCard}

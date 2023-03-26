@@ -7,6 +7,7 @@ import {Diamonds} from "./svg/Diamonds";
 import {Clubs} from "./svg/Clubs";
 import './index.scss';
 function PlayingCard({
+  index,
   suit,
   value,
   shown,
@@ -17,6 +18,7 @@ function PlayingCard({
   zLocation,
   hidden,
   rolloverColor,
+  frontColor,
   active,
   clickable,
   handleClick,
@@ -32,12 +34,12 @@ function PlayingCard({
     'S': <Spades myWidth={24} myHeight={24}/>,
   };
   const valueColor = (suit === 'H' || suit === 'D') ? 'value-red' : 'value-black';
-  const cardFrontColor = active ? '#eee' : '#afafaf';
+  const cardFrontColor = active ? frontColor : '#afafaf';
   const cardBodyClass = `card-body${clickable ? ' clickable': '' }`;
   const cardClicked = () => {
     if (clickable) {
-      const id = `${suit}${value}`;
-      handleClick(id);
+      const suitValue = `${suit}${value}`;
+      handleClick(index, suitValue);
     }
   };
   const enterCard = () => {
@@ -93,6 +95,7 @@ function PlayingCard({
 }
 
 PlayingCard.propTypes = {
+  index: PropTypes.number,
   suit: PropTypes.string,
   value: PropTypes.string,
   shown: PropTypes.bool,
@@ -103,12 +106,14 @@ PlayingCard.propTypes = {
   zLocation: PropTypes.number,
   hidden: PropTypes.bool,
   rolloverColor: PropTypes.string,
+  frontColor: PropTypes.string,
   active: PropTypes.bool,
   clickable: PropTypes.bool,
   handleClick: PropTypes.func,
 };
 
 PlayingCard.defaultProps = {
+  index: 0,
   suit: 'H',
   value: '9',
   shown: true,
@@ -119,9 +124,10 @@ PlayingCard.defaultProps = {
   zLocation: 0,
   hidden: false,
   rolloverColor: '#0f0',
+  frontColor: '#eee',
   active: true,
   clickable: true,
-  handleClick: () => {},
+  handleClick: () => {}
 };
 
 export default PlayingCard;

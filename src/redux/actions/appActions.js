@@ -160,3 +160,35 @@ export const throwHand = () => {
     type: actionTypes.THROW_HAND,
   };
 };
+
+export const userSelectDiscard = (index) => {
+  return {
+    type: actionTypes.USER_SELECT_DISCARD,
+    index
+  };
+};
+
+export const removeUserDiscards = () => {
+  return {
+    type: actionTypes.REMOVE_USER_DISCARDS,
+  };
+};
+
+export const computerDiscards = () => {
+  return {
+    type: actionTypes.COMPUTER_DISCARDS,
+  };
+}
+
+export const declareTrumpSuit = () => {
+  return {
+    type: actionTypes.DECLARE_TRUMP_SUIT,
+  };
+};
+
+export const setTrumpSuit = (suit) => {
+  return {
+    type: actionTypes.SET_TRUMP_SUIT,
+    suit
+  };
+};

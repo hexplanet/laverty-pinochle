@@ -17,8 +17,8 @@ function Hand({
   cardClicked,
 }) {
   const [cardsToDisplay, setCardsToDisplay] = useState([]);
-  const handCardClick = (cardId) => {
-    cardClicked(id, cardId);
+  const handCardClick = (index, suitValue) => {
+    cardClicked(id, index, suitValue);
   };
   useEffect(() => {
     const totalCards = cards.length;
@@ -49,10 +49,12 @@ function Hand({
       newCards.push(
         <PlayingCard
           key={`Card${index}`}
+          index={index}
           xLocation={xCard}
           yLocation={yCard}
           suit={card.suit}
           value={card.value}
+          frontColor={card.frontColor}
           shown={shown}
           rotation={spinCard}
           rolloverColor={card.rolloverColor}

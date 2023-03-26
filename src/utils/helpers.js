@@ -1,3 +1,8 @@
+import {Hearts} from "../components/PlayingCard/svg/Hearts";
+import {Diamonds} from "../components/PlayingCard/svg/Diamonds";
+import {Clubs} from "../components/PlayingCard/svg/Clubs";
+import {Spades} from "../components/PlayingCard/svg/Spades";
+
 export const generateShuffledDeck = () => {
   const cards = [];
   const suits = ['H', 'S', 'D', 'C'];
@@ -43,7 +48,7 @@ export const generalModalData = (lines, props = {}) => {
     message: displayed,
     zoom: 100,
     hasCloseButton: false,
-    header: false,
+    header: '',
     hasHeaderSeparator: false,
     ...props
   };
@@ -78,7 +83,7 @@ export const getCardLocation = (id, state) => {
       baseLocation = state.discardDisplaySettings[playerIndex];
       break;
     case 'M':
-      baseLocation = state.mebDisplaySettings[playerIndex];
+      baseLocation = state.meldDisplaySettings[playerIndex];
       break;
     default:
       baseLocation = state.miscDisplaySettings.playArea;
@@ -120,6 +125,8 @@ export const createLandingCard = (stoppedCard, objectType, playerIndex, subIndex
     suit: stoppedCard.suit,
     value: stoppedCard.value,
     shown: stoppedCard.shown,
+    clickable: false,
+    rolloverColor: '',
   };
   if (objectType === 'P' || objectType === 'M') {
     if (stoppedCard.target.xOffset !== undefined) {
@@ -156,14 +163,14 @@ export const sortCardHand = (hand) => {
   });
   return sortedHand;
 };
-export const getHandMeb = (hand, trump) => {
+export const getHandMeld = (hand, trump) => {
   const fullSuit = {
     'H': 'Hearts',
     'C': 'Clubs',
     'D': 'Diamonds',
     'S': 'Spades',
   };
-  const mebCombinations = [
+  const meldCombinations = [
     { cards: [`${trump}A`,`${trump}10`,`${trump}K`,`${trump}Q`,`${trump}J`], value: 15, title: 'Run'},
     { cards: [`${trump}9`], value: 1, title: '9 of Trump'},
     { cards: ['HA', 'DA', 'SA', 'CA'], value: 10, title: 'Aces'},
@@ -183,21 +190,21 @@ export const getHandMeb = (hand, trump) => {
   let textDisplay = '';
   let points = 0;
   let matches = [];
-  let mebCards;
+  let meldCards;
   let handCard;
   let totalMatches;
   let displayLine;
   let misses;
-  mebCombinations.forEach((mebCombination, mebIndex) => {
+  meldCombinations.forEach((meldCombination, meldIndex) => {
     matches = [];
-    mebCards = mebCombination.cards.length;
-    for (let i = 0; i < mebCards; i ++) {
+    meldCards = meldCombination.cards.length;
+    for (let i = 0; i < meldCards; i ++) {
       matches.push(0);
     }
     hand.forEach(card => {
       handCard = `${card.suit}${card.value}`;
-      mebCombination.cards.forEach((mebCard, index) => {
-        if (mebCard === handCard) {
+      meldCombination.cards.forEach((meldCard, index) => {
+        if (meldCard === handCard) {
           matches[index] = matches[index] + 1;
         }
       });
@@ -212,15 +219,15 @@ export const getHandMeb = (hand, trump) => {
         totalMatches = match;
       }
     });
-    if (totalMatches === 0 && misses === 1 && (mebIndex < 6 || mebIndex !== 1)) {
-      nearMiss = nearMiss + (mebCombination.value * .125);
+    if (totalMatches === 0 && misses === 1 && (meldIndex < 6 || meldIndex !== 1)) {
+      nearMiss = nearMiss + (meldCombination.value * .125);
     }
-    if (mebIndex === 0) {
+    if (meldIndex === 0) {
       runs = totalMatches;
     }
     if (totalMatches > 0) {
       cardsRequired = [];
-      if (mebIndex > 6 && mebCombination.cards[0][0] === trump) {
+      if (meldIndex > 6 && meldCombination.cards[0][0] === trump) {
         totalMatches = totalMatches - runs;
         if (totalMatches > 0) {
           points = points + ((totalMatches - runs) * 4);
@@ -229,12 +236,12 @@ export const getHandMeb = (hand, trump) => {
           textDisplay = `${textDisplay}<br/>${displayLine}`;
         }
       } else {
-        displayLine = (totalMatches > 1) ? `2 ${mebCombination.title}` : mebCombination.title;
-        points = points + (totalMatches * mebCombination.value);
+        displayLine = (totalMatches > 1) ? `2 ${meldCombination.title}` : meldCombination.title;
+        points = points + (totalMatches * meldCombination.value);
         textDisplay = `${textDisplay}<br/>${displayLine}`;
       }
       if (totalMatches > 0) {
-        mebCombination.cards.forEach(card => {
+        meldCombination.cards.forEach(card => {
           cardsRequired = cardsUsed.filter(usedCard => usedCard === card);
           for (let c = 0; c < totalMatches - cardsRequired; c++) {
             cardsUsed.push(card);
@@ -314,7 +321,7 @@ export const getHandBid = (hand, players) => {
   const suits = ['S','D','C','H']
   let highBid = 0;
   suits.forEach(suit => {
-    const { points, nearMiss } = getHandMeb(hand, suit);
+    const { points, nearMiss } = getHandMeld(hand, suit);
     const { projectedCounts } = getProjectedCount(hand, suit, players);
     const currentBid = Math.round((points / 2) + nearMiss + projectedCounts);
     if (currentBid > highBid) {
@@ -322,4 +329,77 @@ export const getHandBid = (hand, players) => {
     }
   });
   return highBid;
+};
+
+export const getTrumpSuit = (hand, players) => {
+  const suits = ['S','D','C','H']
+  let highSuit = 0;
+  let trumpSuit = 'H';
+  suits.forEach(suit => {
+    const { points } = getHandMeld(hand, suit);
+    const { projectedCounts } = getProjectedCount(hand, suit, players, false);
+    const currentTotal = Math.round(points + projectedCounts);
+    if (currentTotal > highSuit) {
+      highSuit = currentTotal;
+      trumpSuit = suit;
+    }
+  });
+  return trumpSuit;
+};
+
+export const getWinValue = (hand, index) => {
+  const filterSuit = hand[index].suit;
+  const targetValue = hand[index].value;
+  const checkHand = [...hand];
+  const suitCards = checkHand.filter(check => check.suit === filterSuit);
+  const cardsInSuit = suitCards.length;
+  const winValues = ['A', 'A', '10', '10', 'K', 'K', 'Q', 'Q', 'J', '10', '9', '9'];
+  let win = 0;
+  let lose = 0;
+  let isDone = false;
+  winValues.forEach(winValue => {
+    if (!isDone) {
+      const matchIndex = suitCards.findIndex(match => match.value === winValue);
+      if (matchIndex > -1) {
+        win = win + 1;
+        suitCards.splice(matchIndex, 1);
+      } else {
+        lose = lose + 1;
+      }
+      if (winValue === targetValue) {
+        isDone = true;
+      }
+    }
+  });
+  let winValue = 0;
+  if (win > lose) { winValue = 1; }
+  if (win === lose) { winValue = .5; }
+  return {
+    winValue,
+    cardsInSuit
+  };
+};
+
+export const getFormedSuitIcon = (suit) => {
+  let suitIcon;
+  switch(suit) {
+    case 'H':
+      suitIcon = (<Hearts />);
+      break;
+    case 'D':
+      suitIcon = (<Diamonds />);
+      break;
+    case 'C':
+      suitIcon = (<Clubs />);
+      break;
+    default:
+      suitIcon = (<Spades />);
+  }
+  const iconStyle = {
+    width: '24px',
+    height: '24px',
+    display: 'inline-block',
+    margin: '3px'
+  };
+  return (<div style={iconStyle}>{suitIcon}</div>);
 };

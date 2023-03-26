@@ -33,8 +33,8 @@ function ScorePad({
         if (point.bid !== "" && point.gotSet) {
           scoreLines.push(<div className='set' style={topRowStyle} key={`set${index}${pointIndex}`}>X</div>);
         }
-        const mebClass = point.gotSet ? 'meb erased': 'meb';
-        scoreLines.push(<div className={mebClass} style={topRowStyle} key={`meb${index}${pointIndex}`}>{point.meb}</div>);
+        const meldClass = point.gotSet ? 'meld erased': 'meld';
+        scoreLines.push(<div className={meldClass} style={topRowStyle} key={`meld${index}${pointIndex}`}>{point.meld}</div>);
         if (point.counts !== "") {
           const plusClass = point.gotSet ? 'plus erased': 'plus';
           const countsClass = point.gotSet ? 'counts erased': 'counts';

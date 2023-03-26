@@ -5,14 +5,20 @@ import {
   getRandomRange,
   createLandingCard,
   sortCardHand,
-  getHandMeb,
+  getHandMeld,
   getProjectedCount,
   getHandBid,
+  getTrumpSuit,
+  getWinValue, getFormedSuitIcon,
 } from '../../utils/helpers';
+import { Diamonds } from "../../components/PlayingCard/svg/Diamonds";
+import { Hearts } from "../../components/PlayingCard/svg/Hearts";
+import { Clubs } from "../../components/PlayingCard/svg/Clubs";
+import { Spades } from "../../components/PlayingCard/svg/Spades";
 export const playerDisplaySettingsLogic = (width, height, players) => {
   const playerHandLocations = [];
   const playerDiscardLocations = [];
-  const playerMebLocations = [];
+  const playerMeldLocations = [];
   const miscLocations = {};
   const ratio = (width < height ? width : height) / 1250;
   const zoomFactor = ratio * 100;
@@ -28,7 +34,7 @@ export const playerDisplaySettingsLogic = (width, height, players) => {
     zoom: zoomFactor * .75,
     rotation: 0,
   });
-  playerMebLocations.push({
+  playerMeldLocations.push({
     x: width / 2,
     y: height - (270 * ratio),
     zoom: zoomFactor * .75,
@@ -47,7 +53,7 @@ export const playerDisplaySettingsLogic = (width, height, players) => {
       zoom: zoomFactor * .75,
       rotation: 315,
     });
-    playerMebLocations.push({
+    playerMeldLocations.push({
       x: 200 * ratio,
       y: 600 * ratio,
       zoom: zoomFactor * .75,
@@ -65,7 +71,7 @@ export const playerDisplaySettingsLogic = (width, height, players) => {
       zoom: zoomFactor * .75,
       rotation: 45,
     });
-    playerMebLocations.push({
+    playerMeldLocations.push({
       x: width - (200 * ratio),
       y: 600 * ratio,
       zoom: zoomFactor * .75,
@@ -85,7 +91,7 @@ export const playerDisplaySettingsLogic = (width, height, players) => {
       zoom: zoomFactor * .75,
       rotation: 270,
     });
-    playerMebLocations.push({
+    playerMeldLocations.push({
       x: (270 * ratio),
       y: height / 2,
       zoom: zoomFactor * .75,
@@ -103,7 +109,7 @@ export const playerDisplaySettingsLogic = (width, height, players) => {
       zoom: zoomFactor * .75,
       rotation: 0,
     });
-    playerMebLocations.push({
+    playerMeldLocations.push({
       x: width / 2,
       y: 270 * ratio,
       zoom: zoomFactor * .75,
@@ -121,7 +127,7 @@ export const playerDisplaySettingsLogic = (width, height, players) => {
       zoom: zoomFactor * .75,
       rotation: 270,
     });
-    playerMebLocations.push({
+    playerMeldLocations.push({
       x: width - (270 * ratio),
       y: height / 2,
       zoom: zoomFactor * .75,
@@ -178,7 +184,7 @@ export const playerDisplaySettingsLogic = (width, height, players) => {
   return {
     playerHandLocations,
     playerDiscardLocations,
-    playerMebLocations,
+    playerMeldLocations,
     miscLocations,
     zoomRatio: ratio,
   };
@@ -189,7 +195,7 @@ export const resolveCardMovement = (
   keyId,
   movingCards,
   hands,
-  mebs,
+  melds,
   discardPiles,
   playPile
 ) => {
@@ -214,9 +220,9 @@ export const resolveCardMovement = (
         changedValues.hands = newHands;
         break;
       case 'M':
-        const newMebs = [...mebs];
-        newMebs[playerIndex] = [...mebs[playerIndex], landingCard];
-        changedValues.mebs = newMebs;
+        const newMelds = [...melds];
+        newMelds[playerIndex] = [...melds[playerIndex], landingCard];
+        changedValues.melds = newMelds;
         break;
       case 'D':
         const newDiscardPiles = [...discardPiles];
@@ -239,7 +245,7 @@ export const setGameValuesForNewGame = (teams, players) => {
     discardPiles: [],
     showHands: [],
     hands: [],
-    mebs: [],
+    melds: [],
     playPile: [],
     movingCards: [],
     playPileShown: false,
@@ -253,7 +259,7 @@ export const setGameValuesForNewGame = (teams, players) => {
   for(let i = 0; i < players.length; i++) {
     initedValues.discardPiles.push([]);
     initedValues.hands.push([]);
-    initedValues.mebs.push([]);
+    initedValues.melds.push([]);
     initedValues.showHands.push(i === 0);
     initedValues.bids.push(0);
     initedValues.bidModals.push({shown: false})
@@ -310,7 +316,7 @@ export const passDeckToDealer = (state) => {
   let cardsToMove = [];
   let toDealerMovingCards = state.movingCards;
   const toDealerDiscards = [...state.discardPiles];
-  const toDealerMebs = [...state.mebs];
+  const toDealerMelds = [...state.melds];
   const toDealerHands = [...state.hands];
   let toDealerPlayPile = [...state.playPile];
   const targetCardId = `D${state.dealer}`;
@@ -322,11 +328,11 @@ export const passDeckToDealer = (state) => {
       newDiscard.pop();
       toDealerDiscards[i] = [...newDiscard];
     }
-    if (state.mebs[i].length > 0) {
-      cardsToMove.push(`M${i}${state.mebs[i].length - 1}`);
-      const newMeb = state.mebs[i];
-      newMeb.pop();
-      toDealerMebs[i] = [...newMeb];
+    if (state.melds[i].length > 0) {
+      cardsToMove.push(`M${i}${state.melds[i].length - 1}`);
+      const newMeld = state.melds[i];
+      newMeld.pop();
+      toDealerMelds[i] = [...newMeld];
     }
     if (state.hands[i].length > 0) {
       cardsToMove.push(`H${i}${state.hands[i].length - 1}`);
@@ -336,7 +342,7 @@ export const passDeckToDealer = (state) => {
     }
   }
   if (state.playPile.length > 0) {
-    cardsToMove.push(`P`);
+    cardsToMove.push(`P${toDealerPlayPile.length - 1}`);
     toDealerPlayPile.pop();
     toDealerPlayPile=[...toDealerPlayPile];
   }
@@ -344,6 +350,7 @@ export const passDeckToDealer = (state) => {
     sourceCard = getCardLocation(cardToMove, state);
     newMovingCard = {
       id: `${cardToMove}to${targetCardId}`,
+      key: `${cardToMove}to${targetCardId}`,
       keyId: `${cardToMove}to${targetCardId}${Date.now()}`,
       shown: false,
       speed: 1,
@@ -354,7 +361,7 @@ export const passDeckToDealer = (state) => {
   });
   return ({
     toDealerMovingCards,
-    toDealerMebs,
+    toDealerMelds,
     toDealerDiscards,
     toDealerHands,
     toDealerPlayPile,
@@ -593,7 +600,7 @@ export const computerBid = (hands, dealToPlayer, players, bids) => {
   const suits = ['H', 'S', 'D', 'C'];
   let suitBid;
   suits.forEach(suit => {
-    const { points, nearMiss } = getHandMeb(hands[dealToPlayer], suit);
+    const { points, nearMiss } = getHandMeld(hands[dealToPlayer], suit);
     const { projectedCounts } = getProjectedCount(hands[dealToPlayer], suit, players);
     suitBid = Math.round((points / 2) + projectedCounts + nearMiss);
     if (suitBid < 21) {
@@ -696,7 +703,7 @@ export const resolveBidding = (
     updatedBidScore[i].push({
       bid: (bidColumn === i) ? String(wonBidWith) : '',
       gotSet: false,
-      meb: '',
+      meld: '',
       counts: '',
       score: '',
     });
@@ -720,20 +727,21 @@ export const displayWidow = (
 ) => {
   const newPlayPile = playPile;
   if (widowCardIndex > -1) {
-    const adjustedCard = newPlayPile[widowCardIndex];
+    const pileIndex = newPlayPile.length - widowCardIndex - 1;
+    const adjustedCard = newPlayPile[pileIndex];
     adjustedCard.shown = true;
     adjustedCard.rotation = 0;
     adjustedCard.xOffset = -(60 * (players.length - 1)) + (120 * widowCardIndex) + 10;
     adjustedCard.yOffset = 150;
-    newPlayPile[widowCardIndex] = {...adjustedCard};
+    newPlayPile[pileIndex] = {...adjustedCard};
   }
   return [...newPlayPile];
 };
 
 export const movingWidow = (state) => {
   let widowCards = [];
-  state.playPile.forEach(card => {
-    const sourceCardId = 'P-1';
+  state.playPile.forEach((card, cardIndex) => {
+    const sourceCardId = `P${cardIndex}`;
     const sourceCard = getCardLocation(sourceCardId, state);
     const targetCardId = `H${state.tookBid}`;
     const targetCard = getCardLocation(targetCardId, state);
@@ -758,16 +766,16 @@ export const shouldComputerThrowHand = (hands, tookBid, bidAmount, players) => {
   let computerThrowGameState = 'throwHandContinue';
   const suits = ['D', 'S', 'C', 'H'];
   let high = 0;
-  let meb = 0;
+  let meld = 0;
   suits.forEach(suit => {
-    const { points } = getHandMeb(hands[tookBid], suit);
+    const { points } = getHandMeld(hands[tookBid], suit);
     const { projectedCounts } = getProjectedCount(hands[tookBid], suit, players, false);
     if (points + projectedCounts > high) {
       high = points + projectedCounts;
-      meb = points;
+      meld = points;
     }
   });
-  const willFail = (hands.length === 3 && meb + 25 < bidAmount);
+  const willFail = (hands.length === 3 && meld + 25 < bidAmount);
   let mayFail;
   if (hands.length === 3) {
     mayFail = (high < bidAmount - 4);
@@ -783,7 +791,7 @@ export const shouldComputerThrowHand = (hands, tookBid, bidAmount, players) => {
 
 export const shouldComputerAgreeThrowHand = (hands, tookBid, players) => {
   let computerAgreeThrowHand = 'throwHand';
-  const { points } = getHandMeb(hands[tookBid], '');
+  const { points } = getHandMeld(hands[tookBid], '');
   const { totalWins } = getProjectedCount(hands[tookBid], '', players, false);
   if (points >= 8 || totalWins >= 4) {
     computerAgreeThrowHand = 'throwHandDisagree';
@@ -795,16 +803,16 @@ export const shouldUserThrowHand = (hands, bidAmount, players) => {
   let throwPlayerModal = {shown: false};
   const suits = ['D', 'S', 'C', 'H'];
   let high = 0;
-  let meb = 0;
+  let meld = 0;
   suits.forEach(suit => {
-    const { points } = getHandMeb(hands[0], suit);
+    const { points } = getHandMeld(hands[0], suit);
     const { projectedCounts } = getProjectedCount(hands[0], suit, players, false);
     if (points + projectedCounts > high) {
       high = points + projectedCounts;
-      meb = points;
+      meld = points;
     }
   });
-  const willFail = (hands.length === 3 && meb + 25 < bidAmount);
+  const willFail = (hands.length === 3 && meld + 25 < bidAmount);
   let mayFail;
   if (hands.length === 3) {
     mayFail = (high < bidAmount - 4);
@@ -844,23 +852,254 @@ export const shouldUserThrowHand = (hands, bidAmount, players) => {
 };
 
 export const setUpDiscards = (hands, tookBid, players) => {
+  const discardHands = [...hands];
   let discardGameState = 'computerDiscard';
   let discardPlayerModal = {shown: false};
   const flexWord = (tookBid === 0) ? 'have' : 'has';
   const discardMessage = (<span><b>{players[tookBid]}</b> {flexWord} to discard {players.length} cards</span>);
   const discardPromptModal = generalModalData(discardMessage, {});
   if (tookBid === 0) {
-    const userDiscardMessage = (<span>Discard {players.length} cards. Meb cards are yellowed.</span>)
+    const userDiscardMessage = (<span>Discard {players.length} cards. Meld cards are yellowed.</span>)
     discardPlayerModal = generalModalData(userDiscardMessage, {
       width: 500,
       height: 105,
       buttons: [{ label: 'Discard', status: 'inactive', returnMessage: 'userDiscard' }],
     });
     discardGameState = 'waitUserDiscard';
+    const { cardsUsed } = getHandMeld(hands[0], '');
+    discardHands[0].forEach((card, cardIndex) => {
+      const suitValue = `${discardHands[0][cardIndex].suit}${discardHands[0][cardIndex].value}`;
+      const whereMatch = cardsUsed.findIndex(usedCard => usedCard === suitValue);
+      if (whereMatch > -1) {
+        cardsUsed.splice(whereMatch, 1);
+        discardHands[0][cardIndex].frontColor = '#eea';
+      }
+      discardHands[0][cardIndex].shown = true;
+      discardHands[0][cardIndex].active = true;
+      discardHands[0][cardIndex].clickable = true;
+      discardHands[0][cardIndex].raised = false;
+      discardHands[0][cardIndex].rolloverColor = '#0f0';
+    });
   }
   return {
     discardGameState,
     discardPlayerModal,
-    discardPromptModal
+    discardPromptModal,
+    discardHands
   };
+};
+
+export const userSelectDiscard = (hands, playerModal, index) => {
+  const discardUserHands = [...hands];
+  const discardUserModal = {...playerModal};
+  discardUserHands[0][index].raised = !discardUserHands[0][index].raised;
+  let totalRaised = 0;
+  discardUserHands[0].forEach(card => {
+    if (card.raised) {
+      totalRaised++;
+    }
+  });
+  discardUserModal.buttons[0].status = (totalRaised === hands.length) ? '' : 'inactive';
+  return {
+    discardUserHands,
+    discardUserModal
+  };
+};
+
+export const removeUserDiscard = (state) => {
+  const removeUserHands = [...state.hands];
+  let removeUserMovingCards = [];
+  const sources = [];
+  for (let i = state.hands[0].length - 1; i >= 0; i = i - 1) {
+    if (state.hands[0][i].raised) {
+      sources.push(state.hands[0][i]);
+      sources[sources.length - 1].index = i;
+      removeUserHands[0].splice(i, 1);
+    } else {
+      state.hands[0][i].frontColor = '#eee';
+      state.hands[0][i].clickable = false;
+      state.hands[0][i].rolloverColor = '';
+    }
+  }
+  removeUserHands[0] = [...removeUserHands[0]];
+  sources.forEach(source => {
+    const sourceCardId = `H${state.tookBid}${source.index}`;
+    const sourceCard = getCardLocation(sourceCardId, state);
+    sourceCard.zoom = sourceCard.zoom * 2;
+    const targetCardId = `D${state.tookBid}`;
+    const targetCard = getCardLocation(targetCardId, state);
+    targetCard.rotation = targetCard.rotation + getRandomRange(-10, 10, 1);
+    const newMovingCard = {
+      id: `${sourceCardId}to${targetCardId}`,
+      keyId: `${sourceCardId}to${targetCardId}${Date.now()}`,
+      suit: source.suit,
+      value: source.value,
+      shown: false,
+      speed: 1,
+      source: sourceCard,
+      target: targetCard,
+    };
+    removeUserMovingCards = [...removeUserMovingCards, newMovingCard];
+  });
+  const userDiscardMessage = (<span><b>{state.players[0]}</b> have discarded the required cards</span>);
+  const removeUserPrompt = generalModalData(userDiscardMessage, {});
+  return {
+    removeUserHands,
+    removeUserMovingCards,
+    removeUserPrompt
+  };
+};
+
+export const calculateComputerDiscard = (state) => {
+  let removeComputerHands = [...state.hands];
+  let removeComputerMovingCards = [];
+  const trumpSuit = getTrumpSuit(state.hands[state.tookBid], state.players);
+  const { cardsUsed } = getHandMeld(state.hands[state.tookBid], trumpSuit);
+  const possibleDiscards = [...state.hands[state.tookBid]];
+  const heldCards = [];
+  cardsUsed.forEach(usedCard => {
+    const matchIndex = possibleDiscards.findIndex(card => usedCard === `${card.suit}${card.value}` );
+    if (matchIndex > -1) {
+      const heldCard = possibleDiscards.splice(matchIndex, 1);
+      heldCards.push(heldCard[0]);
+    }
+  });
+  for(let i = possibleDiscards.length - 1; i >= 0; i = i -1) {
+    if (possibleDiscards[i].suit === trumpSuit) {
+      const heldCard = possibleDiscards.splice(i, 1);
+      heldCards.push(heldCard[0]);
+    }
+  }
+  while (possibleDiscards.length < state.hands.length) {
+    let lowestValue = 999;
+    let lowestIndex = -1;
+    heldCards.forEach((held, heldIndex) => {
+      const checkSuitValue = `${held.suit}${held.value}`;
+      const checkHand = [...state.hands[state.tookBid]];
+      const checkIndex = checkHand.findIndex(check => checkSuitValue === `${check.suit}${check.value}`);
+      if (checkIndex > -1) {
+        checkHand.splice(checkIndex, 1);
+        const { points } = getHandMeld(checkHand, trumpSuit);
+        const { projectedCounts } = getProjectedCount(checkHand, trumpSuit, state.players, false);
+        if (points + projectedCounts < lowestValue) {
+          lowestValue = points + projectedCounts;
+          lowestIndex = heldIndex;
+        }
+      }
+    });
+    if (lowestIndex > -1) {
+      const unheldCard = heldCards.splice(lowestIndex, 1);
+      possibleDiscards.push(unheldCard[0]);
+    }
+  }
+  const valueKeepRanking = ['K', '10', '9', 'J', 'Q', 'A'];
+  while (possibleDiscards.length > state.hands.length) {
+    let highest = 0;
+    let highestIndex = 0;
+    possibleDiscards.forEach((possible, possibleIndex) => {
+      const { winValue, cardsInSuit } = getWinValue(possibleDiscards, possibleIndex);
+      const possibleScore = (100 * winValue) + (valueKeepRanking.indexOf(possible.value) * 10) + cardsInSuit;
+      if (possibleScore > highest) {
+        highest = possibleScore;
+        highestIndex = possibleIndex;
+      }
+    });
+    possibleDiscards.splice(highestIndex, 1);
+  }
+  const replaceHand = [...state.hands[state.tookBid]];
+  possibleDiscards.forEach((source, disIndex) => {
+    const sourceIndex =
+      replaceHand.findIndex(
+        findCard => findCard.value === source.value && findCard.value === source.value
+      );
+    const sourceCardId = `H${state.tookBid}${disIndex}`;
+    const sourceCard = getCardLocation(sourceCardId, state);
+    sourceCard.zoom = sourceCard.zoom * 2;
+    const targetCardId = `D${state.tookBid}`;
+    const targetCard = getCardLocation(targetCardId, state);
+    targetCard.rotation = targetCard.rotation + getRandomRange(-10, 10, 1);
+    const newMovingCard = {
+      id: `${sourceCardId}to${targetCardId}`,
+      keyId: `${sourceCardId}to${targetCardId}${Date.now()}`,
+      suit: source.suit,
+      value: source.value,
+      shown: false,
+      speed: 1,
+      source: sourceCard,
+      target: targetCard,
+    };
+    removeComputerMovingCards = [...removeComputerMovingCards, newMovingCard];
+    replaceHand.splice(sourceIndex, 1);
+  });
+  removeComputerHands[state.tookBid] = replaceHand;
+  const computerDiscardMessage =
+    (<span><b>{state.players[state.tookBid]}</b> has discarded {state.hands.count} cards</span>);
+  const removeComputerPrompt = generalModalData(computerDiscardMessage, {});
+  return {
+    removeComputerHands,
+    removeComputerMovingCards,
+    removeComputerPrompt
+  };
+};
+
+export const userSelectTrump = (hands, players) => {
+  const validSuits = [];
+  hands[0].forEach(card => {
+    if (validSuits.indexOf(card.suit) === -1) {
+      validSuits.push(card.suit);
+    }
+  });
+  const trumpButtons = [];
+  validSuits.forEach(suit => {
+    let suitIcon;
+    switch(suit) {
+      case 'H':
+        suitIcon = (<Hearts />);
+        break;
+      case 'D':
+        suitIcon = (<Diamonds />);
+        break;
+      case 'C':
+        suitIcon = (<Clubs />);
+        break;
+      default:
+        suitIcon = (<Spades />);
+    }
+    trumpButtons.push({
+      returnMessage: `trumpIs_${suit}`,
+      icon: suitIcon,
+      height: 30,
+      width: 30
+    });
+  });
+  const userTrumpPlayer = generalModalData((<span>Select Trump Suit</span>), {
+    width: 400,
+    height: 105,
+    buttons: trumpButtons,
+  });
+  const userTrumpMessage = (<span><b>{players[0]}</b> have to select a trump suit</span>);
+  const userTrumpPrompt = generalModalData(userTrumpMessage, {});
+  return {
+    userTrumpPrompt,
+    userTrumpPlayer
+  };
+};
+
+export const showTrumpPrompt = (trumpSuit, tookBid, bidAmount, players) => {
+  const trumpIcon = getFormedSuitIcon(trumpSuit);
+  const trumpStyle = {
+    marginTop: '3px',
+    width: '100%'
+  };
+  const bidStyle = {
+    position: 'absolute',
+    right: '3px',
+    top: '3px',
+  };
+  const line =
+    (<div style={trumpStyle}>{trumpIcon} <b>{players[tookBid]}</b> <div style={bidStyle}>{bidAmount}</div></div>);
+  const userTrumpPrompt = generalModalData('', {
+    header: line,
+  });
+  return userTrumpPrompt;
 };

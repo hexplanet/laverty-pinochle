@@ -8,6 +8,11 @@
     background-color: #dd8;
     color: #000;
     font-weight:600;
+    svg {
+      width: 24px;
+      max-height: 24px;
+      padding-top: 2px;
+    }
   }
   .inner-button:hover {
     background-color: #ffa;

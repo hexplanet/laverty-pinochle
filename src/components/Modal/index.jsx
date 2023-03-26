@@ -67,9 +67,11 @@ function Modal({
     handleModalInput('button', 'click', message);
   };
   const generatedButtons = [];
-  buttons.forEach(modalButton => {
+  const baseTime = Date.now();
+  buttons.forEach((modalButton, buttonIndex) => {
     generatedButtons.push(
       <Button
+        key={`modalButton_${baseTime + buttonIndex}`}
         icon={modalButton.icon}
         buttonClass={modalButton.buttonClass}
         status={modalButton.status}
@@ -126,7 +128,7 @@ Modal.propTypes = {
   boxStyleClass: PropTypes.string,
   header: PropTypes.string,
   hasHeaderSeparator: PropTypes.bool,
-  message: PropTypes.string,
+  message: PropTypes.any,
   textInputs: PropTypes.array,
   buttons: PropTypes.array,
   handleCloseModal: PropTypes.func,

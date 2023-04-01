@@ -9,7 +9,7 @@ import {
   getProjectedCount,
   getHandBid,
   getTrumpSuit,
-  getWinValue, getFormedSuitIcon,
+  getWinValue, getFormedSuitIcon, getTrumpBidHeader,
 } from '../../utils/helpers';
 import { Diamonds } from "../../components/PlayingCard/svg/Diamonds";
 import { Hearts } from "../../components/PlayingCard/svg/Hearts";
@@ -246,6 +246,7 @@ export const setGameValuesForNewGame = (teams, players) => {
     showHands: [],
     hands: [],
     melds: [],
+    meldScores: [],
     playPile: [],
     movingCards: [],
     playPileShown: false,
@@ -260,6 +261,7 @@ export const setGameValuesForNewGame = (teams, players) => {
     initedValues.discardPiles.push([]);
     initedValues.hands.push([]);
     initedValues.melds.push([]);
+    initedValues.meldScores.push(0);
     initedValues.showHands.push(i === 0);
     initedValues.bids.push(0);
     initedValues.bidModals.push({shown: false})
@@ -1085,21 +1087,79 @@ export const userSelectTrump = (hands, players) => {
   };
 };
 
-export const showTrumpPrompt = (trumpSuit, tookBid, bidAmount, players) => {
-  const trumpIcon = getFormedSuitIcon(trumpSuit);
-  const trumpStyle = {
-    marginTop: '3px',
-    width: '100%'
+export const computerSelectTrump = (hands, tookBid, players) => {
+  const computerTrumpSuit = getTrumpSuit(hands[tookBid], players);
+  return {
+    computerTrumpSuit
   };
-  const bidStyle = {
-    position: 'absolute',
-    right: '3px',
-    top: '3px',
-  };
-  const line =
-    (<div style={trumpStyle}>{trumpIcon} <b>{players[tookBid]}</b> <div style={bidStyle}>{bidAmount}</div></div>);
-  const userTrumpPrompt = generalModalData('', {
-    header: line,
-  });
-  return userTrumpPrompt;
 };
+
+export const startMeldMessage = (trumpSuit, tookBid, bidAmount, players) => {
+  const trumpHeader = getTrumpBidHeader(trumpSuit, tookBid, bidAmount, players);
+  const meldMessage = generalModalData('Lay down meld', {
+    ...trumpHeader
+  });
+  return meldMessage;
+};
+
+export const meldCards = (state) => {
+  let meldHands = [...state.hands];
+  let meldHand = meldHands[state.dealToPlayer];
+  let meldPlacedCards = [...state.melds];
+  let meldPile = meldPlacedCards[state.dealToPlayer];
+  const { cardsUsed } = getHandMeld(state.hands[state.dealToPlayer], state.trumpSuit);
+  const values = ['A', '10', 'K', 'Q', 'J', '9'];
+  const suits = ['C', 'H', 'S', 'D'];
+  const valueColumns = {'A':0, '10':0, 'K':0, 'Q':0, 'J':0, '9':0};
+  const suitRows = {'C':0, 'H':0, 'S':0, 'D':0};
+  suits.forEach(suit => {
+    const suitMatches = cardsUsed.filter(cardUsed => cardUsed[0] === suit);
+    suitRows[suit] = suitMatches.length;
+    values.forEach(value => {
+      const valueMatches = cardsUsed.filter(cardUsed => cardUsed === `${suit}${value}`);
+      if (valueMatches.length > valueColumns[value]) {
+        valueColumns[value] = valueMatches.length;
+      }
+    });
+  });
+  const columns = [];
+  values.forEach(value => {
+    for (let i = 0; i < valueColumns[value]; i++) {
+      columns.push(value);
+    }
+  });
+  const rows = [];
+  suits.forEach(suit => {
+    if (suitRows[suit] > 0) {
+      rows.push(suit);
+    }
+  });
+  const leftEdge = columns.length * -25;
+  const topEdge = -35 + (rows.length * -70);
+  rows.forEach((row, rowIndex) => {
+    columns.forEach((column, columnIndex) => {
+      const usedIndex = cardsUsed.indexOf(`${row}${column}`);
+      if (usedIndex > -1) {
+        const cardIndex = meldHand.findIndex(card => card.suit === row && card.value === column);
+        if (cardIndex > -1) {
+          meldPile = [...meldPile, {
+            suit: row,
+            value: column,
+            shown: true,
+            xOffset: leftEdge + (columnIndex * 50),
+            yOffset: topEdge + (rowIndex * 70)
+          }];
+          meldHand.splice(cardIndex, 1);
+          cardsUsed.splice(usedIndex, 1);
+        }
+      }
+    });
+  });
+  meldHands[state.dealToPlayer] = meldHand;
+  meldPlacedCards[state.dealToPlayer] = meldPile;
+  return {
+    meldHands,
+    meldPlacedCards
+  };
+};
+

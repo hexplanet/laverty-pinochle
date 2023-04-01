@@ -55,7 +55,7 @@ export const generalModalData = (lines, props = {}) => {
   return promptModal;
 };
 
-export const getCardLocation = (id, state) => {
+export const getCardLocation = (id, state, xAdjust = 0, yAdjust = 0) => {
   // id char(0): H, D, M, P,
   // id char(1): player
   // id char(2+): index
@@ -99,9 +99,9 @@ export const getCardLocation = (id, state) => {
         }
       }
   }
-  xLocation = baseLocation.x;
-  yLocation = baseLocation.y;
   zoom = baseLocation.zoom;
+  xLocation = baseLocation.x + (zoom * xAdjust);
+  yLocation = baseLocation.y + (zoom * yAdjust);
   if (objectType !== 'P') {
     rotation = baseLocation.rotation;
   }
@@ -402,4 +402,31 @@ export const getFormedSuitIcon = (suit) => {
     margin: '3px'
   };
   return (<div style={iconStyle}>{suitIcon}</div>);
+};
+
+export const getTrumpBidHeader = (trumpSuit, tookBid, bidAmount, players) => {
+  const trumpIcon = getFormedSuitIcon(trumpSuit);
+  const trumpStyle = {
+    width: '34px',
+    position: 'absolute',
+    left: '3px',
+    top: '3px',
+  };
+  const userStyle = {
+    marginTop: '2px',
+    width: 'calc(100% - 24px)',
+    textAlign: 'center',
+  };
+  const bidStyle = {
+    position: 'absolute',
+    right: '3px',
+    top: '3px',
+  };
+  const line = (
+    <div><div style={trumpStyle}>{trumpIcon}</div><div style={userStyle}><b>{players[tookBid]}</b></div><div style={bidStyle}>{bidAmount}</div></div>
+  );
+  return {
+    header: line,
+    hasHeaderSeparator: true
+  };
 };

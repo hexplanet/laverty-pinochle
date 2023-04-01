@@ -192,3 +192,15 @@ export const setTrumpSuit = (suit) => {
     suit
   };
 };
+
+export const startMeld = () => {
+  return {
+    type: actionTypes.START_MELD
+  };
+};
+
+export const displayMeld = () => {
+  return {
+    type: actionTypes.DISPLAY_MELD
+  };
+};

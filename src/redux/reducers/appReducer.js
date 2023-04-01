@@ -24,6 +24,7 @@ const initialState = {
   trumpSuit: '',
   meldDisplaySettings: [],
   melds: [],
+  meldScores: [],
   miscDisplaySettings: {
     scorePad: {},
     playArea: {},
@@ -606,21 +607,61 @@ const appReducer = (state = initialState, action) => {
           promptModal: userTrumpPrompt
         };
       }
-      return {
-        ...state
-      };
-    case actionTypes.SET_TRUMP_SUIT:
-      const trumpPrompt = reducerLogic.showTrumpPrompt(
-        action.suit,
+      const {
+        computerTrumpSuit
+      } = reducerLogic.computerSelectTrump(
+        state.hands,
         state.tookBid,
-        state.bidAmount,
         state.players
       );
       return {
         ...state,
+        trumpSuit: computerTrumpSuit,
         gameState: 'startMeld',
-        trumpSuit: action.suit,
-        promptModal: trumpPrompt,
+      };
+    case actionTypes.SET_TRUMP_SUIT:
+      return {
+        ...state,
+        gameState: 'startMeld',
+        trumpSuit: action.suit
+      };
+    case actionTypes.START_MELD:
+      const meldMessage = reducerLogic.startMeldMessage(
+        state.trumpSuit,
+        state.tookBid,
+        state.bidAmount,
+        state.players
+      );
+      const newMeldScores = [];
+      for(let i = 0; i < state.players.length; i++) {
+        newMeldScores.push(0);
+      }
+      return {
+        ...state,
+        meldScores: [...newMeldScores],
+        dealToPlayer: state.tookBid,
+        promptModal: meldMessage,
+        gameState: 'displayMeld'
+      };
+    case actionTypes.DISPLAY_MELD:
+      if (state.thrownHand) {
+        if (state.dealToPlayer === state.tookBid ||
+          (state.players.length === 4 && state.dealToPlayer === ((state.tookBid + 2) % 4))) {
+          return {
+            ...state,
+            gameState: 'movingMeldCards:complete'
+          };
+        }
+      }
+      const {
+        meldHands,
+        meldPlacedCards
+      } = reducerLogic.meldCards(state);
+      return {
+        ...state,
+        hands: [...meldHands],
+        melds: [...meldPlacedCards],
+        gameState: 'meldDelay'
       };
     default:
         return state;

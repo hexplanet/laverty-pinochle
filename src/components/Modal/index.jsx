@@ -126,7 +126,7 @@ Modal.propTypes = {
   hasCloseButton: PropTypes.bool,
   hasBox: PropTypes.bool,
   boxStyleClass: PropTypes.string,
-  header: PropTypes.string,
+  header: PropTypes.any,
   hasHeaderSeparator: PropTypes.bool,
   message: PropTypes.any,
   textInputs: PropTypes.array,

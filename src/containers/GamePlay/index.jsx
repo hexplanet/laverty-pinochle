@@ -9,7 +9,13 @@ import ScorePad from "../../components/ScorePad";
 import Modal from "../../components/Modal";
 import { getRandomRange }  from "../../utils/helpers";
 import './index.scss';
-import {decideBidWinner, decideThrowHand, moveWidowToHand, startDiscards} from "../../redux/actions/appActions";
+import {
+  decideBidWinner,
+  decideThrowHand,
+  moveWidowToHand,
+  startDiscards,
+  startMeld
+} from "../../redux/actions/appActions";
 
 function GamePlay() {
   const dispatch = useDispatch();
@@ -174,6 +180,12 @@ function GamePlay() {
       case 'waitRemoveDiscards:complete':
       case 'selectTrumpSuit':
         dispatch(appActions.declareTrumpSuit());
+        break;
+      case 'startMeld':
+        dispatch(appActions.startMeld());
+        break;
+      case 'displayMeld':
+        dispatch(appActions.displayMeld());
         break;
       default:
         console.log('uncovered gameState: ', gameState);

@@ -430,3 +430,36 @@ export const getTrumpBidHeader = (trumpSuit, tookBid, bidAmount, players) => {
     hasHeaderSeparator: true
   };
 };
+
+export const setValidCards = (
+  hand,
+  ledSuit,
+  trumpSuit,
+  firstPlay
+) => {
+  const validHand = [...hand];
+  let validSuit = (ledSuit === '' && firstPlay) ? trumpSuit : ledSuit;
+  if (validSuit !== '') {
+    const matchedSuit = hand.filter(card => card.suit === validSuit);
+    if (matchedSuit === 0) {
+      validSuit = trumpSuit;
+      const matchedTrump = hand.filter(card => card.suit === validSuit);
+      if (matchedTrump === 0) {
+        validSuit = '';
+      }
+    }
+  }
+  validHand.forEach((card, cardIndex) => {
+    validHand[cardIndex].shown = true;
+    if (card.suit === validSuit || validSuit === '') {
+      validHand[cardIndex].active = true;
+      validHand[cardIndex].clickable = true;
+      validHand[cardIndex].rolloverColor = '#0f0';
+    } else {
+      validHand[cardIndex].active = false;
+      validHand[cardIndex].clickable = false;
+      validHand[cardIndex].rolloverColor = '';
+    }
+  });
+  return validHand;
+};

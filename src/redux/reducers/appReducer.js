@@ -18,7 +18,9 @@ const initialState = {
   tookBid: 0,
   bidAmount: 0,
   thrownHand: false,
-  tookHand: 0,
+  firstPlay: true,
+  tookPlay: 0,
+  winningPlay: 0,
   bidModals: [],
   bidOffset: 21,
   trumpSuit: '',
@@ -371,7 +373,7 @@ const appReducer = (state = initialState, action) => {
         promptModal: tookBidPromptModal,
         playScore: [...updatedBidScore],
         tookBid: wonTheBid,
-        tookHand: wonTheBid,
+        tookPlay: wonTheBid,
         bidAmount: wonBidWith,
         gameState: 'waitDisplayWidow',
         thrownHand: false,
@@ -514,6 +516,9 @@ const appReducer = (state = initialState, action) => {
         <span><b>{state.players[state.tookBid]}</b> throws the hand</span>
       );
       const throwPromptModal = generalModalData(throwHandText, {});
+      const throwPlayScore = state.playScore;
+      const playTeamIndex = state.players.length === 4 ? state.tookBid % 2 : state.tookBid;
+      throwPlayScore[playTeamIndex][throwPlayScore[playTeamIndex].length - 1].gotSet = true;
       let throwPlayerModal = {shown: false};
       if (state.tookBid !== 2) {
         throwPlayerModal = generalModalData('', {
@@ -532,6 +537,7 @@ const appReducer = (state = initialState, action) => {
         thrownHand: true,
         promptModal: throwPromptModal,
         playerModal: throwPlayerModal,
+        playScore: [...throwPlayScore],
       };
     case actionTypes.START_DISCARDS:
       const {
@@ -644,24 +650,125 @@ const appReducer = (state = initialState, action) => {
         gameState: 'displayMeld'
       };
     case actionTypes.DISPLAY_MELD:
+      const shownMeld = state.bidModals;
       if (state.thrownHand) {
         if (state.dealToPlayer === state.tookBid ||
           (state.players.length === 4 && state.dealToPlayer === ((state.tookBid + 2) % 4))) {
+          shownMeld[state.dealToPlayer] =
+            generalModalData('', {
+              header: 'X',
+              width: 80,
+              height: 44,
+            });
           return {
             ...state,
-            gameState: 'movingMeldCards:complete'
+            gameState: 'meldDelay',
+            bidModals: [...shownMeld],
           };
         }
       }
       const {
         meldHands,
-        meldPlacedCards
+        meldPlacedCards,
+        meldPlaceScores
       } = reducerLogic.meldCards(state);
+      shownMeld[state.dealToPlayer] =
+        generalModalData('', {
+          header: meldPlaceScores[state.dealToPlayer],
+          width: 80,
+          height: 44,
+        });
       return {
         ...state,
         hands: [...meldHands],
         melds: [...meldPlacedCards],
-        gameState: 'meldDelay'
+        meldScores: [...meldPlaceScores],
+        gameState: 'meldDelay',
+        bidModals: [...shownMeld],
+      };
+    case actionTypes.NEXT_MELD:
+      const {
+        meldDealToPlayer,
+        meldGameState,
+        meldPlayScore,
+        meldPlayerModal,
+        meldPromptModal
+      } = reducerLogic.postMeldLaydown(
+        state.dealToPlayer,
+        state.thrownHand,
+        state.tookBid,
+        state.meldScores,
+        state.playScore,
+        state.players,
+        state.promptModal,
+        state.trumpSuit,
+        state.bidAmount,
+        state.teams
+      );
+      return {
+        ...state,
+        dealToPlayer: meldDealToPlayer,
+        playScore: [...meldPlayScore],
+        gameState: meldGameState,
+        playerModal: meldPlayerModal,
+        promptModal: meldPromptModal
+      };
+    case actionTypes.START_GAME_PLAY:
+      const {
+        startMovingCards,
+        startGameState,
+        startPromptModal,
+        startBidModals,
+        startMelds
+      } = reducerLogic.startGamePlay(state);
+      return {
+        ...state,
+        firstPlay: true,
+        movingCards: [...startMovingCards],
+        gameState: startGameState,
+        playerModal: {shown: false},
+        promptModal: {...startPromptModal},
+        bidModals: [...startBidModals],
+        melds: [...startMelds]
+      };
+    case actionTypes.PLAY_LEAD:
+      if (state.dealToPlayer === 0) {
+        const {
+          userLeadPlayerModal,
+          userLeadPromptModal,
+          userLeadPlayHands,
+        } = reducerLogic.userLeadPlay(
+          state.hands,
+          state.trumpSuit,
+          state.firstPlay,
+          state.promptModal,
+          state.players
+        );
+        return {
+          ...state,
+          playerModal: {...userLeadPlayerModal},
+          promptModal: {...userLeadPromptModal},
+          hands: [...userLeadPlayHands],
+          winningPlay: state.tookPlay,
+          gameState: 'waitUserPlay',
+        };
+      }
+      return {
+        ...state
+      };
+    case actionTypes.USER_PLAY:
+      const {
+        userPlayHands,
+        userPlayMovingCards,
+        userPlayPromptModal
+      } = reducerLogic.userPlay(state, action.cardIndex);
+      return {
+        ...state,
+        hands: [...userPlayHands],
+        movingCards: [...userPlayMovingCards],
+        playerModal: {shown: false},
+        promptModal: {...userPlayPromptModal},
+        gameState: 'cardToPlayPile'
       };
     default:
         return state;

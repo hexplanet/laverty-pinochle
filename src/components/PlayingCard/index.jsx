@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState, userEffect, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import BackOfCard from "./svg/BackOfCard";
 import {Hearts} from "./svg/Hearts";
@@ -24,6 +24,11 @@ function PlayingCard({
   handleClick,
 }) {
   const [borderColor, setBorderColor] = useState('#aaa');
+  useEffect(() => {
+    if (rolloverColor === '') {
+      setBorderColor('#aaa');
+    }
+  }, [rolloverColor]);
   if (hidden) {
     return (<div/>);
   }

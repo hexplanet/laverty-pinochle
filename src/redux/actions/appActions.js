@@ -204,3 +204,28 @@ export const displayMeld = () => {
     type: actionTypes.DISPLAY_MELD
   };
 };
+
+export const nextMeld = () => {
+  return {
+    type: actionTypes.NEXT_MELD
+  };
+};
+
+export const startGamePlay = () => {
+  return {
+    type: actionTypes.START_GAME_PLAY
+  };
+};
+
+export const playLead = () => {
+  return {
+    type: actionTypes.PLAY_LEAD
+  };
+};
+
+export const userSelectPlay = (cardIndex) => {
+  return {
+    type: actionTypes.USER_PLAY,
+    cardIndex
+  };
+};

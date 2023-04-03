@@ -30,3 +30,7 @@ export const DECLARE_TRUMP_SUIT = 'DECLARE_TRUMP_SUIT';
 export const SET_TRUMP_SUIT = 'SET_TRUMP_SUIT';
 export const START_MELD = 'START_MELD';
 export const DISPLAY_MELD = 'DISPLAY_MELD';
+export const NEXT_MELD = 'NEXT_MELD';
+export const START_GAME_PLAY = 'START_GAME_PLAY';
+export const PLAY_LEAD = 'PLAY_LEAD';
+export const USER_PLAY = 'USER_PLAY';

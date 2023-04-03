@@ -9,13 +9,6 @@ import ScorePad from "../../components/ScorePad";
 import Modal from "../../components/Modal";
 import { getRandomRange }  from "../../utils/helpers";
 import './index.scss';
-import {
-  decideBidWinner,
-  decideThrowHand,
-  moveWidowToHand,
-  startDiscards,
-  startMeld
-} from "../../redux/actions/appActions";
 
 function GamePlay() {
   const dispatch = useDispatch();
@@ -187,6 +180,14 @@ function GamePlay() {
       case 'displayMeld':
         dispatch(appActions.displayMeld());
         break;
+      case 'meldDelay':
+        setTimeout(() => {
+          dispatch(appActions.nextMeld());
+        }, getRandomRange(250, 2000, 1));
+        break;
+      case 'movingMeldCardsBack:complete':
+        dispatch(appActions.playLead());
+        break;
       default:
         console.log('uncovered gameState: ', gameState);
     }
@@ -242,6 +243,9 @@ function GamePlay() {
       case 'nameTrumpSuit':
         dispatch(appActions.storeGameState('selectTrumpSuit'));
         break;
+      case 'startGamePlay':
+        dispatch(appActions.startGamePlay());
+        break;
       default:
         if (message.substr(0,4) === 'bid_') {
           dispatch(appActions.getUserBid(message));
@@ -255,6 +259,9 @@ function GamePlay() {
   const handleClickedCard = (id, index, suitValue) => {
     if (gameState === 'waitUserDiscard') {
       dispatch(appActions.userSelectDiscard(index));
+    }
+    if (gameState === 'waitUserPlay') {
+      dispatch(appActions.userSelectPlay(index));
     }
   };
   const applyObjectToModal = (location, data, key) => {

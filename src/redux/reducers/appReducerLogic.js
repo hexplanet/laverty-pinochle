@@ -9,7 +9,9 @@ import {
   getProjectedCount,
   getHandBid,
   getTrumpSuit,
-  getWinValue, getFormedSuitIcon, getTrumpBidHeader,
+  getWinValue,
+  getTrumpBidHeader,
+  setValidCards
 } from '../../utils/helpers';
 import { Diamonds } from "../../components/PlayingCard/svg/Diamonds";
 import { Hearts } from "../../components/PlayingCard/svg/Hearts";
@@ -795,7 +797,7 @@ export const shouldComputerAgreeThrowHand = (hands, tookBid, players) => {
   let computerAgreeThrowHand = 'throwHand';
   const { points } = getHandMeld(hands[tookBid], '');
   const { totalWins } = getProjectedCount(hands[tookBid], '', players, false);
-  if (points >= 8 || totalWins >= 4) {
+  if (points >= 12 || totalWins >= 6) {
     computerAgreeThrowHand = 'throwHandDisagree';
   }
   return { computerAgreeThrowHand };
@@ -1107,7 +1109,9 @@ export const meldCards = (state) => {
   let meldHand = meldHands[state.dealToPlayer];
   let meldPlacedCards = [...state.melds];
   let meldPile = meldPlacedCards[state.dealToPlayer];
-  const { cardsUsed } = getHandMeld(state.hands[state.dealToPlayer], state.trumpSuit);
+  const meldPlaceScores = [...state.meldScores];
+  const { points, cardsUsed } = getHandMeld(state.hands[state.dealToPlayer], state.trumpSuit);
+  meldPlaceScores[state.dealToPlayer] = points;
   const values = ['A', '10', 'K', 'Q', 'J', '9'];
   const suits = ['C', 'H', 'S', 'D'];
   const valueColumns = {'A':0, '10':0, 'K':0, 'Q':0, 'J':0, '9':0};
@@ -1159,7 +1163,187 @@ export const meldCards = (state) => {
   meldPlacedCards[state.dealToPlayer] = meldPile;
   return {
     meldHands,
-    meldPlacedCards
+    meldPlacedCards,
+    meldPlaceScores
+  };
+};
+
+export const postMeldLaydown = (
+  dealToPlayer,
+  thrownHand,
+  tookBid,
+  meldScores,
+  playScore,
+  players,
+  promptModal,
+  trumpSuit,
+  bidAmount,
+  teams
+) => {
+  const meldDealToPlayer = (dealToPlayer + 1) % players.length;
+  let meldGameState = 'displayMeld';
+  const meldPlayScore = playScore;
+  let meldPlayerModal = { shown:false };
+  let meldPromptModal = promptModal;
+  if (meldDealToPlayer === tookBid) {
+    const blankTeam = (!thrownHand ? -1 : (players.length === 4 ? tookBid % 2 : tookBid));
+    for(let i = 0; i < teams.length; i++) {
+      const previousScore = meldPlayScore[i].length === 1 ? 0 : meldPlayScore[i][meldPlayScore[i].length - 2].score;
+      if (blankTeam !== i) {
+        const meldScore = meldScores[i] + (teams.length === 2 ? meldScores[i + 2] : 0);
+        meldPlayScore[i][meldPlayScore[i].length - 1].meld = meldScore;
+        if (blankTeam > -1) {
+          meldPlayScore[i][meldPlayScore[i].length - 1].score = previousScore + meldScore;
+        }
+      } else {
+        meldPlayScore[i][meldPlayScore[i].length - 1].score = previousScore - bidAmount;
+      }
+    }
+    const trumpHeader = getTrumpBidHeader(trumpSuit, tookBid, bidAmount, players);
+    if (blankTeam > -1) {
+      meldGameState = 'finalThrownHandWait';
+      meldPlayerModal = generalModalData(
+        '',
+        {
+          hasBox: false,
+          buttons: [{
+            label: 'End Hand',
+            status: 'warning',
+            returnMessage: 'endOfHand'
+          }],
+        }
+      );
+      meldPromptModal = generalModalData((<div><b>{teams[blankTeam]}</b> has thrown the hand</div>), {
+        ...trumpHeader
+      });
+    } else {
+      meldGameState = 'startGamePlayWait';
+      meldPlayerModal = generalModalData(
+        '',
+        {
+          hasBox: false,
+          buttons: [{
+            label: 'Start Play',
+            returnMessage: 'startGamePlay'
+          }],
+        }
+      );
+      let message = '';
+      if (players.length === 4) {
+        message = (
+          <div>
+            <span><b>{teams[0]}</b>: {meldScores[0] + meldScores[2]}</span><br/>
+            <span><b>{teams[1]}</b>: {meldScores[1] + meldScores[3]}</span>
+          </div>
+        );
+      }
+      meldPromptModal = generalModalData(message, {
+        ...trumpHeader
+      });
+    }
+  }
+  return {
+    meldDealToPlayer,
+    meldGameState,
+    meldPlayScore,
+    meldPlayerModal,
+    meldPromptModal
+  };
+};
+
+export const startGamePlay = (state) => {
+  const startBidModals = [];
+  let startMovingCards = [];
+  let startMelds = [];
+  let startGameState = 'movingMeldCardsBack:complete';
+  const trumpHeader = getTrumpBidHeader(state.trumpSuit, state.tookBid, state.bidAmount, state.players);
+  const startPromptModal = generalModalData('', { ...trumpHeader });
+  for (let i = 0; i < state.players.length; i++) {
+    state.melds[i].forEach((card, cardIndex) => {
+      startGameState = 'movingMeldCardsBack';
+      const sourceCardId = `M${i}${cardIndex}`;
+      const sourceCard = getCardLocation(sourceCardId, state);
+      const targetCardId = `H${i}${cardIndex}`;
+      const targetCard = getCardLocation(targetCardId, state);
+      targetCard.zoom = sourceCard.zoom * 2;
+      const newMovingCard = {
+        id: `${sourceCardId}to${targetCardId}`,
+        keyId: `${sourceCardId}to${targetCardId}${Date.now()}`,
+        suit: card.suit,
+        value: card.value,
+        shown: false,
+        speed: 1,
+        source: sourceCard,
+        target: targetCard,
+      };
+      startMovingCards = [...startMovingCards, newMovingCard];
+    });
+    startBidModals.push({shown: false});
+    startMelds.push([]);
+  }
+  return {
+    startMovingCards,
+    startGameState,
+    startPromptModal,
+    startBidModals,
+    startMelds
+  };
+};
+
+export const userLeadPlay = (hands, trumpSuit, firstPlay, promptModal, players) => {
+  const userLeadPlayHands = [...hands];
+  let userLeadPlayerModal = {shown: false};
+  const userLeadPromptModal = {...promptModal};
+  userLeadPromptModal.message = (<span><b>{players[0]}</b> lead play</span>);
+  const userHand = setValidCards(hands[0], '', trumpSuit, firstPlay);
+  userLeadPlayHands[0] = [...userHand];
+  if (firstPlay) {
+    userLeadPlayerModal = generalModalData('You must lead trump suit on first play', {
+      width: 425,
+      height: 40,
+    });
+  }
+  console.log(userHand);
+  return {
+    userLeadPlayerModal,
+    userLeadPromptModal,
+    userLeadPlayHands
+  };
+};
+
+export const userPlay = (state, selectedIndex) => {
+  const userPlayPromptModal = {...state.promptModal};
+  userPlayPromptModal.message = '';
+  const selectedCard = state.hands[0][selectedIndex];
+  const sourceCardId = `H0${selectedIndex}`;
+  const sourceCard = getCardLocation(sourceCardId, state);
+  sourceCard.zoom = sourceCard.zoom * 2;
+  const targetCardId = `P0`;
+  const targetCard = getCardLocation(targetCardId, state);
+  const newMovingCard = {
+    id: `${sourceCardId}to${targetCardId}`,
+    keyId: `${sourceCardId}to${targetCardId}${Date.now()}`,
+    suit: selectedCard.suit,
+    value: selectedCard.value,
+    shown: true,
+    speed: 1,
+    source: sourceCard,
+    target: targetCard,
+  };
+  const userPlayMovingCards = [newMovingCard];
+  const userPlayHands = [...state.hands];
+  const userHand = userPlayHands[0];
+  userHand.splice(selectedIndex, 1);
+  userHand.forEach((card, cardIndex) => {
+    userHand[cardIndex].active = true;
+    userHand[cardIndex].clickable = false;
+    userHand[cardIndex].rolloverColor = '';
+  });
+  userPlayHands[0] = userHand;
+  return {
+    userPlayHands,
+    userPlayMovingCards,
+    userPlayPromptModal
   };
 };
 

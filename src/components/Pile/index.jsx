@@ -18,20 +18,22 @@ function Pile({
   useEffect(() => {
     const newCards = [];
     cards.forEach((card, index) => {
-      const cardShown = (card.shown === undefined) ? shown : shown && card.shown;
-      newCards.push(
-        <PlayingCard
-          key={`Pile${index}`}
-          xLocation={110 + (hasHeight ? (index * 0.2) : 0) + (card.xOffset ? card.xOffset : 0)}
-          yLocation={110 - (hasHeight ? (index * 0.5) : 0) + (card.yOffset ? card.yOffset : 0)}
-          suit={card.suit}
-          value={card.value}
-          shown={cardShown}
-          rotation={card.rotation}
-          rolloverColor=''
-          clickable={false}
-        />
-      );
+      if (card !== null) {
+        const cardShown = (card.shown === undefined) ? shown : shown && card.shown;
+        newCards.push(
+          <PlayingCard
+            key={`Pile${index}`}
+            xLocation={110 + (hasHeight ? (index * 0.2) : 0) + (card.xOffset ? card.xOffset : 0)}
+            yLocation={110 - (hasHeight ? (index * 0.5) : 0) + (card.yOffset ? card.yOffset : 0)}
+            suit={card.suit}
+            value={card.value}
+            shown={cardShown}
+            rotation={card.rotation}
+            rolloverColor=''
+            clickable={false}
+          />
+        );
+      }
     });
     setCardsToDisplay(newCards);
   }, [cards, shown, hasHeight]);

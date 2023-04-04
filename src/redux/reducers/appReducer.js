@@ -14,6 +14,8 @@ const initialState = {
   showHands: [],
   handFanOut: -1,
   hands: [],
+  seenWidow: [],
+  seenCards: [],
   bids: [],
   tookBid: 0,
   bidAmount: 0,
@@ -38,7 +40,7 @@ const initialState = {
   zoomRatio: 1,
   dealer: 0,
   dealToPlayer: 0,
-  playPile: {shown: false},
+  playPile: [],
   playPileShown: true,
   playScore: [],
   gameWon: '',
@@ -413,12 +415,17 @@ const appReducer = (state = initialState, action) => {
         playPileShown: true,
       };
     case actionTypes.MOVE_WIDOW_TO_HAND:
-      const widowMovingCards = reducerLogic.movingWidow(state);
+      const {
+        widowMovingCards,
+        widowSeen,
+        widowEmptyPlayPile
+      }= reducerLogic.movingWidow(state);
       return {
         ...state,
         gameState: 'widowMoving',
         movingCards: [...widowMovingCards],
-        playPile: [],
+        playPile: [...widowEmptyPlayPile],
+        seenWidow: [...widowSeen],
       };
     case actionTypes.DECIDE_THROW_HAND:
       if (state.tookBid === 0) {
@@ -502,7 +509,7 @@ const appReducer = (state = initialState, action) => {
           }],
         });
       } else {
-        disagreeGameState = 'startDiscards';
+        disagreeGameState = 'selectTrumpSuit';
       }
       return {
         ...state,
@@ -548,7 +555,9 @@ const appReducer = (state = initialState, action) => {
       } = reducerLogic.setUpDiscards(
         state.hands,
         state.tookBid,
-        state.players
+        state.players,
+        state.trumpSuit,
+        state.bidAmount
       );
       return {
         ...state,
@@ -589,13 +598,16 @@ const appReducer = (state = initialState, action) => {
         removeComputerHands,
         removeComputerMovingCards,
         removeComputerPrompt,
+        removeComputerPlayer,
+        removeComputerGameState
       } = reducerLogic.calculateComputerDiscard(state);
       return {
         ...state,
-        gameState: 'waitRemoveDiscards',
+        gameState: removeComputerGameState,
         hands: [...removeComputerHands],
         movingCards: removeComputerMovingCards,
-        promptModal: removeComputerPrompt
+        promptModal: removeComputerPrompt,
+        playerModal: removeComputerPlayer
       };
     case actionTypes.DECLARE_TRUMP_SUIT:
       if (state.tookBid === 0) {
@@ -614,21 +626,26 @@ const appReducer = (state = initialState, action) => {
         };
       }
       const {
-        computerTrumpSuit
+        computerTrumpSuit,
+        computerTrumpPlayer,
+        computerTrumpPrompt
       } = reducerLogic.computerSelectTrump(
         state.hands,
         state.tookBid,
-        state.players
+        state.players,
+        state.bidAmount
       );
       return {
         ...state,
         trumpSuit: computerTrumpSuit,
-        gameState: 'startMeld',
+        gameState: 'userTrumpWait',
+        playerModal: computerTrumpPlayer,
+        promptModal: computerTrumpPrompt
       };
     case actionTypes.SET_TRUMP_SUIT:
       return {
         ...state,
-        gameState: 'startMeld',
+        gameState: 'startDiscards',
         trumpSuit: action.suit
       };
     case actionTypes.START_MELD:
@@ -670,7 +687,8 @@ const appReducer = (state = initialState, action) => {
       const {
         meldHands,
         meldPlacedCards,
-        meldPlaceScores
+        meldPlaceScores,
+        meldSeenCards
       } = reducerLogic.meldCards(state);
       shownMeld[state.dealToPlayer] =
         generalModalData('', {
@@ -685,6 +703,7 @@ const appReducer = (state = initialState, action) => {
         meldScores: [...meldPlaceScores],
         gameState: 'meldDelay',
         bidModals: [...shownMeld],
+        seenCards: [...meldSeenCards]
       };
     case actionTypes.NEXT_MELD:
       const {
@@ -753,6 +772,7 @@ const appReducer = (state = initialState, action) => {
           gameState: 'waitUserPlay',
         };
       }
+      // Computer Lead Play
       return {
         ...state
       };
@@ -769,6 +789,26 @@ const appReducer = (state = initialState, action) => {
         playerModal: {shown: false},
         promptModal: {...userPlayPromptModal},
         gameState: 'cardToPlayPile'
+      };
+    case actionTypes.RESOLVE_PLAY:
+      const {
+        resolveWinningPlay,
+        resolvePromptModal
+      } = reducerLogic.resolvePlay(
+        state.players,
+        state.playPile,
+        state.trumpSuit,
+        state.dealToPlayer,
+        state.tookPlay,
+        state.winningPlay,
+        state.tookBid,
+        state.bidAmount
+      );
+      return {
+        ...state,
+        gameState: 'waitToClearPlayPile',
+        winningPlay: resolveWinningPlay,
+        promptModal: resolvePromptModal
       };
     default:
         return state;

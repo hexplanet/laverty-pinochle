@@ -162,7 +162,6 @@ function GamePlay() {
       case 'throwHand':
         dispatch(appActions.throwHand());
         break;
-      case 'throwHandContinue':
       case 'startDiscards':
         dispatch(appActions.clearPlayerModal());
         dispatch(appActions.startDiscards());
@@ -170,10 +169,11 @@ function GamePlay() {
       case 'computerDiscard':
         dispatch(appActions.computerDiscards());
         break;
-      case 'waitRemoveDiscards:complete':
+      case 'throwHandContinue':
       case 'selectTrumpSuit':
         dispatch(appActions.declareTrumpSuit());
         break;
+      case 'waitRemoveDiscards:complete':
       case 'startMeld':
         dispatch(appActions.startMeld());
         break;
@@ -188,6 +188,8 @@ function GamePlay() {
       case 'movingMeldCardsBack:complete':
         dispatch(appActions.playLead());
         break;
+      case 'cardToPlayPile:complete':
+        dispatch(appActions.resolvePlay());
       default:
         console.log('uncovered gameState: ', gameState);
     }
@@ -223,7 +225,7 @@ function GamePlay() {
         break;
       case 'throwHandContinue':
         dispatch(appActions.clearPlayerModal());
-        dispatch(appActions.startDiscards());
+        dispatch(appActions.storeGameState('selectTrumpSuit'));
         break;
       case 'userThrowHand':
         dispatch(appActions.clearPlayerModal());
@@ -245,6 +247,14 @@ function GamePlay() {
         break;
       case 'startGamePlay':
         dispatch(appActions.startGamePlay());
+        break;
+      case 'postTrumpSuitContinue':
+        dispatch(appActions.clearPlayerModal());
+        dispatch(appActions.startDiscards());
+        break;
+      case 'postDiscardTrump':
+        dispatch(appActions.clearPlayerModal());
+        dispatch(appActions.storeGameState('waitRemoveDiscards:complete'));
         break;
       default:
         if (message.substr(0,4) === 'bid_') {

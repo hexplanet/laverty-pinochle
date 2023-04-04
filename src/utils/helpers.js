@@ -404,6 +404,24 @@ export const getFormedSuitIcon = (suit) => {
   return (<div style={iconStyle}>{suitIcon}</div>);
 };
 
+export const suitIconSelector = (suit) => {
+  let suitIcon;
+  switch(suit) {
+    case 'H':
+      suitIcon = (<Hearts />);
+      break;
+    case 'D':
+      suitIcon = (<Diamonds />);
+      break;
+    case 'C':
+      suitIcon = (<Clubs />);
+      break;
+    default:
+      suitIcon = (<Spades />);
+  }
+  return suitIcon;
+};
+
 export const getTrumpBidHeader = (trumpSuit, tookBid, bidAmount, players) => {
   const trumpIcon = getFormedSuitIcon(trumpSuit);
   const trumpStyle = {
@@ -431,7 +449,7 @@ export const getTrumpBidHeader = (trumpSuit, tookBid, bidAmount, players) => {
   };
 };
 
-export const setValidCards = (
+export const setValidCardIndexes = (
   hand,
   ledSuit,
   trumpSuit,
@@ -449,17 +467,11 @@ export const setValidCards = (
       }
     }
   }
+  const validIndexes = [];
   validHand.forEach((card, cardIndex) => {
-    validHand[cardIndex].shown = true;
     if (card.suit === validSuit || validSuit === '') {
-      validHand[cardIndex].active = true;
-      validHand[cardIndex].clickable = true;
-      validHand[cardIndex].rolloverColor = '#0f0';
-    } else {
-      validHand[cardIndex].active = false;
-      validHand[cardIndex].clickable = false;
-      validHand[cardIndex].rolloverColor = '';
+      validIndexes.push(cardIndex);
     }
   });
-  return validHand;
+  return validIndexes;
 };

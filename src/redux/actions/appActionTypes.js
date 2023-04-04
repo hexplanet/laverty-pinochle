@@ -34,3 +34,4 @@ export const NEXT_MELD = 'NEXT_MELD';
 export const START_GAME_PLAY = 'START_GAME_PLAY';
 export const PLAY_LEAD = 'PLAY_LEAD';
 export const USER_PLAY = 'USER_PLAY';
+export const RESOLVE_PLAY = 'RESOLVE_PLAY';

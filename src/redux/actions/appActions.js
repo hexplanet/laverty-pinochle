@@ -229,3 +229,9 @@ export const userSelectPlay = (cardIndex) => {
     cardIndex
   };
 };
+
+export const resolvePlay = () => {
+  return {
+    type: actionTypes.RESOLVE_PLAY
+  };
+};

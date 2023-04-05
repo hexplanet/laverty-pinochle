@@ -16,6 +16,8 @@ const initialState = {
   hands: [],
   seenWidow: [],
   seenCards: [],
+  seenTrump: 0,
+  offSuits: [],
   bids: [],
   tookBid: 0,
   bidAmount: 0,
@@ -175,8 +177,10 @@ const appReducer = (state = initialState, action) => {
           state.dealer
       );
       const newShowHands = [];
+      const newOffSuits = [];
       for(let i = 0; i < state.players.length; i++) {
         newShowHands.push(false);
+        newOffSuits.push([]);
       }
       return {
         ...state,
@@ -185,6 +189,7 @@ const appReducer = (state = initialState, action) => {
         showHands: newShowHands,
         promptModal: clearPlayerPrompt,
         handFanOut: -1,
+        offSuits: newOffSuits
       };
     case actionTypes.DEAL_CARDS:
       const {
@@ -643,10 +648,12 @@ const appReducer = (state = initialState, action) => {
         promptModal: computerTrumpPrompt
       };
     case actionTypes.SET_TRUMP_SUIT:
+      const setTrumpGameState = state.thrownHand ? 'startMeld' : 'startDiscards';
       return {
         ...state,
-        gameState: 'startDiscards',
-        trumpSuit: action.suit
+        gameState: setTrumpGameState,
+        trumpSuit: action.suit,
+        seenTrump: 0,
       };
     case actionTypes.START_MELD:
       const meldMessage = reducerLogic.startMeldMessage(
@@ -772,9 +779,16 @@ const appReducer = (state = initialState, action) => {
           gameState: 'waitUserPlay',
         };
       }
-      // Computer Lead Play
+      const {
+        computerLeadPlayHands,
+        computerPlayMovingCards
+      } = reducerLogic.computerLeadPlay(state);
       return {
-        ...state
+        ...state,
+        hands: [...computerLeadPlayHands],
+        movingCards: [...computerPlayMovingCards],
+        winningPlay: state.tookPlay,
+        gameState: 'cardToPlayPile',
       };
     case actionTypes.USER_PLAY:
       const {
@@ -808,7 +822,8 @@ const appReducer = (state = initialState, action) => {
         ...state,
         gameState: 'waitToClearPlayPile',
         winningPlay: resolveWinningPlay,
-        promptModal: resolvePromptModal
+        promptModal: resolvePromptModal,
+        firstPlay: false
       };
     default:
         return state;

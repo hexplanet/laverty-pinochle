@@ -812,7 +812,7 @@ export const shouldComputerAgreeThrowHand = (hands, tookBid, players) => {
   let computerAgreeThrowHand = 'throwHand';
   const { points } = getHandMeld(hands[tookBid], '');
   const { totalWins } = getProjectedCount(hands[tookBid], '', players, false);
-  if (points >= 12 || totalWins >= 6) {
+  if (points >= 12 || totalWins.length >= 6) {
     computerAgreeThrowHand = 'throwHandDisagree';
   }
   return { computerAgreeThrowHand };
@@ -1158,6 +1158,15 @@ export const meldCards = (state) => {
   meldPlaceScores[state.dealToPlayer] = points;
   const meldSeenCards = [...state.seenCards];
   meldSeenCards[state.dealToPlayer] = [...cardsUsed];
+  if (state.dealToPlayer === state.tookBid) {
+    state.seenWidow.forEach(widow => {
+      if (widow[0] === state.trumpSuit || widow[1] === 'A') {
+        if (cardsUsed.indexOf(widow) === -1) {
+          meldSeenCards[state.dealToPlayer] = [...meldSeenCards[state.dealToPlayer], widow];
+        }
+      }
+    });
+  }
   const values = ['A', '10', 'K', 'Q', 'J', '9'];
   const suits = ['C', 'H', 'S', 'D'];
   const valueColumns = {'A':0, '10':0, 'K':0, 'Q':0, 'J':0, '9':0};
@@ -1403,6 +1412,32 @@ export const userPlay = (state, selectedIndex) => {
     userPlayHands,
     userPlayMovingCards,
     userPlayPromptModal
+  };
+};
+
+export const computerLeadPlay = (state) => {
+  const computerLeadPlayHands = [...state.hands];
+  const validHand = computerLeadPlayHands[state.tookPlay];
+  const computerPlayMovingCards = [];
+  const validCards = setValidCardIndexes(validHand, '', state.trumpSuit, state.firstPlay);
+  const { totalWins } = getProjectedCount(validHand, state.trumpSuit, state.players, false);
+  const pullValues = ['Q', 'J', '9', '10', 'K', 'A'];
+  const nonCounterValue = ['9', 'J', 'Q', 'K', '10', 'A'];
+  const counterValue = ['K', '10', '9', 'J', 'Q', 'A'];
+  let playCardIndex;
+  if (state.firstPlay) {
+    if (validHand[validCards[0]].value === 'A') {
+      // Select lowest winning card
+    } else {
+      // Select lowest index from the pullValues
+    }
+  } else {
+
+  }
+  console.log({validCards, totalWins});
+  return {
+    computerLeadPlayHands,
+    computerPlayMovingCards
   };
 };
 

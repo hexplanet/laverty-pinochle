@@ -228,8 +228,7 @@ export const getHandMeld = (hand, trump) => {
     if (totalMatches > 0) {
       cardsRequired = [];
       if (meldIndex > 6 && meldCombination.cards[0][0] === trump) {
-        totalMatches = totalMatches - runs;
-        if (totalMatches > 0) {
+        if (totalMatches > runs) {
           points = points + ((totalMatches - runs) * 4);
           displayLine = (totalMatches - runs > 1)
             ? `2 Royal Marriages in ${fullSuit[trump]}` : `Royal Marriage in ${fullSuit[trump]}`;
@@ -243,7 +242,7 @@ export const getHandMeld = (hand, trump) => {
       if (totalMatches > 0) {
         meldCombination.cards.forEach(card => {
           cardsRequired = cardsUsed.filter(usedCard => usedCard === card);
-          for (let c = 0; c < totalMatches - cardsRequired; c++) {
+          for (let c = 0; c < totalMatches - cardsRequired.length; c++) {
             cardsUsed.push(card);
           }
         });
@@ -272,7 +271,7 @@ export const getProjectedCount = (hand, trump, players, preWidow = true) => {
   let losses;
   let whichCards;
   let howManyTrump;
-  let totalWins = 0;
+  let totalWins = [];
   suits.forEach(suit => {
     isTrump = (suit === trump);
     wins = 0;
@@ -293,6 +292,10 @@ export const getProjectedCount = (hand, trump, players, preWidow = true) => {
         losses = losses + (2 - whichCards[strength]);
         if (whichCards[strength] > 0 && howMany > losses) {
           wins = wins + whichCards[strength];
+          totalWins.push(`${suit}${strength}`);
+          if (whichCards[strength] > 1) {
+            totalWins.push(`${suit}${strength}`);
+          }
         } else {
           if (strength === '10' || strength === 'K') {
             lostCounts = lostCounts + whichCards[strength];
@@ -303,7 +306,6 @@ export const getProjectedCount = (hand, trump, players, preWidow = true) => {
     } else {
       projectedCounts = projectedCounts + 2;
     }
-    totalWins = totalWins + wins;
   })
   if (preWidow) {
     lostCounts = lostCounts < numPlayers ? 0 : lostCounts - numPlayers;

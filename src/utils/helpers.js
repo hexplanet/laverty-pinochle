@@ -3,7 +3,7 @@ import {Diamonds} from "../components/PlayingCard/svg/Diamonds";
 import {Clubs} from "../components/PlayingCard/svg/Clubs";
 import {Spades} from "../components/PlayingCard/svg/Spades";
 
-export const generateShuffledDeck = () => {
+export const generateShuffledDeck = (shuffles = 1000) => {
   const cards = [];
   const suits = ['H', 'S', 'D', 'C'];
   const values = ['9', 'J', 'Q', 'K', '10', 'A'];
@@ -16,7 +16,7 @@ export const generateShuffledDeck = () => {
   let cut1;
   let cut2;
   let holdCard;
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < shuffles; i++) {
     cut1 = Math.floor(Math.random() * 48);
     cut2 = Math.floor(Math.random() * 48);
     if (cut1 !== cut2) {
@@ -451,6 +451,17 @@ export const getTrumpBidHeader = (trumpSuit, tookBid, bidAmount, players) => {
   };
 };
 
+export const getHandLeaderMessage = (suitLed, ledValue, suitWin, winValue, players, tookPlay, winningPlayer) => {
+  const ledSuit = suitIconSelector(suitLed);
+  const winSuit = suitIconSelector(suitWin);
+  const suitStyle = {width: 24, display: 'inline-flex'};
+  const messageStyle = {display: 'inline-flex'};
+  const line1 = (<div style={messageStyle}><b>{players[tookPlay]}</b>&nbsp;start&nbsp;<b>{ledValue}</b><span style={suitStyle}>{ledSuit}</span></div>);
+  const line2 =
+    (<div style={messageStyle}><b>{players[winningPlayer]}</b>&nbsp;with&nbsp;<b>{winValue}</b><span style={suitStyle}>{winSuit}</span></div>);
+  return (<div>{line1}<br/>{line2}</div>);
+}
+
 export const setValidCardIndexes = (
   hand,
   ledSuit,
@@ -476,4 +487,91 @@ export const setValidCardIndexes = (
     }
   });
   return validIndexes;
+};
+
+export const getUnplayedCards = (validHand, playedCards, widowDiscards) => {
+  const cards = generateShuffledDeck(0);
+  validHand.forEach(handCard => {
+    const foundIndex = cards.findIndex(card => card.suit === handCard.suit && card.value === handCard.value);
+    if (foundIndex > -1) {
+      cards.splice(foundIndex, 1);
+    }
+  });
+  playedCards.forEach(hand => {
+    hand.forEach(playedCard => {
+      const foundIndex = cards.findIndex(card => playedCard === `${card.suit}${card.value}`);
+      if (foundIndex > -1) {
+        cards.splice(foundIndex, 1);
+      }
+    });
+  });
+  widowDiscards.forEach(widowCard => {
+    const foundIndex = cards.findIndex(card => widowCard.suit === card.suit && widowCard.value === card.value);
+    if (foundIndex > -1) {
+      cards.splice(foundIndex, 1);
+    }
+  });
+  return [...cards];
+};
+
+export const getWinningCards = (hands, unplayedCards, offSuits, trumpSuit, tookPlay, firstPlay) => {
+  const winners = [];
+  const suits = ['H','C','D','S'];
+  const values = ['9','J','Q','K','10','A'];
+  suits.forEach(suit => {
+    if (suit === trumpSuit || !firstPlay) {
+      let highUnplayed = -1;
+      unplayedCards.forEach(card => {
+        if (card.suit === suit) {
+          if (values.indexOf(card.value) > highUnplayed) {
+            highUnplayed = values.indexOf(card.value);
+          }
+        }
+      });
+      let lowestWin = -1;
+      hands[tookPlay].forEach(card => {
+        if (card.suit === suit) {
+          const cardIndex = values.indexOf(card.value);
+          if (cardIndex >= highUnplayed) {
+            if (lowestWin === -1) {
+              lowestWin = cardIndex;
+            } else if (cardIndex < lowestWin) {
+              lowestWin = cardIndex;
+            }
+          }
+        }
+      });
+      if (lowestWin > -1) {
+        let addWinner = true;
+        if (suit !== trumpSuit) {
+          for(let i = 0; i < hands.length; i++) {
+            if (i !== tookPlay) {
+              if (offSuits[i].indexOf(suit) > -1) {
+                if (offSuits[i].indexOf(trumpSuit) === -1) {
+                  addWinner = false;
+                }
+              }
+            }
+          }
+        }
+        if (addWinner) {
+          winners.push(`${suit}${values[lowestWin]}`);
+        }
+      }
+    }
+  });
+  return winners;
+};
+
+export const getHighestNonCount = (hand, suit) => {
+  const nonCounterValue = ['A', '10', 'K', '9', 'J', 'Q'];
+  let bestIndex = -1;
+  hand.forEach(card => {
+    if (card.suit === suit) {
+      if (nonCounterValue.indexOf(card.value) > bestIndex) {
+        bestIndex = nonCounterValue.indexOf(card.value);
+      }
+    }
+  });
+  return (bestIndex === -1) ? '' : `${suit}${nonCounterValue[bestIndex]}`;
 };

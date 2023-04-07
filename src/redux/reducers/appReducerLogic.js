@@ -16,7 +16,9 @@ import {
   getUnplayedCards,
   getWinningCards,
   getHighestNonCount,
-  getHandLeaderMessage
+  getHandLeaderMessage,
+  getTrumpPullingSuits,
+  getPartnerPassSuits
 } from '../../utils/helpers';
 
 export const playerDisplaySettingsLogic = (width, height, players) => {
@@ -1382,16 +1384,63 @@ export const userLeadPlay = (hands, trumpSuit, firstPlay, promptModal, players) 
     }
   });
   userLeadPlayHands[0] = [...validHand];
+  let message = 'You took the play, please led a card';
   if (firstPlay) {
-    userLeadPlayerModal = generalModalData('You must lead trump suit on first play', {
+    message = 'You must lead trump suit on first play';
+  }
+  userLeadPlayerModal = generalModalData(message, {
+    width: 425,
+    height: 40,
+  });
+  return {
+    userLeadPlayerModal,
+    userLeadPromptModal,
+    userLeadPlayHands
+  };
+};
+
+export const userFollowPlay = (hands, trumpSuit, players, playPile, winningPlay, tookPlay) => {
+  const userFollowPlayHands = [...hands];
+  let userFollowPlayerModal = {shown: false};
+  const ledCard = playPile[tookPlay];
+  const winningCard = playPile[winningPlay];
+  const ledSuit = ledCard.suit;
+  const ledValue = (ledSuit === trumpSuit) ? winningCard.value : '';
+  const validHand = [...hands[0]];
+  const validCards = setValidCardIndexes(validHand, ledSuit, trumpSuit, false, ledValue);
+  validHand.forEach((card, cardIndex) => {
+    validHand[cardIndex].shown = true;
+    if (validCards.indexOf(cardIndex) > -1) {
+      validHand[cardIndex].active = true;
+      validHand[cardIndex].clickable = true;
+      validHand[cardIndex].rolloverColor = '#0f0';
+    } else {
+      validHand[cardIndex].active = false;
+      validHand[cardIndex].clickable = false;
+      validHand[cardIndex].rolloverColor = '';
+    }
+  });
+  userFollowPlayHands[0] = [...validHand];
+  let message = '';
+  if (ledSuit === trumpSuit && validHand[validCards[0]].suit === trumpSuit) {
+    message = 'You must play higher trump if you can';
+  }
+  if (ledSuit !== trumpSuit && validHand[validCards[0]].suit === trumpSuit) {
+    message = 'You must play trump if off suit';
+  }
+  if (message === '') {
+    userFollowPlayerModal = generalModalData(message, {
+      shown: false,
+    });
+  } else {
+    userFollowPlayerModal = generalModalData(message, {
       width: 425,
       height: 40,
     });
   }
   return {
-    userLeadPlayerModal,
-    userLeadPromptModal,
-    userLeadPlayHands
+    userFollowPlayerModal,
+    userFollowPlayHands,
   };
 };
 
@@ -1450,22 +1499,103 @@ export const computerLeadPlay = (state) => {
     state.tookPlay,
     state.firstPlay
   );
-  let playCard = '';
+  let playCard = null;
   if (state.firstPlay) {
     if (winningCards.length > 0) {
+      // Play required trump for win
       playCard = winningCards[0];
     } else {
+      // Play required trump for lose
       playCard = getHighestNonCount(validHand, state.trumpSuit);
     }
   } else {
-    // if winning cards includes trump decide
-    //   if control trump play trump winner
-    // else play non-trump winner
-    //
-    // If no valid winner either pull trump, pass, or give up
+    const trumpLeft = unplayedCards.filter(card => card.suit === state.trumpSuit);
+    const trumpInHand = validHand.filter(card => card.suit === state.trumpSuit);
+    const trumpWin = winningCards.filter(card => card.suit === state.trumpSuit);
+    if (trumpWin.length === 1) {
+      if (trumpLeft < trumpInHand) {
+        // Control Trump Cards
+        playCard = trumpWin[0];
+      }
+    }
+    if (playCard === null) {
+      if (winningCards.length > trumpWin.length) {
+        // Play winning card
+        while(playCard === null) {
+          const winIndex = getRandomRange(0, winningCards.length - 1, 1);
+          if (winningCards[winIndex].suit !== state.trumpSuit) {
+            playCard = {...winningCards[winIndex]};
+          }
+        }
+      }
+    }
+    let suitIndex;
+    let stepIndex;
+    let stopCheck;
+    // Losing cards
+    if (playCard === null) {
+      // Pull trump in an off suit
+      const trumpPullingSuits = getTrumpPullingSuits(state.offSuits, state.trumpSuit, state.tookPlay);
+      if (trumpPullingSuits.length > 0) {
+        suitIndex = getRandomRange(0, winningCards.length - 1, 1);
+        stepIndex = suitIndex;
+        stopCheck = false;
+        while(playCard === null && !stopCheck) {
+          playCard = getHighestNonCount(validHand, trumpPullingSuits[stepIndex], true);
+          stepIndex = (stepIndex + 1) % state.players.length;
+          stopCheck = (stepIndex === suitIndex);
+        }
+      }
+    }
+    if (playCard === null) {
+      // Pull trump with Trump
+      const pullWithTrump = (trumpInHand > trumpLeft) || (trumpInHand + 2) >= validHand.length;
+      if (pullWithTrump) {
+        playCard = getHighestNonCount(validHand, state.trumpSuit, true);
+      }
+    }
+    if (playCard === null && state.players.length === 4) {
+      // Attempt to pass lead to partner
+      const partnerPassSuits = getPartnerPassSuits(
+        state.offSuits,
+        state.trumpSuit,
+        state.tookPlay,
+        unplayedCards,
+        state.seenCards
+      );
+      if (partnerPassSuits.length > 0) {
+        suitIndex = getRandomRange(0, partnerPassSuits.length - 1, 1);
+        stepIndex = suitIndex;
+        stopCheck = false;
+        while(playCard === null && !stopCheck) {
+          playCard = getHighestNonCount(validHand, partnerPassSuits[stepIndex], true);
+          stepIndex = (stepIndex + 1) % state.players.length;
+          stopCheck = (stepIndex === suitIndex);
+        }
+      }
+    }
+    if (playCard === null) {
+      // give and just play lowest card with a preference to non-trump
+      const lowValues = ['A', '10', 'K', 'Q', 'J', '9'];
+      let isTrump = true;
+      let lowIndex = -1;
+      validHand.forEach(card => {
+        if (card.suit !== state.trumpSuit && isTrump) {
+          isTrump = false;
+          lowIndex = -1;
+        }
+        if ((card.suit === state.trumpSuit && isTrump) || card.suit !== state.trumpSuit) {
+          const cardValueIndex = lowValues.indexOf(card.value);
+          if (cardValueIndex > lowIndex) {
+            lowIndex = cardValueIndex;
+            playCard = card;
+          }
+        }
+      });
+    }
   }
-  if (playCard !== '') {
-    const selectedIndex = validHand.findIndex(card => playCard === `${card.suit}${card.value}`);
+  if (playCard !== null) {
+    const selectedIndex = validHand.findIndex(card => playCard.suit === card.suit && playCard.value === card.value);
     if (selectedIndex > -1) {
       const selectedCard = state.hands[state.tookPlay][selectedIndex];
       const sourceCardId = `H${state.tookPlay}${selectedIndex}`;
@@ -1531,7 +1661,9 @@ export const resolvePlay = (
   );
   const trumpHeader = getTrumpBidHeader(trumpSuit, tookBid, bidAmount, players);
   const resolvePromptModal = generalModalData(totalMessage, {...trumpHeader});
-  resolvePlayedCards[dealToPlayer] = [...resolvePlayedCards[dealToPlayer], `${playedCard.suit}${playedCard.value}`];
+  resolvePlayedCards[dealToPlayer] = [...resolvePlayedCards[dealToPlayer],
+    {suit: playedCard.suit, value: playedCard.value}
+  ];
   return {
     resolveWinningPlay,
     resolvePromptModal,

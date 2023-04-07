@@ -6,7 +6,7 @@ import {Spades} from "../components/PlayingCard/svg/Spades";
 export const generateShuffledDeck = (shuffles = 1000) => {
   const cards = [];
   const suits = ['H', 'S', 'D', 'C'];
-  const values = ['9', 'J', 'Q', 'K', '10', 'A'];
+  const values = ['A', '10', 'K', 'Q', 'J', '9'];
   suits.forEach(suit => {
     values.forEach(value => {
       cards.push({ suit, value});
@@ -466,26 +466,38 @@ export const setValidCardIndexes = (
   hand,
   ledSuit,
   trumpSuit,
-  firstPlay
+  firstPlay,
+  ledValue = ''
 ) => {
+  const values = ['9', 'J', 'Q', 'K', '10', 'A'];
   const validHand = [...hand];
   let validSuit = (ledSuit === '' && firstPlay) ? trumpSuit : ledSuit;
   if (validSuit !== '') {
     const matchedSuit = hand.filter(card => card.suit === validSuit);
-    if (matchedSuit === 0) {
+    if (matchedSuit.length === 0) {
       validSuit = trumpSuit;
       const matchedTrump = hand.filter(card => card.suit === validSuit);
-      if (matchedTrump === 0) {
+      if (matchedTrump.length === 0) {
         validSuit = '';
       }
     }
   }
   const validIndexes = [];
-  validHand.forEach((card, cardIndex) => {
-    if (card.suit === validSuit || validSuit === '') {
-      validIndexes.push(cardIndex);
-    }
-  });
+  if (ledSuit === trumpSuit && validSuit === trumpSuit) {
+    const ledIndex = values.indexOf(ledValue);
+    validHand.forEach((card, cardIndex) => {
+      if (card.suit === validSuit && values.indexOf(card.value) > ledIndex) {
+        validIndexes.push(cardIndex);
+      }
+    });
+  }
+  if (validIndexes.length === 0) {
+    validHand.forEach((card, cardIndex) => {
+      if (card.suit === validSuit || validSuit === '') {
+        validIndexes.push(cardIndex);
+      }
+    });
+  }
   return validIndexes;
 };
 
@@ -499,7 +511,7 @@ export const getUnplayedCards = (validHand, playedCards, widowDiscards) => {
   });
   playedCards.forEach(hand => {
     hand.forEach(playedCard => {
-      const foundIndex = cards.findIndex(card => playedCard === `${card.suit}${card.value}`);
+      const foundIndex = cards.findIndex(card => playedCard.suit === card.suit && playedCard.value === card.value);
       if (foundIndex > -1) {
         cards.splice(foundIndex, 1);
       }
@@ -555,7 +567,7 @@ export const getWinningCards = (hands, unplayedCards, offSuits, trumpSuit, tookP
           }
         }
         if (addWinner) {
-          winners.push(`${suit}${values[lowestWin]}`);
+          winners.push({suit, value: values[lowestWin]});
         }
       }
     }
@@ -563,15 +575,60 @@ export const getWinningCards = (hands, unplayedCards, offSuits, trumpSuit, tookP
   return winners;
 };
 
-export const getHighestNonCount = (hand, suit) => {
+export const getHighestNonCount = (hand, suit, limitToNonCount = false) => {
   const nonCounterValue = ['A', '10', 'K', '9', 'J', 'Q'];
   let bestIndex = -1;
   hand.forEach(card => {
     if (card.suit === suit) {
-      if (nonCounterValue.indexOf(card.value) > bestIndex) {
-        bestIndex = nonCounterValue.indexOf(card.value);
+      const valueIndex = nonCounterValue.indexOf(card.value);
+      if (valueIndex > bestIndex && (!limitToNonCount || valueIndex > 2)) {
+        bestIndex = valueIndex;
       }
     }
   });
-  return (bestIndex === -1) ? '' : `${suit}${nonCounterValue[bestIndex]}`;
+  return (bestIndex === -1) ? null : {suit, value: nonCounterValue[bestIndex]};
+};
+
+export const getTrumpPullingSuits = (offSuits, trumpSuit, tookPlay) => {
+  const pullSuits = [];
+  const suits = ['H', 'C', 'D', 'S'];
+  offSuits.forEach((offSuit, player) => {
+    if (player !== tookPlay && (offSuits.length === 3 || player !== (tookPlay + 2) % 4 )) {
+      suits.forEach(suit => {
+        if (suit !== trumpSuit) {
+          if (offSuit.indexOf(trumpSuit) === -1 && offSuit.indexOf(suit) > -1) {
+            pullSuits.push(suit);
+          }
+        }
+      });
+    }
+  });
+  return pullSuits;
+};
+
+export const getPartnerPassSuits = (offSuits, trumpSuit, tookPlay, unplayedCards, seenCards) => {
+  const partner = (tookPlay + 2) % 4;
+  const blocker = (tookPlay + 1) % 4;
+  const suits = ['H', 'C', 'D', 'S'];
+  let passSuits = [];
+  let doneChecking = false;
+  suits.forEach(suit => {
+    if (suit !== trumpSuit && !doneChecking) {
+      const remainingValues = unplayedCards.filter(card => card.suit === suit);
+      if (remainingValues.length > 0) {
+        const suitWinner = `${suit}${remainingValues[0].value}`;
+        if (offSuits[blocker].indexOf(suit) > -1 || seenCards[blocker].indexOf(suitWinner) === -1) {
+          if (offSuits[partner].indexOf(suit) === -1) {
+            if (seenCards[partner].indexOf(suitWinner) > -1) {
+              passSuits = [suit];
+              doneChecking = true;
+            } else {
+              passSuits.push(suit);
+            }
+          }
+        }
+      }
+    }
+  });
+  return passSuits;
 };

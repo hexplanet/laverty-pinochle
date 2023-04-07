@@ -223,6 +223,12 @@ export const playLead = () => {
   };
 };
 
+export const playFollow = () => {
+  return {
+    type: actionTypes.PLAY_FOLLOW
+  };
+};
+
 export const userSelectPlay = (cardIndex) => {
   return {
     type: actionTypes.USER_PLAY,

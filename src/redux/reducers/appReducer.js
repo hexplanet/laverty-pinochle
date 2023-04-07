@@ -790,6 +790,39 @@ const appReducer = (state = initialState, action) => {
         winningPlay: state.tookPlay,
         gameState: 'cardToPlayPile'
       };
+    case actionTypes.PLAY_FOLLOW:
+      const nextPlayer = (state.dealToPlayer + 1)  % state.players.length;
+      if (nextPlayer === state.tookPlay) {
+        return {
+          ...state,
+          gameState: 'calculatePlayWinner'
+        };
+      }
+      if (nextPlayer === 0) {
+        const {
+          userFollowPlayerModal,
+          userFollowPromptModal,
+          userFollowPlayHands,
+        } = reducerLogic.userFollowPlay(
+          state.hands,
+          state.trumpSuit,
+          state.players,
+          state.playPile,
+          state.winningPlay,
+          state.tookPlay
+        );
+        return {
+          ...state,
+          playerModal: {...userFollowPlayerModal},
+          hands: [...userFollowPlayHands],
+          gameState: 'waitUserPlay',
+          dealToPlayer: nextPlayer,
+        }
+      }
+      return {
+        ...state,
+        dealToPlayer: nextPlayer,
+      };
     case actionTypes.USER_PLAY:
       const {
         userPlayHands,

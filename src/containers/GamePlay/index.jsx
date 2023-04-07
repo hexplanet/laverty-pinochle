@@ -190,6 +190,12 @@ function GamePlay() {
         break;
       case 'cardToPlayPile:complete':
         dispatch(appActions.resolvePlay());
+        break;
+      case 'waitToClearPlayPile':
+        setTimeout(() => {
+          dispatch(appActions.playFollow());
+        }, getRandomRange(250, 1000, 1));
+        break;
       default:
         console.log('uncovered gameState: ', gameState);
     }

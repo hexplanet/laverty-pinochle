@@ -88,7 +88,7 @@ export const getCardLocation = (id, state, xAdjust = 0, yAdjust = 0) => {
     default:
       baseLocation = state.miscDisplaySettings.playArea;
       if (playerIndex >= 0) {
-        if (state.players === 3) {
+        if (state.players.length === 3) {
           xOffset = threeHandPlayOffsets[playerIndex].x;
           yOffset = threeHandPlayOffsets[playerIndex].y;
           rotation = threeHandPlayOffsets[playerIndex].r;
@@ -460,6 +460,15 @@ export const getHandLeaderMessage = (suitLed, ledValue, suitWin, winValue, playe
   const line2 =
     (<div style={messageStyle}><b>{players[winningPlayer]}</b>&nbsp;with&nbsp;<b>{winValue}</b><span style={suitStyle}>{winSuit}</span></div>);
   return (<div>{line1}<br/>{line2}</div>);
+}
+
+export const getHandWinMessage = (suitWin, winValue, players, winningPlayer) => {
+  const winSuit = suitIconSelector(suitWin);
+  const suitStyle = {width: 24, display: 'inline-flex'};
+  const messageStyle = {display: 'inline-flex'};
+  const message =
+    (<div style={messageStyle}><b>{players[winningPlayer]}</b>&nbsp;wins&nbsp;<b>{winValue}</b><span style={suitStyle}>{winSuit}</span></div>);
+  return message;
 }
 
 export const setValidCardIndexes = (

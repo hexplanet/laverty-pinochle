@@ -186,6 +186,7 @@ function GamePlay() {
         }, getRandomRange(250, 2000, 1));
         break;
       case 'movingMeldCardsBack:complete':
+      case 'startNextPlay':
         dispatch(appActions.playLead());
         break;
       case 'cardToPlayPile:complete':
@@ -195,6 +196,14 @@ function GamePlay() {
         setTimeout(() => {
           dispatch(appActions.playFollow());
         }, getRandomRange(250, 1000, 1));
+        break;
+      case 'waitMovePlayPileToDiscard':
+        setTimeout(() => {
+          dispatch(appActions.movePlayPileToDiscard());
+        }, 2500);
+        break;
+      case 'playPileToDiscard:complete':
+        dispatch(appActions.startNextPlay());
         break;
       default:
         console.log('uncovered gameState: ', gameState);

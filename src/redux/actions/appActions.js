@@ -241,3 +241,15 @@ export const resolvePlay = () => {
     type: actionTypes.RESOLVE_PLAY
   };
 };
+
+export const movePlayPileToDiscard = () => {
+  return {
+    type: actionTypes.MOVE_PLAY_PILE_TO_DISCARD
+  };
+};
+
+export const startNextPlay = () => {
+  return {
+    type: actionTypes.START_NEXT_PLAY
+  };
+};

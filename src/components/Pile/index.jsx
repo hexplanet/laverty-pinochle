@@ -29,6 +29,7 @@ function Pile({
             value={card.value}
             shown={cardShown}
             rotation={card.rotation}
+            frontColor={card.frontColor}
             rolloverColor=''
             clickable={false}
           />

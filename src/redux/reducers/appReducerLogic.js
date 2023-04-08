@@ -21,7 +21,8 @@ import {
   getPartnerPassSuits,
   throwCardIntoMiddle,
   getBestCounter,
-  getLowestNonCount
+  getLowestNonCount,
+  getHandWinMessage
 } from '../../utils/helpers';
 
 export const playerDisplaySettingsLogic = (width, height, players) => {
@@ -1489,8 +1490,8 @@ export const computerLeadPlay = (state) => {
   let computerPlayMovingCards = [];
   const widowDiscards = [];
   if (state.tookPlay === state.tookBid) {
-    for (let i = 0; i <4; i++) {
-      widowDiscards.push(state.discardPiles[state.tookPlay][i]);
+    for (let i = 0; i <state.players.length; i++) {
+      widowDiscards.push(state.discardPiles[state.tookBid][i]);
     }
   }
   const unplayedCards = getUnplayedCards(validHand, state.playedCards, widowDiscards);
@@ -1622,8 +1623,8 @@ export const computerFollowPlay = (state, nextPlayer) => {
   const widowDiscards = [];
   const values = ['9', 'J', 'Q', 'K', '10', 'A'];
   if (nextPlayer === state.tookBid) {
-    for (let i = 0; i <4; i++) {
-      widowDiscards.push(state.discardPiles[state.tookPlay][i]);
+    for (let i = 0; i < state.players.length; i++) {
+      widowDiscards.push(state.discardPiles[state.tookBid][i]);
     }
   }
   const unplayedCards = getUnplayedCards(validHand, state.playedCards, widowDiscards);
@@ -1797,3 +1798,53 @@ export const resolvePlay = (
     resolvePlayedCards
   };
 };
+
+export const displayPlayWinner = (trumpSuit, players, playPile, winningPlay, promptModal) => {
+  const calculateWinnerPlayPile = [...playPile];
+  calculateWinnerPlayPile[winningPlay].frontColor = '#eea';
+  const winCard = calculateWinnerPlayPile[winningPlay];
+  const calculateWinnerPromptModal = {...promptModal};
+  calculateWinnerPromptModal.message = getHandWinMessage(winCard.suit , winCard.value , players, winningPlay);
+  return {
+    calculateWinnerPlayPile,
+    calculateWinnerPromptModal
+  };
+};
+export const movePlayPileToDiscard = (state) => {
+  let playToDiscardMovingCards = [];
+  let discardPile = state.winningPlay;
+  if (state.players.length === 4) {
+    if (state.winningPlay % 2 === state.tookBid % 2) {
+      discardPile = state.tookBid;
+    } else {
+      discardPile = (state.tookBid + 1) % 4;
+    }
+  }
+  for(let i = 0; i < state.players.length; i++) {
+    const sourceCardId = `P${i}`;
+    const sourceCard = getCardLocation(sourceCardId, state);
+    const targetCardId = `D${discardPile}`;
+    const targetCard = getCardLocation(targetCardId, state);
+    targetCard.rotation = targetCard.rotation + getRandomRange(-10, 10, 1);
+    const newMovingCard = {
+      id: `${sourceCardId}to${targetCardId}`,
+      keyId: `${sourceCardId}to${targetCardId}${Date.now()}`,
+      suit: state.playPile[i].suit,
+      value: state.playPile[i].value,
+      shown: false,
+      speed: 1,
+      source: sourceCard,
+      target: targetCard,
+    };
+    playToDiscardMovingCards = [...playToDiscardMovingCards, newMovingCard];
+  }
+  const playToDiscardPlayPile = [];
+  for(let i = 0; i < state.players.length; i++) {
+    playToDiscardPlayPile.push(null);
+  }
+  return {
+    playToDiscardMovingCards,
+    playToDiscardPlayPile
+  };
+}
+

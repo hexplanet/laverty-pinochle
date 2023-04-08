@@ -36,3 +36,5 @@ export const PLAY_LEAD = 'PLAY_LEAD';
 export const PLAY_FOLLOW = 'PLAY_FOLLOW';
 export const USER_PLAY = 'USER_PLAY';
 export const RESOLVE_PLAY = 'RESOLVE_PLAY';
+export const MOVE_PLAY_PILE_TO_DISCARD = 'MOVE_PLAY_PILE_TO_DISCARD';
+export const START_NEXT_PLAY = 'START_NEXT_PLAY';

@@ -6,8 +6,8 @@ import {
 
 const initialState = {
   gameState: 'init',
-  teams: ['Us', 'Them'],
-  players: ['You', 'Steven', 'Ellen', 'Jessica'],
+  teams: ['Us', 'Them', 'Jessica'],
+  players: ['You', 'Steven', 'Ellen'],
   playerDisplaySettings: [],
   discardPiles: [],
   discardDisplaySettings: [],
@@ -793,15 +793,26 @@ const appReducer = (state = initialState, action) => {
     case actionTypes.PLAY_FOLLOW:
       const nextPlayer = (state.dealToPlayer + 1)  % state.players.length;
       if (nextPlayer === state.tookPlay) {
+        const {
+          calculateWinnerPlayPile,
+          calculateWinnerPromptModal
+        } = reducerLogic.displayPlayWinner(
+          state.trumpSuit,
+          state.players,
+          state.playPile,
+          state.winningPlay,
+          state.promptModal
+        );
         return {
           ...state,
-          gameState: 'calculatePlayWinner'
+          gameState: 'waitMovePlayPileToDiscard',
+          playPile: [...calculateWinnerPlayPile],
+          promptModal: {...calculateWinnerPromptModal},
         };
       }
       if (nextPlayer === 0) {
         const {
           userFollowPlayerModal,
-          userFollowPromptModal,
           userFollowPlayHands,
         } = reducerLogic.userFollowPlay(
           state.hands,
@@ -867,6 +878,28 @@ const appReducer = (state = initialState, action) => {
         promptModal: resolvePromptModal,
         firstPlay: false,
         playedCards: [...resolvePlayedCards]
+      };
+    case actionTypes.MOVE_PLAY_PILE_TO_DISCARD:
+      const {
+        playToDiscardMovingCards,
+        playToDiscardPlayPile
+      } = reducerLogic.movePlayPileToDiscard(state);
+      return {
+        ...state,
+        gameState: 'playPileToDiscard',
+        playPile: [...playToDiscardPlayPile],
+        movingCards: [...playToDiscardMovingCards]
+      };
+    case actionTypes.START_NEXT_PLAY:
+      let nextPlayGameState = 'startNextPlay';
+      if (state.hands[0].length === 0) {
+        nextPlayGameState = 'startTallyCount';
+      }
+      return {
+        ...state,
+        gameState: nextPlayGameState,
+        tookPlay: state.winningPlay,
+        dealToPlayer: state.winningPlay
       };
     default:
         return state;

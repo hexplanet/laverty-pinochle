@@ -456,7 +456,7 @@ export const getHandLeaderMessage = (suitLed, ledValue, suitWin, winValue, playe
   const winSuit = suitIconSelector(suitWin);
   const suitStyle = {width: 24, display: 'inline-flex'};
   const messageStyle = {display: 'inline-flex'};
-  const line1 = (<div style={messageStyle}><b>{players[tookPlay]}</b>&nbsp;start&nbsp;<b>{ledValue}</b><span style={suitStyle}>{ledSuit}</span></div>);
+  const line1 = (<div style={messageStyle}><b>{players[tookPlay]}</b>&nbsp;leads&nbsp;<b>{ledValue}</b><span style={suitStyle}>{ledSuit}</span></div>);
   const line2 =
     (<div style={messageStyle}><b>{players[winningPlayer]}</b>&nbsp;with&nbsp;<b>{winValue}</b><span style={suitStyle}>{winSuit}</span></div>);
   return (<div>{line1}<br/>{line2}</div>);
@@ -577,16 +577,31 @@ export const getWinningCards = (hands, unplayedCards, offSuits, trumpSuit, tookP
 
 export const getHighestNonCount = (hand, suit, limitToNonCount = false) => {
   const nonCounterValue = ['A', '10', 'K', '9', 'J', 'Q'];
+  return getCardValueByArray(hand, suit, nonCounterValue, (limitToNonCount ? 2: -1));
+};
+
+export const getLowestNonCount = (hand, suit, limitToNonCount = false) => {
+  const lowestCounterValue = ['A', '10', 'K', 'Q', 'J', '9'];
+  return getCardValueByArray(hand, suit, lowestCounterValue, (limitToNonCount ? 2: -1));
+};
+export const getBestCounter = (hand, suit, limitToCount = false) => {
+  const counterValue = ['A', 'Q', 'J', '9', '10', 'K'];
+  return getCardValueByArray(hand, suit, counterValue, (limitToCount ? 3 : -1));
+};
+
+export const getCardValueByArray = (hand, suit, valueArray, arraylimit = -1) => {
   let bestIndex = -1;
+  let selectedSuit = '';
   hand.forEach(card => {
-    if (card.suit === suit) {
-      const valueIndex = nonCounterValue.indexOf(card.value);
-      if (valueIndex > bestIndex && (!limitToNonCount || valueIndex > 2)) {
+    if (card.suit === suit || suit === '') {
+      const valueIndex = valueArray.indexOf(card.value);
+      if (valueIndex > bestIndex && valueIndex > arraylimit) {
         bestIndex = valueIndex;
+        selectedSuit = card.suit;
       }
     }
   });
-  return (bestIndex === -1) ? null : {suit, value: nonCounterValue[bestIndex]};
+  return (bestIndex === -1) ? null : {suit: selectedSuit, value: valueArray[bestIndex]};
 };
 
 export const getTrumpPullingSuits = (offSuits, trumpSuit, tookPlay) => {
@@ -632,3 +647,23 @@ export const getPartnerPassSuits = (offSuits, trumpSuit, tookPlay, unplayedCards
   });
   return passSuits;
 };
+
+export const throwCardIntoMiddle = (state, player, selectedIndex) => {
+  const selectedCard = state.hands[player][selectedIndex];
+  const sourceCardId = `H${player}${selectedIndex}`;
+  const sourceCard = getCardLocation(sourceCardId, state);
+  sourceCard.zoom = sourceCard.zoom * 2;
+  const targetCardId = `P${player}`;
+  const targetCard = getCardLocation(targetCardId, state);
+  const newMovingCard = {
+    id: `${sourceCardId}to${targetCardId}`,
+    keyId: `${sourceCardId}to${targetCardId}${Date.now()}`,
+    suit: selectedCard.suit,
+    value: selectedCard.value,
+    shown: true,
+    speed: 1,
+    source: sourceCard,
+    target: targetCard,
+  };
+  return newMovingCard;
+}

@@ -18,7 +18,10 @@ import {
   getHighestNonCount,
   getHandLeaderMessage,
   getTrumpPullingSuits,
-  getPartnerPassSuits
+  getPartnerPassSuits,
+  throwCardIntoMiddle,
+  getBestCounter,
+  getLowestNonCount
 } from '../../utils/helpers';
 
 export const playerDisplaySettingsLogic = (width, height, players) => {
@@ -1597,30 +1600,154 @@ export const computerLeadPlay = (state) => {
   if (playCard !== null) {
     const selectedIndex = validHand.findIndex(card => playCard.suit === card.suit && playCard.value === card.value);
     if (selectedIndex > -1) {
-      const selectedCard = state.hands[state.tookPlay][selectedIndex];
-      const sourceCardId = `H${state.tookPlay}${selectedIndex}`;
-      const sourceCard = getCardLocation(sourceCardId, state);
-      sourceCard.zoom = sourceCard.zoom * 2;
-      const targetCardId = `P${state.tookPlay}`;
-      const targetCard = getCardLocation(targetCardId, state);
-      const newMovingCard = {
-        id: `${sourceCardId}to${targetCardId}`,
-        keyId: `${sourceCardId}to${targetCardId}${Date.now()}`,
-        suit: selectedCard.suit,
-        value: selectedCard.value,
-        shown: true,
-        speed: 1,
-        source: sourceCard,
-        target: targetCard,
-      };
-      computerPlayMovingCards = [newMovingCard];
-      const userHand = computerLeadPlayHands[state.tookPlay];
-      userHand.splice(selectedIndex, 1);
+      computerPlayMovingCards = [throwCardIntoMiddle(state, state.tookPlay, selectedIndex)];
+      validHand.splice(selectedIndex, 1);
     }
   }
   return {
     computerLeadPlayHands,
     computerPlayMovingCards
+  };
+};
+
+export const computerFollowPlay = (state, nextPlayer) => {
+  const computerFollowHands = [...state.hands];
+  const validHand = computerFollowHands[nextPlayer];
+  let computerFollowMovingCards = [];
+  const ledCard = state.playPile[state.tookPlay];
+  const ledHand = validHand.filter(card => card.suit === ledCard.suit);
+  const trumpHand = validHand.filter(card => card.suit === state.trumpSuit);
+  const winningCard = state.playPile[state.winningPlay];
+  const beenTrumped = (winningCard.suit === state.trumpSuit && ledCard.suit !== state.trumpSuit);
+  const widowDiscards = [];
+  const values = ['9', 'J', 'Q', 'K', '10', 'A'];
+  if (nextPlayer === state.tookBid) {
+    for (let i = 0; i <4; i++) {
+      widowDiscards.push(state.discardPiles[state.tookPlay][i]);
+    }
+  }
+  const unplayedCards = getUnplayedCards(validHand, state.playedCards, widowDiscards);
+  const highLedCard = unplayedCards.find(card => card.suit === ledCard.suit);
+  const highLedIndex = highLedCard ? values.indexOf(highLedCard.value) : -1;
+  const blocker = ((nextPlayer + 1) % state.players.length);
+  const blockerPlayer = (blocker === state.tookPlay) ? -1 : blocker;
+  let likelyBlockerWin = false;
+  if (blockerPlayer > -1) {
+    if (state.offSuits[blockerPlayer].indexOf(ledCard.suit) > -1) {
+      if (state.offSuits[blockerPlayer].indexOf(state.trumpSuit) === -1) {
+        if (beenTrumped) {
+          if (values.indexOf(winningCard.value) < highLedIndex) {
+            likelyBlockerWin = true;
+          }
+        } else {
+          likelyBlockerWin = true;
+        }
+      }
+    } else {
+      if (values.indexOf(winningCard.value) < highLedIndex) {
+        likelyBlockerWin = true;
+      }
+    }
+  }
+  const friendlyPlayer = (state.players.length === 4) ? (nextPlayer + 2) % 4 : -1;
+  const friendlyWinner = (state.winningPlay === friendlyPlayer);
+  const friendlySeat =
+    (friendlyPlayer > -1 && friendlyPlayer !== state.tookPlay && ((nextPlayer + 1) % 4) !== state.tookPlayer)
+      ? friendlyPlayer : -1;
+  if (friendlySeat > -1) {
+    if (state.offSuits[friendlyPlayer].indexOf(ledCard.suit) > -1) {
+      if (state.offSuits[friendlyPlayer].indexOf(state.trumpSuit) === -1) {
+        if (beenTrumped) {
+          if (values.indexOf(winningCard.value) < highLedIndex) {
+            likelyBlockerWin = false;
+          }
+        } else {
+          likelyBlockerWin = false;
+        }
+      }
+    } else {
+      if (values.indexOf(winningCard.value) < highLedIndex) {
+        likelyBlockerWin = false;
+      }
+    }
+  }
+  let playCard = null;
+  if (ledHand.length === 0) {
+    if (trumpHand.length === 0) {
+      // Play Off
+      if (friendlyWinner || !likelyBlockerWin) {
+        playCard = getBestCounter(validHand, '');
+      }
+      if (playCard === null) {
+        playCard = getLowestNonCount(validHand, '');
+      }
+    } else {
+      // Trump Play
+      if (beenTrumped) {
+        validHand.forEach(card => {
+          if (card.suit === state.trumpSuit) {
+            const valueIndex = values.indexOf(card.value);
+            if (valueIndex > values.indexOf(winningCard.value)) {
+              if (playCard === null || values.indexOf(playCard.value) > valueIndex) {
+                playCard = {suit: state.trumpSuit, value: card.value};
+              }
+            }
+          }
+        });
+      }
+      if (playCard === null) {
+        playCard = getLowestNonCount(validHand, state.trumpSuit);
+      }
+    }
+  } else {
+    if (ledCard.suit === state.trumpSuit) {
+      validHand.forEach(card => {
+        if (card.suit === state.trumpSuit) {
+          const valueIndex = values.indexOf(card.value);
+          if (valueIndex > values.indexOf(winningCard.value)) {
+            if (playCard === null || values.indexOf(playCard.value) > valueIndex) {
+              playCard = {suit: state.trumpSuit, value: card.value};
+            }
+          }
+        }
+      });
+    }
+    if (playCard === null) {
+      const winningCards = getWinningCards(
+        state.hands,
+        unplayedCards,
+        state.offSuits,
+        state.trumpSuit,
+        nextPlayer,
+        false
+      );
+      const winCard = winningCards.find(card => card.suit === ledCard.suit);
+      if (winCard && !beenTrumped) {
+        if (values.indexOf(winCard.value) > values.indexOf(winningCard.value)) {
+          // Projected Winning Card
+          playCard = winCard;
+        }
+      }
+    }
+    if (playCard === null) {
+      // All losers from here
+      if (friendlyWinner && !likelyBlockerWin) {
+        playCard = getBestCounter(validHand, ledCard.suit);
+      } else {
+        playCard = getLowestNonCount(validHand, ledCard.suit);
+      }
+    }
+  }
+  if (playCard !== null) {
+    const selectedIndex = validHand.findIndex(card => playCard.suit === card.suit && playCard.value === card.value);
+    if (selectedIndex > -1) {
+      computerFollowMovingCards = [throwCardIntoMiddle(state, nextPlayer, selectedIndex)];
+      validHand.splice(selectedIndex, 1);
+    }
+  }
+  return {
+    computerFollowHands,
+    computerFollowMovingCards
   };
 };
 
@@ -1654,7 +1781,7 @@ export const resolvePlay = (
     playPile[tookPlay].suit,
     playPile[tookPlay].value,
     playPile[resolveWinningPlay].suit,
-    playPile[tookPlay].value,
+    playPile[resolveWinningPlay].value,
     players,
     tookPlay,
     resolveWinningPlay

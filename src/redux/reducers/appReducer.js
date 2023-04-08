@@ -819,8 +819,15 @@ const appReducer = (state = initialState, action) => {
           dealToPlayer: nextPlayer,
         }
       }
+      const {
+        computerFollowHands,
+        computerFollowMovingCards
+      } = reducerLogic.computerFollowPlay(state, nextPlayer);
       return {
         ...state,
+        hands: [...computerFollowHands],
+        movingCards: [...computerFollowMovingCards],
+        gameState: 'cardToPlayPile',
         dealToPlayer: nextPlayer,
       };
     case actionTypes.USER_PLAY:

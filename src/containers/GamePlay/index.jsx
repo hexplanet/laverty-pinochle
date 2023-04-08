@@ -319,7 +319,7 @@ function GamePlay() {
             zoom={playerDisplaySettings[index].zoom}
             cards={newHand}
             fanOut={handFanOut}
-            shown={showHands[index]}
+            shown={/*showHands[index]*/true}
             cardClicked={handleClickedCard}
           />
         );

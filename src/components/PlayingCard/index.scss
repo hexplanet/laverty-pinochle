@@ -2,6 +2,7 @@
   position: absolute;
   width: 100px;
   height: 140px;
+  pointer-events: none;
   .card-container {
     position: relative;
     left: -50px;
@@ -14,6 +15,7 @@
         height: 140px;
         &.clickable {
           cursor: pointer;
+          pointer-events: all;
         }
         .top-left-suit {
           position: absolute;

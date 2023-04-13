@@ -27,6 +27,7 @@ function Pile({
             yLocation={110 - (hasHeight ? (index * 0.5) : 0) + (card.yOffset ? card.yOffset : 0)}
             suit={card.suit}
             value={card.value}
+            frontColor={card.frontColor}
             shown={cardShown}
             rotation={card.rotation}
             frontColor={card.frontColor}

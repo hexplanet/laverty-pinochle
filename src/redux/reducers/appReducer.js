@@ -3,11 +3,12 @@ import * as reducerLogic from './appReducerLogic';
 import {
   generalModalData,
 } from '../../utils/helpers';
+import {setGameValuesForNewHand} from "./appReducerLogic";
 
 const initialState = {
   gameState: 'init',
-  teams: ['Us', 'Them', 'Jessica'],
-  players: ['You', 'Steven', 'Ellen'],
+  teams: ['Us', 'Them'],
+  players: ['You', 'Steven', 'Ellen', 'Jessica'],
   playerDisplaySettings: [],
   discardPiles: [],
   discardDisplaySettings: [],
@@ -158,7 +159,8 @@ const appReducer = (state = initialState, action) => {
         toDealerMelds,
         toDealerDiscards,
         toDealerHands,
-        toDealerPlayPile
+        toDealerPlayPile,
+        toDealerBidModels
       } = reducerLogic.passDeckToDealer(state);
       return {
         ...state,
@@ -167,6 +169,7 @@ const appReducer = (state = initialState, action) => {
         discardPiles: toDealerDiscards,
         hands: toDealerHands,
         playPile: toDealerPlayPile,
+        bidModals: [...toDealerBidModels]
       };
     case actionTypes.PRE_DEAL:
       const {
@@ -204,9 +207,27 @@ const appReducer = (state = initialState, action) => {
         bidOffset: 21,
       };
     case actionTypes.SET_HAND_FAN_OUT:
+/* TODO: Remove testing code
+      const testHands = state.hands;
+      testHands[2] = [
+        {suit: "S", value: "A"},
+        {suit: "S", value: "10"},
+        {suit: "S", value: "K"},
+        {suit: "S", value: "Q"},
+        {suit: "S", value: "J"},
+        {suit: "S", value: "9"},
+        {suit: "S", value: "9"},
+        {suit: "C", value: "A"},
+        {suit: "D", value: "A"},
+        {suit: "H", value: "A"},
+      ];
+*/
       return {
         ...state,
-        handFanOut: action.fanOut,
+        handFanOut: action.fanOut,/* TODO: Remove testing code
+
+        hands: [...testHands]
+        */
       };
     case actionTypes.CHECK_FOR_NINES:
       const {
@@ -757,7 +778,38 @@ const appReducer = (state = initialState, action) => {
         bidModals: [...startBidModals],
         melds: [...startMelds]
       };
+    case actionTypes.MOVE_REST_TO_DISCARD:
+      const {
+        restDiscardMovingCards,
+        restDiscardShowHands,
+        restDiscardHands
+      } = reducerLogic.moveRestToDiscardPile(state);
+      return {
+        ...state,
+        movingCards: [...restDiscardMovingCards],
+        showHands: [...restDiscardShowHands],
+        hands: [...restDiscardHands],
+        gameState: 'restMoveToDiscard'
+      };
     case actionTypes.PLAY_LEAD:
+      const {
+        gotRestGameState,
+        gotRestPlayerModal,
+        gotRestPromptModal,
+        gotRestShowHands,
+        gotRestWinningPlay
+      } = reducerLogic.gotTheRest(state);
+      if (gotRestGameState !== '') {
+        return {
+          ...state,
+          playerModal: {...gotRestPlayerModal},
+          promptModal: {...gotRestPromptModal},
+          winningPlay: gotRestWinningPlay,
+          tookPlay: gotRestWinningPlay,
+          gameState: gotRestGameState,
+          showHands: [...gotRestShowHands],
+        };
+      }
       if (state.dealToPlayer === 0) {
         const {
           userLeadPlayerModal,
@@ -795,19 +847,23 @@ const appReducer = (state = initialState, action) => {
       if (nextPlayer === state.tookPlay) {
         const {
           calculateWinnerPlayPile,
-          calculateWinnerPromptModal
+          calculateWinnerPromptModal,
+          calculateWinnerOffSuits,
         } = reducerLogic.displayPlayWinner(
           state.trumpSuit,
           state.players,
           state.playPile,
           state.winningPlay,
-          state.promptModal
+          state.promptModal,
+          state.tookPlay,
+          state.offSuits
         );
         return {
           ...state,
           gameState: 'waitMovePlayPileToDiscard',
           playPile: [...calculateWinnerPlayPile],
           promptModal: {...calculateWinnerPromptModal},
+          offSuits: [...calculateWinnerOffSuits]
         };
       }
       if (nextPlayer === 0) {
@@ -891,15 +947,96 @@ const appReducer = (state = initialState, action) => {
         movingCards: [...playToDiscardMovingCards]
       };
     case actionTypes.START_NEXT_PLAY:
-      let nextPlayGameState = 'startNextPlay';
-      if (state.hands[0].length === 0) {
-        nextPlayGameState = 'startTallyCount';
-      }
+      const {
+        nextPlayGameState,
+        nextPlayPromptMessage,
+        nextPlayDealToPlayer
+      } = reducerLogic.setUpNextPlay(
+        state.hands,
+        state.promptModal,
+        state.tookBid,
+        state.winningPlay
+      );
       return {
         ...state,
         gameState: nextPlayGameState,
         tookPlay: state.winningPlay,
-        dealToPlayer: state.winningPlay
+        dealToPlayer: nextPlayDealToPlayer,
+        promptModal: {...nextPlayPromptMessage},
+      };
+    case actionTypes.TALLY_COUNTS:
+      const {
+        tallyMovingCards,
+        tallyDiscardPiles,
+        tallyDealToPlayer,
+        tallyGameState
+      } = reducerLogic.discardToMeldTally(state);
+      return {
+        ...state,
+        gameState: tallyGameState,
+        dealToPlayer: tallyDealToPlayer,
+        movingCards: [...tallyMovingCards],
+        discardPiles: [...tallyDiscardPiles],
+      };
+    case actionTypes.ADD_COUNT_TO_TALLY:
+      const {
+        addCountBidModals
+      } = reducerLogic.addCountToTally(
+        state.bidModals,
+        state.melds,
+        state.tookPlay,
+        state.dealToPlayer
+      );
+      return {
+        ...state,
+        gameState: 'tallyCounts',
+        bidModals: [...addCountBidModals]
+      };
+    case actionTypes.ADD_COUNT_TO_SCORE:
+      const {
+        addScorePlayScore,
+        addScorePlayerModal,
+        addScorePromptModal,
+        addScoreGameWon
+      } = reducerLogic.addCountToScore(
+        state.teams,
+        state.players,
+        state.playScore,
+        state.melds,
+        state.bidModals,
+        state.tookBid,
+        state.bidAmount
+      );
+      const addScoreNewHand = reducerLogic.setGameValuesForNewHand(state.players);
+      return {
+        ...state,
+        playScore: [...addScorePlayScore],
+        playerModal: {...addScorePlayerModal},
+        promptModal: {...addScorePromptModal},
+        gameWon: addScoreGameWon,
+        ...addScoreNewHand
+      };
+    case actionTypes.END_HAND:
+      const {
+        endHandGameState,
+        endHandPlayerModal,
+        endHandPromptModal,
+        endHandDealer,
+        endHandGameWon
+      } = reducerLogic.resolveEndHand(
+        state.teams,
+        state.players,
+        state.playScore,
+        state.tookBid,
+        state.dealer
+      );
+      return {
+        ...state,
+        gameState: endHandGameState,
+        playerModal: {...endHandPlayerModal},
+        promptModal: {...endHandPromptModal},
+        dealer: endHandDealer,
+        gameWon: endHandGameWon
       };
     default:
         return state;

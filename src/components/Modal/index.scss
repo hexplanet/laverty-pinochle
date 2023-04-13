@@ -12,9 +12,11 @@
   }
   .box-container {
     position: absolute;
+    pointer-events: none;
     .box-transition {
       position: absolute;
       .modal-box {
+        pointer-events: all;
         -webkit-user-select: none; /* Safari */
         -ms-user-select: none; /* IE 10 and IE 11 */
         user-select: none; /* Standard syntax */

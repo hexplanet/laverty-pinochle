@@ -44,6 +44,7 @@ function GamePlay() {
   const [gamePlayerModal, setGamePlayerModal] = useState([]);
   const [gameMovingCard, setGameMovingCard] = useState([]);
   const [actionTimer, setActionTimer] = useState(null);
+  const [expandScoreCard, setExpandScoreCard] = useState(false);
   const updateDimensions = () => {
     if (window.innerWidth !== windowWidth || window.innerHeight !== windowHeight) {
       setWindowWidth(window.innerWidth);
@@ -153,7 +154,6 @@ function GamePlay() {
         dispatch(appActions.decideThrowHand());
         break;
       case 'computerWantsToThrowHand':
-
         dispatch(appActions.agreeThrowHand());
         break;
       case 'throwHandDisagree':
@@ -202,15 +202,24 @@ function GamePlay() {
           dispatch(appActions.movePlayPileToDiscard());
         }, 2500);
         break;
+      case 'restMoveToDiscard:complete':
       case 'playPileToDiscard:complete':
         dispatch(appActions.startNextPlay());
         break;
+      case 'tallyCounts':
+      case 'nextTally':
+        dispatch(appActions.tallyCounts());
+        break;
+      case 'moveDiscardToMeldTally:complete':
+        dispatch(appActions.addCountToTally());
+        break;
+      case 'doneCounting':
+        dispatch(appActions.addCountToScore())
+        break;
       default:
-        console.log('uncovered gameState: ', gameState);
     }
   }, [gameState]);
   const handleModalInput = (type, event, message) => {
-    console.log(type, event, message);
     switch(message) {
       case 'ninesUserRedeal':
         if (hands.length === 4) {
@@ -271,6 +280,14 @@ function GamePlay() {
         dispatch(appActions.clearPlayerModal());
         dispatch(appActions.storeGameState('waitRemoveDiscards:complete'));
         break;
+      case 'endOfHand':
+        dispatch(appActions.clearPlayerModal());
+        dispatch(appActions.endHand());
+        break;
+      case 'winRestContinue':
+        dispatch(appActions.clearPlayerModal());
+        dispatch(appActions.moveRestToDiscard());
+        break;
       default:
         if (message.substr(0,4) === 'bid_') {
           dispatch(appActions.getUserBid(message));
@@ -288,6 +305,10 @@ function GamePlay() {
     if (gameState === 'waitUserPlay') {
       dispatch(appActions.userSelectPlay(index));
     }
+  };
+  const handleScoreCardCLick = () => {
+    console.log(expandScoreCard);
+    setExpandScoreCard(!expandScoreCard);
   };
   const applyObjectToModal = (location, data, key) => {
     return (
@@ -328,7 +349,7 @@ function GamePlay() {
             zoom={playerDisplaySettings[index].zoom}
             cards={newHand}
             fanOut={handFanOut}
-            shown={/*showHands[index]*/true}
+            shown={showHands[index]/*true TODO: Remove Testing Code */}
             cardClicked={handleClickedCard}
           />
         );
@@ -336,7 +357,6 @@ function GamePlay() {
     });
     setGameHands([...newGameHands]);
   }, [hands, playerDisplaySettings, showHands, handFanOut]);
-
   useEffect(() => {
     const newGameDiscards = [];
     discardPiles.forEach((discard, index) => {
@@ -374,7 +394,6 @@ function GamePlay() {
     });
     setGameMelds(newGameMelds);
   }, [melds, meldDisplaySettings]);
-
   useEffect(() => {
     const newGamePlayArea = [];
     if (miscDisplaySettings.playArea.x !== undefined) {
@@ -403,11 +422,13 @@ function GamePlay() {
           teams={teams}
           scores={playScore}
           won={gameWon}
+          handleClick={handleScoreCardCLick}
+          hasBlocker={expandScoreCard}
         />
       );
     }
     setScorePad(newGameScorePad);
-  }, [teams, playScore, gameWon, miscDisplaySettings]);
+  }, [teams, playScore, gameWon, miscDisplaySettings, expandScoreCard]);
   useEffect(() => {
     const newGamePlayerModal = [];
     for (let i = 0; i < hands.length; i++) {
@@ -453,6 +474,7 @@ function GamePlay() {
           value={movingCard.value}
           shown={movingCard.shown}
           speed={movingCard.speed}
+          frontColor={movingCard.frontColor}
           travelTime={movingCard.travelTime}
           source={movingCard.source}
           target={movingCard.target}

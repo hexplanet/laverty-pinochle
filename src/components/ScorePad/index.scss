@@ -11,6 +11,8 @@
     height: 800px;
     left: -300px;
     top: -400px;
+    padding: 0;
+    cursor: pointer;
     .score-pad-container {
       position: absolute;
       left: 0;
@@ -118,5 +120,21 @@
         }
       }
     }
+  }
+}
+
+.lavpin-global-score-pad {
+  .scorepad-blocker {
+    position: fixed;
+    left: 0;
+    top: 0;
+    cursor: default;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, .75);
+    z-index: 10000;
+  }
+  .lavpin-score-pad {
+    z-index: 10001;
   }
 }

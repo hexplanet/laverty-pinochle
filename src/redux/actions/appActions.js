@@ -253,3 +253,33 @@ export const startNextPlay = () => {
     type: actionTypes.START_NEXT_PLAY
   };
 };
+
+export const tallyCounts = () => {
+  return {
+    type: actionTypes.TALLY_COUNTS
+  };
+};
+
+export const addCountToTally = () => {
+  return {
+    type: actionTypes.ADD_COUNT_TO_TALLY
+  };
+};
+
+export const addCountToScore = () => {
+  return {
+    type: actionTypes.ADD_COUNT_TO_SCORE
+  };
+};
+
+export const endHand = () => {
+  return {
+    type: actionTypes.END_HAND
+  };
+};
+
+export const moveRestToDiscard = () => {
+  return {
+    type: actionTypes.MOVE_REST_TO_DISCARD
+  };
+}

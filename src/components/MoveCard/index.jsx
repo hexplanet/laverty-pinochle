@@ -16,6 +16,7 @@ function MoveCard({
   source,
   target,
   movementDone,
+  frontColor
   }) {
   const [location, setLocation] = useState({
     left: `${source.x}px`,
@@ -32,6 +33,9 @@ function MoveCard({
   if (speed > 0) {
     const distance = Math.sqrt((xDifference * xDifference) + (yDifference * yDifference));
     timeEnd = (distance / speed);
+    if (travelTime > 0 && timeEnd < travelTime) {
+      timeEnd = travelTime;
+    }
   }
   const rotationDifference = target.rotation - source.rotation;
   const zoomDifference = target.zoom - source.zoom;
@@ -69,6 +73,7 @@ function MoveCard({
         zoom={zoomNow}
         rolloverColor=''
         clickable={false}
+        frontColor={frontColor}
       />
     </div>
   );
@@ -87,6 +92,7 @@ MoveCard.propTypes = {
   source: PropTypes.object.isRequired,
   target: PropTypes.object.isRequired,
   movementDone: PropTypes.func.isRequired,
+  frontColor: PropTypes.string,
 };
 
 MoveCard.defaultProps = {
@@ -98,6 +104,7 @@ MoveCard.defaultProps = {
   speed: 1,
   travelTime: 0,
   zLocation: 0,
+  frontColor: '#eee',
 };
 
 export default MoveCard;

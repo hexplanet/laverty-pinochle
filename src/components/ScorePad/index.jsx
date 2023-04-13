@@ -6,11 +6,12 @@ import RuledPaper from "./svg/RuledPaper";
 function ScorePad({
   xLocation,
   yLocation,
-  zLocation,
   zoom,
   teams,
   won,
   scores,
+  handleClick,
+  hasBlocker
 }) {
   const scoreElements = [];
   useMemo(() => {
@@ -50,22 +51,46 @@ function ScorePad({
     });
     return scoreElements;
   }, [teams, won, scores, scoreElements]);
+  const blockAll = (event) => {
+    event.stopPropagation();
+  }
   const location = {
     left: `${xLocation}px`,
-    top: `${yLocation}px`,
-    zIndex: zLocation,
+    top: `${yLocation}px`
+  };
+  const blockedLocation = {
+    left: '50%',
+    top: '50%'
   };
   const transformStyle = {
     transform: `scale(${zoom/100})`,
   };
+  const blockedTransformStyle = {
+    transform: `scale(${(zoom * 4)/100})`,
+  };
+  if (hasBlocker) {
+    return (
+      <div className='lavpin-global-score-pad'>
+        <button className='scorepad-blocker' onClick={blockAll} />
+        <div className='lavpin-score-pad' style={blockedLocation}>
+          <button onClick={handleClick} className={'score-pad-transform'} style={blockedTransformStyle}>
+            <RuledPaper columns = { teams.length } />
+            <div className='score-pad-container'>
+              {scoreElements}
+            </div>
+          </button>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className='lavpin-score-pad' style={location}>
-      <div className={'score-pad-transform'} style={transformStyle}>
+      <button onClick={handleClick} className={'score-pad-transform'} style={transformStyle}>
         <RuledPaper columns = { teams.length } />
         <div className='score-pad-container'>
           {scoreElements}
         </div>
-      </div>
+      </button>
     </div>
   );
 }
@@ -73,19 +98,21 @@ function ScorePad({
 ScorePad.propTypes = {
   xLocation: PropTypes.number,
   yLocation: PropTypes.number,
-  zLocation: PropTypes.number,
   zoom: PropTypes.number,
   teams: PropTypes.array.isRequired,
   won: PropTypes.string,
   scores: PropTypes.array.isRequired,
+  handleClick: PropTypes.func,
+  hasBlocker: PropTypes.bool,
 };
 
 ScorePad.defaultProps = {
   xLocation: 0,
   yLocation: 0,
-  zLocation: 0,
   zoom: 100,
   won: '',
+  handleClick: () => {},
+  hasBlocker: false
 };
 
 export default ScorePad;

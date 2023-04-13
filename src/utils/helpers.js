@@ -115,8 +115,13 @@ export const getCardLocation = (id, state, xAdjust = 0, yAdjust = 0) => {
 };
 
 export const getRandomRange = (min, max, step) => {
-  const range = (max - min) * (step / 1);
-  const randomNumber = Math.floor(Math.random() * range);
+  if (min === max) {
+    return min;
+  }
+  const range = ((max - min) + 1) * (step / 1);
+  let randomNumber = Math.floor(Math.random() * range);
+  if (randomNumber < min) { randomNumber = min; }
+  if (randomNumber > max) { randomNumber = max; }
   return (min + (randomNumber * step));
 };
 
@@ -144,6 +149,7 @@ export const createLandingCard = (stoppedCard, objectType, playerIndex, subIndex
     returnedCard.yOffset = getRandomRange(-8, 8, 1);
     returnedCard.rotation = getRandomRange(-10, 10, 1);
   }
+  returnedCard.frontColor = stoppedCard.frontColor;
   return returnedCard;
 };
 
@@ -676,3 +682,36 @@ export const throwCardIntoMiddle = (state, player, selectedIndex) => {
   };
   return newMovingCard;
 }
+
+export const getWinner = (playScore, tookBid) => {
+  const scores = [];
+  playScore.forEach(teamScore => {
+    scores.push(Number(teamScore[teamScore.length -1].score));
+  });
+  const winners = [];
+  let won = -1;
+  let highest = 0;
+  scores.forEach((score, scoreIndex) => {
+    if (score >= 120) {
+      winners.push(scoreIndex);
+      if (scoreIndex === tookBid) {
+        won = scoreIndex;
+      }
+      if (score > highest) {
+        highest = score;
+      }
+    }
+  });
+  if (won === -1 && winners.length > 0) {
+    if (winners.length === 2) {
+      if (winners[0] > winners[1]) {
+        won = winners[0];
+      } else if (winners[1] > winners[0]) {
+        won = winners[1];
+      }
+    } else {
+      won = winners[0];
+    }
+  }
+  return won;
+};

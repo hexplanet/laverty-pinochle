@@ -63,6 +63,28 @@ function GamePlay() {
     ));
     return () => window.removeEventListener("resize", updateDimensions);
   }, [dispatch]);
+
+  const timedDelay = (howLong, completionFunction) => {
+    const newTimeout = setTimeout(tableClicked, howLong);
+    window.delayWait = completionFunction;
+    window.delayWaitTimeout = newTimeout;
+  };
+  const tableClicked = (event) => {
+    if (window.delayWaitTimeout !== null) {
+      clearTimeout(window.delayWaitTimeout);
+      window.delayWaitTimeout = null;
+    }
+    if (window.delayWait !== null) {
+      (window.delayWait)();
+       window.delayWait = null;
+    }
+  };
+  useEffect(() => {
+    window.delayWaitTimeout = null;
+    window.delayWait = null;
+    window.addEventListener("click", tableClicked);
+    return () => window.removeEventListener("click", tableClicked);
+  }, []);
   useEffect(() => {
     switch(gameState) {
       case 'init':
@@ -131,9 +153,9 @@ function GamePlay() {
         break;
       case 'computerBid':
         dispatch(appActions.storeGameState('waitingOnBid'));
-        setTimeout(() => {
+        timedDelay(getRandomRange(250, 2000, 1), () => {
           dispatch(appActions.resolveComputerBid());
-        }, getRandomRange(250, 2000, 1));
+        });
         break;
       case 'userBid':
         dispatch(appActions.getUserBid());
@@ -181,9 +203,9 @@ function GamePlay() {
         dispatch(appActions.displayMeld());
         break;
       case 'meldDelay':
-        setTimeout(() => {
+        timedDelay(getRandomRange(250, 2000, 1), () => {
           dispatch(appActions.nextMeld());
-        }, getRandomRange(250, 2000, 1));
+        });
         break;
       case 'movingMeldCardsBack:complete':
       case 'startNextPlay':
@@ -193,14 +215,14 @@ function GamePlay() {
         dispatch(appActions.resolvePlay());
         break;
       case 'waitToClearPlayPile':
-        setTimeout(() => {
+        timedDelay(getRandomRange(250, 1000, 1), () => {
           dispatch(appActions.playFollow());
-        }, getRandomRange(250, 1000, 1));
+        });
         break;
       case 'waitMovePlayPileToDiscard':
-        setTimeout(() => {
+        timedDelay(2500, () => {
           dispatch(appActions.movePlayPileToDiscard());
-        }, 2500);
+        });
         break;
       case 'restMoveToDiscard:complete':
       case 'playPileToDiscard:complete':
@@ -307,7 +329,6 @@ function GamePlay() {
     }
   };
   const handleScoreCardCLick = () => {
-    console.log(expandScoreCard);
     setExpandScoreCard(!expandScoreCard);
   };
   const applyObjectToModal = (location, data, key) => {
@@ -349,7 +370,7 @@ function GamePlay() {
             zoom={playerDisplaySettings[index].zoom}
             cards={newHand}
             fanOut={handFanOut}
-            shown={showHands[index]/*true TODO: Remove Testing Code */}
+            shown={showHands[index]}
             cardClicked={handleClickedCard}
           />
         );

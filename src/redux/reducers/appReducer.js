@@ -207,27 +207,9 @@ const appReducer = (state = initialState, action) => {
         bidOffset: 21,
       };
     case actionTypes.SET_HAND_FAN_OUT:
-/* TODO: Remove testing code
-      const testHands = state.hands;
-      testHands[2] = [
-        {suit: "S", value: "A"},
-        {suit: "S", value: "10"},
-        {suit: "S", value: "K"},
-        {suit: "S", value: "Q"},
-        {suit: "S", value: "J"},
-        {suit: "S", value: "9"},
-        {suit: "S", value: "9"},
-        {suit: "C", value: "A"},
-        {suit: "D", value: "A"},
-        {suit: "H", value: "A"},
-      ];
-*/
       return {
         ...state,
-        handFanOut: action.fanOut,/* TODO: Remove testing code
-
-        hands: [...testHands]
-        */
+        handFanOut: action.fanOut,
       };
     case actionTypes.CHECK_FOR_NINES:
       const {

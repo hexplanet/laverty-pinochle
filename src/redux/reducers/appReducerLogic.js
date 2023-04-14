@@ -1618,7 +1618,7 @@ export const computerLeadPlay = (state) => {
     const trumpInHand = validHand.filter(card => card.suit === state.trumpSuit);
     const trumpWin = winningCards.filter(card => card.suit === state.trumpSuit);
     if (trumpWin.length === 1) {
-      if (trumpLeft < trumpInHand && trumpLeft > 0 ) {
+      if (trumpLeft < trumpInHand && trumpInHand > validHand.length + 2 && trumpLeft > 0 ) {
         // Control Trump Cards
         playCard = trumpWin[0];
       }
@@ -1763,7 +1763,7 @@ export const computerFollowPlay = (state, nextPlayer) => {
   const friendlyPlayer = (state.players.length === 4) ? (nextPlayer + 2) % 4 : -1;
   const friendlyWinner = (state.winningPlay === friendlyPlayer);
   const friendlySeat =
-    (friendlyPlayer > -1 && friendlyPlayer !== state.tookPlay && ((nextPlayer + 1) % 4) !== state.tookPlayer)
+    (friendlyPlayer > -1 && friendlyPlayer !== state.tookPlay && ((nextPlayer + 1) % 4) !== state.tookPlay)
       ? friendlyPlayer : -1;
   if (friendlySeat > -1) {
     if (state.offSuits[friendlyPlayer].indexOf(ledCard.suit) > -1) {
@@ -1786,7 +1786,8 @@ export const computerFollowPlay = (state, nextPlayer) => {
   if (ledHand.length === 0) {
     if (trumpHand.length === 0) {
       // Play Off
-      if (friendlyWinner || !likelyBlockerWin) {
+      console.log({nextPlayer, friendlyWinner, likelyBlockerWin});
+      if (friendlyWinner && !likelyBlockerWin) {
         playCard = getBestCounter(validHand, '');
       }
       if (playCard === null) {

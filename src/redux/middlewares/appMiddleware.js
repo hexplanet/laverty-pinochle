@@ -1,4 +1,4 @@
-import * as actionTypes from '../actions/appActionTypes';
+import * as actionTypes from '../actions/gameActionTypes';
 const appMiddleware =
   ({dispatch, getState}) =>
     (next) =>

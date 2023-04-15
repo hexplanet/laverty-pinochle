@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import CardTable from '../CardTable';
 import { useDispatch, useSelector } from "react-redux";
-import * as appActions from '../../redux/actions/appActions';
+import * as gameActions from '../../redux/actions/gameActions';
 import Hand from "../../components/Hand";
 import MoveCard from "../../components/MoveCard";
 import Pile from "../../components/Pile";
@@ -49,7 +49,7 @@ function GamePlay() {
     if (window.innerWidth !== windowWidth || window.innerHeight !== windowHeight) {
       setWindowWidth(window.innerWidth);
       setWindowHeight(window.innerHeight);
-      dispatch(appActions.setCardTableLayout(
+      dispatch(gameActions.setCardTableLayout(
         window.innerWidth,
         window.innerHeight,
       ));
@@ -57,7 +57,7 @@ function GamePlay() {
   }
   useEffect(() => {
     window.addEventListener("resize", updateDimensions);
-    dispatch(appActions.setCardTableLayout(
+    dispatch(gameActions.setCardTableLayout(
       window.innerWidth,
       window.innerHeight,
     ));
@@ -88,27 +88,27 @@ function GamePlay() {
   useEffect(() => {
     switch(gameState) {
       case 'init':
-        dispatch(appActions.setupForNewGame());
+        dispatch(gameActions.setupForNewGame());
         break;
       case 'choseDealer':
-        dispatch(appActions.throwForAce());
+        dispatch(gameActions.throwForAce());
         break;
       case 'waitForAce:complete':
         if (melds[dealer][melds[dealer].length - 1].value === "A") {
-          dispatch(appActions.selectedDealer());
+          dispatch(gameActions.selectedDealer());
         } else {
-          dispatch(appActions.throwForAce());
+          dispatch(gameActions.throwForAce());
         }
         break;
       case 'preMoveDeckToDealer':
-        dispatch(appActions.storeGameState('waiting'));
+        dispatch(gameActions.storeGameState('waiting'));
         setTimeout(() => {
-          dispatch(appActions.storeGameState('moveDeckToDealer'));
+          dispatch(gameActions.storeGameState('moveDeckToDealer'));
         }, 500);
         break;
       case 'moveDeckToDealer':
-        dispatch(appActions.moveCardsToDealer());
-        const cardsToDealer = () => { dispatch(appActions.moveCardsToDealer()); };
+        dispatch(gameActions.moveCardsToDealer());
+        const cardsToDealer = () => { dispatch(gameActions.moveCardsToDealer()); };
         setActionTimer(
           setInterval(
             cardsToDealer,
@@ -119,14 +119,14 @@ function GamePlay() {
       case 'moveDeckToDealer:complete':
         clearInterval(actionTimer);
         setActionTimer(null);
-        dispatch(appActions.preDeal());
+        dispatch(gameActions.preDeal());
         setTimeout(() => {
-          dispatch(appActions.storeGameState('deal'));
+          dispatch(gameActions.storeGameState('deal'));
         }, 500);
         break;
       case 'deal':
-        dispatch(appActions.moveCardsToDealer());
-        const dealingCards = () => { dispatch(appActions.dealCards()); };
+        dispatch(gameActions.moveCardsToDealer());
+        const dealingCards = () => { dispatch(gameActions.dealCards()); };
         setActionTimer(
           setInterval(
             dealingCards,
@@ -137,106 +137,106 @@ function GamePlay() {
       case 'deal:complete':
         clearInterval(actionTimer);
         setActionTimer(null);
-        dispatch(appActions.storeGameState('fanningOut'));
+        dispatch(gameActions.storeGameState('fanningOut'));
         for (let i = 0; i < 3.25; i = i + 0.25) {
           setTimeout(() => {
-            dispatch(appActions.setHandFanOut(i));
+            dispatch(gameActions.setHandFanOut(i));
           }, 125 * i);
         }
         setTimeout(() => {
-          dispatch(appActions.checkForNines());
+          dispatch(gameActions.checkForNines());
         }, 500);
         break;
       case 'ninesContinue':
       case 'nextBid':
-        dispatch(appActions.nextBid());
+        dispatch(gameActions.nextBid());
         break;
       case 'computerBid':
-        dispatch(appActions.storeGameState('waitingOnBid'));
+        dispatch(gameActions.storeGameState('waitingOnBid'));
         timedDelay(getRandomRange(250, 2000, 1), () => {
-          dispatch(appActions.resolveComputerBid());
+          dispatch(gameActions.resolveComputerBid());
         });
         break;
       case 'userBid':
-        dispatch(appActions.getUserBid());
+        dispatch(gameActions.getUserBid());
         break;
       case 'biddingComplete':
         setTimeout(() => {
-          dispatch(appActions.decideBidWinner());
+          dispatch(gameActions.decideBidWinner());
         }, 1000);
         break;
       case 'showWidow':
         for(let i = 0; i < hands.length + 1; i++) {
           setTimeout(() => {
-            dispatch(appActions.showTheWidow(i));
+            dispatch(gameActions.showTheWidow(i));
           }, 1000 * i);
         }
         break;
       case 'widowMoving:complete':
-        dispatch(appActions.decideThrowHand());
+        dispatch(gameActions.decideThrowHand());
         break;
       case 'computerWantsToThrowHand':
-        dispatch(appActions.agreeThrowHand());
+        dispatch(gameActions.agreeThrowHand());
         break;
       case 'throwHandDisagree':
-        dispatch(appActions.disagreeThrowHand());
+        dispatch(gameActions.disagreeThrowHand());
         break;
       case 'throwHand':
-        dispatch(appActions.throwHand());
+        dispatch(gameActions.throwHand());
         break;
       case 'startDiscards':
-        dispatch(appActions.clearPlayerModal());
-        dispatch(appActions.startDiscards());
+        dispatch(gameActions.clearPlayerModal());
+        dispatch(gameActions.startDiscards());
         break;
       case 'computerDiscard':
-        dispatch(appActions.computerDiscards());
+        dispatch(gameActions.computerDiscards());
         break;
       case 'throwHandContinue':
       case 'selectTrumpSuit':
-        dispatch(appActions.declareTrumpSuit());
+        dispatch(gameActions.declareTrumpSuit());
         break;
       case 'waitRemoveDiscards:complete':
       case 'startMeld':
-        dispatch(appActions.startMeld());
+        dispatch(gameActions.startMeld());
         break;
       case 'displayMeld':
-        dispatch(appActions.displayMeld());
+        dispatch(gameActions.displayMeld());
         break;
       case 'meldDelay':
         timedDelay(getRandomRange(250, 2000, 1), () => {
-          dispatch(appActions.nextMeld());
+          dispatch(gameActions.nextMeld());
         });
         break;
       case 'movingMeldCardsBack:complete':
       case 'startNextPlay':
-        dispatch(appActions.playLead());
+        dispatch(gameActions.playLead());
         break;
       case 'cardToPlayPile:complete':
-        dispatch(appActions.resolvePlay());
+        dispatch(gameActions.resolvePlay());
         break;
       case 'waitToClearPlayPile':
         timedDelay(getRandomRange(250, 1000, 1), () => {
-          dispatch(appActions.playFollow());
+          dispatch(gameActions.playFollow());
         });
         break;
       case 'waitMovePlayPileToDiscard':
         timedDelay(2500, () => {
-          dispatch(appActions.movePlayPileToDiscard());
+          dispatch(gameActions.movePlayPileToDiscard());
         });
         break;
       case 'restMoveToDiscard:complete':
       case 'playPileToDiscard:complete':
-        dispatch(appActions.startNextPlay());
+        dispatch(gameActions.startNextPlay());
         break;
       case 'tallyCounts':
       case 'nextTally':
-        dispatch(appActions.tallyCounts());
+        dispatch(gameActions.tallyCounts());
         break;
       case 'moveDiscardToMeldTally:complete':
-        dispatch(appActions.addCountToTally());
+        dispatch(gameActions.addCountToTally());
         break;
       case 'doneCounting':
-        dispatch(appActions.addCountToScore())
+        dispatch(gameActions.addCountToScore())
         break;
       default:
     }
@@ -245,87 +245,87 @@ function GamePlay() {
     switch(message) {
       case 'ninesUserRedeal':
         if (hands.length === 4) {
-          dispatch(appActions.partnerConfirmNinesRedeal());
+          dispatch(gameActions.partnerConfirmNinesRedeal());
         } else {
-          dispatch(appActions.clearPlayerModal());
-          dispatch(appActions.clearPromptModal());
-          dispatch(appActions.storeGameState('preMoveDeckToDealer'));
+          dispatch(gameActions.clearPlayerModal());
+          dispatch(gameActions.clearPromptModal());
+          dispatch(gameActions.storeGameState('preMoveDeckToDealer'));
         }
         break;
       case 'ninesContinue':
-        dispatch(appActions.clearPlayerModal());
-        dispatch(appActions.storeGameState('nextBid'));
+        dispatch(gameActions.clearPlayerModal());
+        dispatch(gameActions.storeGameState('nextBid'));
         break;
       case 'ninesRedeal':
-        dispatch(appActions.clearPlayerModal());
-        dispatch(appActions.clearPromptModal());
-        dispatch(appActions.storeGameState('preMoveDeckToDealer'));
+        dispatch(gameActions.clearPlayerModal());
+        dispatch(gameActions.clearPromptModal());
+        dispatch(gameActions.storeGameState('preMoveDeckToDealer'));
         break;
       case 'postBidContinue':
-        dispatch(appActions.showTheWidow());
+        dispatch(gameActions.showTheWidow());
         break;
       case 'widowContinue':
-        dispatch(appActions.clearPlayerModal());
-        dispatch(appActions.clearPromptModal());
-        dispatch(appActions.moveWidowToHand());
+        dispatch(gameActions.clearPlayerModal());
+        dispatch(gameActions.clearPromptModal());
+        dispatch(gameActions.moveWidowToHand());
         break;
       case 'throwHandContinue':
-        dispatch(appActions.clearPlayerModal());
-        dispatch(appActions.storeGameState('selectTrumpSuit'));
+        dispatch(gameActions.clearPlayerModal());
+        dispatch(gameActions.storeGameState('selectTrumpSuit'));
         break;
       case 'userThrowHand':
-        dispatch(appActions.clearPlayerModal());
-        dispatch(appActions.agreeThrowHand());
+        dispatch(gameActions.clearPlayerModal());
+        dispatch(gameActions.agreeThrowHand());
         break;
       case 'throwHandDisagree':
-        dispatch(appActions.clearPlayerModal());
-        dispatch(appActions.disagreeThrowHand());
+        dispatch(gameActions.clearPlayerModal());
+        dispatch(gameActions.disagreeThrowHand());
         break;
       case 'throwHand':
-        dispatch(appActions.throwHand());
+        dispatch(gameActions.throwHand());
         break;
       case 'userDiscard':
-        dispatch(appActions.clearPlayerModal());
-        dispatch(appActions.removeUserDiscards());
+        dispatch(gameActions.clearPlayerModal());
+        dispatch(gameActions.removeUserDiscards());
         break;
       case 'nameTrumpSuit':
-        dispatch(appActions.storeGameState('selectTrumpSuit'));
+        dispatch(gameActions.storeGameState('selectTrumpSuit'));
         break;
       case 'startGamePlay':
-        dispatch(appActions.startGamePlay());
+        dispatch(gameActions.startGamePlay());
         break;
       case 'postTrumpSuitContinue':
-        dispatch(appActions.clearPlayerModal());
-        dispatch(appActions.startDiscards());
+        dispatch(gameActions.clearPlayerModal());
+        dispatch(gameActions.startDiscards());
         break;
       case 'postDiscardTrump':
-        dispatch(appActions.clearPlayerModal());
-        dispatch(appActions.storeGameState('waitRemoveDiscards:complete'));
+        dispatch(gameActions.clearPlayerModal());
+        dispatch(gameActions.storeGameState('waitRemoveDiscards:complete'));
         break;
       case 'endOfHand':
-        dispatch(appActions.clearPlayerModal());
-        dispatch(appActions.endHand());
+        dispatch(gameActions.clearPlayerModal());
+        dispatch(gameActions.endHand());
         break;
       case 'winRestContinue':
-        dispatch(appActions.clearPlayerModal());
-        dispatch(appActions.moveRestToDiscard());
+        dispatch(gameActions.clearPlayerModal());
+        dispatch(gameActions.moveRestToDiscard());
         break;
       default:
         if (message.substr(0,4) === 'bid_') {
-          dispatch(appActions.getUserBid(message));
+          dispatch(gameActions.getUserBid(message));
         }
         if (message.substr(0,8) === 'trumpIs_') {
-          dispatch(appActions.clearPlayerModal());
-          dispatch(appActions.setTrumpSuit(message.split('trumpIs_')[1]));
+          dispatch(gameActions.clearPlayerModal());
+          dispatch(gameActions.setTrumpSuit(message.split('trumpIs_')[1]));
         }
     }
   };
   const handleClickedCard = (id, index, suitValue) => {
     if (gameState === 'waitUserDiscard') {
-      dispatch(appActions.userSelectDiscard(index));
+      dispatch(gameActions.userSelectDiscard(index));
     }
     if (gameState === 'waitUserPlay') {
-      dispatch(appActions.userSelectPlay(index));
+      dispatch(gameActions.userSelectPlay(index));
     }
   };
   const handleScoreCardCLick = () => {
@@ -479,7 +479,7 @@ function GamePlay() {
     miscDisplaySettings,
   ]);
   const cardFinishedMovement = (id, keyId) => {
-    dispatch(appActions.resolveCardMovement(id, keyId));
+    dispatch(gameActions.resolveCardMovement(id, keyId));
   };
   useEffect(() => {
     const newGameMovingCards = [];

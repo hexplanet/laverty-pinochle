@@ -1,8 +1,8 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux';
-import appReducer from './reducers/appReducer';
+import gameReducer from './reducers/gameReducer';
 import appMiddleware from './middlewares/appMiddleware';
 
-const allReducers = combineReducers({app: appReducer});
+const allReducers = combineReducers({app: gameReducer});
 const store = createStore(
   allReducers,
   // applyMiddleware() tells createStore() how to handle middleware

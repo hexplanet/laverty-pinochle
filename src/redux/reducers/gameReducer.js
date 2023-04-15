@@ -1,9 +1,8 @@
-import * as actionTypes from '../actions/appActionTypes';
-import * as reducerLogic from './appReducerLogic';
+import * as actionTypes from '../actions/gameActionTypes';
+import * as reducerLogic from './gameReducerLogic';
 import {
   generalModalData,
 } from '../../utils/helpers';
-import {setGameValuesForNewHand} from "./appReducerLogic";
 
 const initialState = {
   gameState: 'init',
@@ -51,7 +50,7 @@ const initialState = {
   promptModal: {shown: false},
 };
 
-const appReducer = (state = initialState, action) => {
+const gameReducer = (state = initialState, action) => {
   switch (action.type) {
     case actionTypes.SET_CARD_TABLE_LAYOUT:
       const {
@@ -1024,4 +1023,4 @@ const appReducer = (state = initialState, action) => {
         return state;
   }
 };
-export default appReducer;
+export default gameReducer;

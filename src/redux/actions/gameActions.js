@@ -1,4 +1,4 @@
-import * as actionTypes from './appActionTypes';
+import * as actionTypes from './gameActionTypes';
 
 export const setCardTableLayout = (width, height, players) => {
   return {

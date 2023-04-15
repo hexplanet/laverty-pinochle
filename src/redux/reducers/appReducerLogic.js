@@ -390,7 +390,8 @@ export const passDeckToDealer = (state) => {
       key: `${cardToMove}to${targetCardId}`,
       keyId: `${cardToMove}to${targetCardId}${Date.now()}`,
       shown: false,
-      speed: 1,
+      speed: 10,
+      travelTime: 51,
       source: sourceCard,
       target: targetCard,
     };
@@ -1398,7 +1399,7 @@ export const moveRestToDiscardPile = (state) => {
         suit: selectedCard.suit,
         value: selectedCard.value,
         shown: true,
-        speed: 1,
+        speed: 10,
         source: sourceCard,
         target: targetCard,
       };
@@ -1786,7 +1787,6 @@ export const computerFollowPlay = (state, nextPlayer) => {
   if (ledHand.length === 0) {
     if (trumpHand.length === 0) {
       // Play Off
-      console.log({nextPlayer, friendlyWinner, likelyBlockerWin});
       if (friendlyWinner && !likelyBlockerWin) {
         playCard = getBestCounter(validHand, '');
       }
@@ -2089,6 +2089,7 @@ export const addCountToScore = (teams, players, playScore, melds, bidModals, too
   const addScorePlayerModal = generalModalData(cabbageMessage, {
     hasBox,
     width: 500,
+    height: 105,
     buttons: [{
       label: 'End Hand',
       status: 'warning',

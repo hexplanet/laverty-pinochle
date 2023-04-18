@@ -1,7 +1,9 @@
 import * as actionTypes from '../actions/gameActionTypes';
-import * as reducerLogic from './gameReducerLogic';
-import { generalModalData } from '../../utils/helpers';
+import * as preBidLogic from './gameReducerPreBidLogic';
+import * as bidMeldLogic from './gameReducerBidMeldLogic';
+import * as gamePlayLogic from './gameReducerGamePlayLogic';
 import * as GAME_STATE from '../../utils/gameStates';
+import { generalModalData } from '../../utils/helpers';
 
 const initialState = {
   gameState: 'init',
@@ -58,7 +60,7 @@ const gameReducer = (state = initialState, action) => {
         playerMeldLocations,
         miscLocations,
         zoomRatio
-      } = reducerLogic.playerDisplaySettingsLogic(
+      } = preBidLogic.playerDisplaySettingsLogic(
         action.width,
         action.height,
         state.players.length,
@@ -103,7 +105,7 @@ const gameReducer = (state = initialState, action) => {
         playerModal: {...state.playerModal, ...blankedPromptModal},
       };
     case actionTypes.RESOLVE_CARD_MOVEMENT:
-      const modifiedValues = reducerLogic.resolveCardMovement(
+      const modifiedValues = preBidLogic.resolveCardMovement(
         action.id,
         action.keyId,
         state.movingCards,
@@ -120,7 +122,7 @@ const gameReducer = (state = initialState, action) => {
         ...modifiedValues,
       };
     case actionTypes.SETUP_FOR_NEW_GAME:
-      const clearedValues = reducerLogic.setGameValuesForNewGame(state.teams, state.players);
+      const clearedValues = preBidLogic.setGameValuesForNewGame(state.teams, state.players);
       return {
         ...state,
         ...clearedValues
@@ -130,7 +132,7 @@ const gameReducer = (state = initialState, action) => {
         newDealer,
         newDiscards,
         newMovingCard
-      } = reducerLogic.throwCardForDeal(state);
+      } = preBidLogic.throwCardForDeal(state);
       const newMovingCards = [...state.movingCards, newMovingCard];
       return {
         ...state,
@@ -142,7 +144,7 @@ const gameReducer = (state = initialState, action) => {
     case actionTypes.SELECTED_DEALER:
       const {
         dealerPromptModal,
-      } = reducerLogic.declareDealer(
+      } = preBidLogic.declareDealer(
         state.players,
         state.dealer
       );
@@ -159,7 +161,7 @@ const gameReducer = (state = initialState, action) => {
         toDealerHands,
         toDealerPlayPile,
         toDealerBidModels
-      } = reducerLogic.passDeckToDealer(state);
+      } = preBidLogic.passDeckToDealer(state);
       return {
         ...state,
         movingCards: toDealerMovingCards,
@@ -173,7 +175,7 @@ const gameReducer = (state = initialState, action) => {
       const {
         shuffledCards,
         clearPlayerPrompt
-      } = reducerLogic.preDealing(
+      } = preBidLogic.preDealing(
           state.discardPiles,
           state.dealer
       );
@@ -196,7 +198,7 @@ const gameReducer = (state = initialState, action) => {
       const {
         dealDeck,
         dealCards,
-      } = reducerLogic.dealing(state);
+      } = preBidLogic.dealing(state);
       return {
         ...state,
         discardPiles: dealDeck,
@@ -214,7 +216,7 @@ const gameReducer = (state = initialState, action) => {
         ninesPromptModal,
         ninesPlayerModal,
         ninesGameState
-      } = reducerLogic.checkForNines(
+      } = preBidLogic.checkForNines(
         state.hands,
         state.players,
       );
@@ -246,7 +248,7 @@ const gameReducer = (state = initialState, action) => {
         postNinesPromptModal,
         postNinesPlayerModal,
         postNinesGameState
-      } = reducerLogic.checkPostNines(
+      } = preBidLogic.checkPostNines(
         state.hands,
         state.players,
       );
@@ -260,7 +262,7 @@ const gameReducer = (state = initialState, action) => {
       const nextBid = (state.dealToPlayer + 1) % (state.players.length);
       const {
         nextBidPrompt
-      } = reducerLogic.nextBid(
+      } = bidMeldLogic.nextBid(
         state.players,
         nextBid,
       );
@@ -318,7 +320,7 @@ const gameReducer = (state = initialState, action) => {
       const {
         bidPlayerModal,
         maxedBidOffset
-      } = reducerLogic.configureUserBidModal(
+      } = bidMeldLogic.configureUserBidModal(
         state.bids,
         initialBidOffset,
         state.dealToPlayer,
@@ -331,7 +333,7 @@ const gameReducer = (state = initialState, action) => {
         playerModal: bidPlayerModal,
       };
     case actionTypes.RESOLVE_COMPUTER_BID:
-      let computerBid = reducerLogic.computerBid(
+      let computerBid = bidMeldLogic.computerBid(
         state.hands,
         state.dealToPlayer,
         state.players,
@@ -369,7 +371,7 @@ const gameReducer = (state = initialState, action) => {
         wonTheBid,
         wonBidWith,
         updatedBidScore
-      } = reducerLogic.resolveBidding(
+      } = bidMeldLogic.resolveBidding(
         state.bids,
         state.players,
         state.teams,
@@ -407,7 +409,7 @@ const gameReducer = (state = initialState, action) => {
         widowBidModels.push({shown:false});
       }
       const widowPlayerPrompt = {shown:false};
-      const widowPlayPile = reducerLogic.displayWidow(
+      const widowPlayPile = bidMeldLogic.displayWidow(
         state.playPile,
         action.widowCardIndex,
         state.players
@@ -425,7 +427,7 @@ const gameReducer = (state = initialState, action) => {
         widowMovingCards,
         widowSeen,
         widowEmptyPlayPile
-      }= reducerLogic.movingWidow(state);
+      }= bidMeldLogic.movingWidow(state);
       return {
         ...state,
         gameState: GAME_STATE.WIDOW_MOVING,
@@ -438,7 +440,7 @@ const gameReducer = (state = initialState, action) => {
         const {
           throwPlayerModal,
           throwGameState
-        } = reducerLogic.shouldUserThrowHand(
+        } = bidMeldLogic.shouldUserThrowHand(
           state.hands,
           state.bidAmount,
           state.players
@@ -451,7 +453,7 @@ const gameReducer = (state = initialState, action) => {
       }
       const {
         computerThrowGameState
-      } = reducerLogic.shouldComputerThrowHand(
+      } = bidMeldLogic.shouldComputerThrowHand(
         state.hands,
         state.tookBid,
         state.bidAmount,
@@ -488,7 +490,7 @@ const gameReducer = (state = initialState, action) => {
       }
       const {
         computerAgreeThrowHand
-      } = reducerLogic.shouldComputerAgreeThrowHand(
+      } = bidMeldLogic.shouldComputerAgreeThrowHand(
         state.hands,
         state.tookBid,
         state.players
@@ -559,7 +561,7 @@ const gameReducer = (state = initialState, action) => {
         discardPlayerModal,
         discardPromptModal,
         discardHands,
-      } = reducerLogic.setUpDiscards(
+      } = bidMeldLogic.setUpDiscards(
         state.hands,
         state.tookBid,
         state.players,
@@ -577,7 +579,7 @@ const gameReducer = (state = initialState, action) => {
       const {
         discardUserHands,
         discardUserModal
-      } = reducerLogic.userSelectDiscard(
+      } = bidMeldLogic.userSelectDiscard(
         state.hands,
         state.playerModal,
         action.index
@@ -592,7 +594,7 @@ const gameReducer = (state = initialState, action) => {
         removeUserHands,
         removeUserMovingCards,
         removeUserPrompt,
-      } = reducerLogic.removeUserDiscard(state);
+      } = bidMeldLogic.removeUserDiscard(state);
       return {
         ...state,
         gameState: GAME_STATE.WAIT_REMOVE_DISCARDS,
@@ -607,7 +609,7 @@ const gameReducer = (state = initialState, action) => {
         removeComputerPrompt,
         removeComputerPlayer,
         removeComputerGameState
-      } = reducerLogic.calculateComputerDiscard(state);
+      } = bidMeldLogic.calculateComputerDiscard(state);
       return {
         ...state,
         gameState: removeComputerGameState,
@@ -621,7 +623,7 @@ const gameReducer = (state = initialState, action) => {
         const {
           userTrumpPrompt,
           userTrumpPlayer
-        } = reducerLogic.userSelectTrump(
+        } = bidMeldLogic.userSelectTrump(
           state.hands,
           state.players
         );
@@ -636,7 +638,7 @@ const gameReducer = (state = initialState, action) => {
         computerTrumpSuit,
         computerTrumpPlayer,
         computerTrumpPrompt
-      } = reducerLogic.computerSelectTrump(
+      } = bidMeldLogic.computerSelectTrump(
         state.hands,
         state.tookBid,
         state.players,
@@ -657,7 +659,7 @@ const gameReducer = (state = initialState, action) => {
         trumpSuit: action.suit,
       };
     case actionTypes.START_MELD:
-      const meldMessage = reducerLogic.startMeldMessage(
+      const meldMessage = bidMeldLogic.startMeldMessage(
         state.trumpSuit,
         state.tookBid,
         state.bidAmount,
@@ -697,7 +699,7 @@ const gameReducer = (state = initialState, action) => {
         meldPlacedCards,
         meldPlaceScores,
         meldSeenCards
-      } = reducerLogic.meldCards(state);
+      } = bidMeldLogic.meldCards(state);
       shownMeld[state.dealToPlayer] =
         generalModalData('', {
           header: meldPlaceScores[state.dealToPlayer],
@@ -720,7 +722,7 @@ const gameReducer = (state = initialState, action) => {
         meldPlayScore,
         meldPlayerModal,
         meldPromptModal
-      } = reducerLogic.postMeldLaydown(
+      } = bidMeldLogic.postMeldLaydown(
         state.dealToPlayer,
         state.thrownHand,
         state.tookBid,
@@ -747,7 +749,7 @@ const gameReducer = (state = initialState, action) => {
         startPromptModal,
         startBidModals,
         startMelds
-      } = reducerLogic.startGamePlay(state);
+      } = gamePlayLogic.startGamePlay(state);
       return {
         ...state,
         firstPlay: true,
@@ -763,7 +765,7 @@ const gameReducer = (state = initialState, action) => {
         restDiscardMovingCards,
         restDiscardShowHands,
         restDiscardHands
-      } = reducerLogic.moveRestToDiscardPile(state);
+      } = gamePlayLogic.moveRestToDiscardPile(state);
       return {
         ...state,
         movingCards: [...restDiscardMovingCards],
@@ -778,7 +780,7 @@ const gameReducer = (state = initialState, action) => {
         gotRestPromptModal,
         gotRestShowHands,
         gotRestWinningPlay
-      } = reducerLogic.gotTheRest(state);
+      } = gamePlayLogic.gotTheRest(state);
       if (gotRestGameState !== '') {
         return {
           ...state,
@@ -795,7 +797,7 @@ const gameReducer = (state = initialState, action) => {
           userLeadPlayerModal,
           userLeadPromptModal,
           userLeadPlayHands,
-        } = reducerLogic.userLeadPlay(
+        } = gamePlayLogic.userLeadPlay(
           state.hands,
           state.trumpSuit,
           state.firstPlay,
@@ -814,7 +816,7 @@ const gameReducer = (state = initialState, action) => {
       const {
         computerLeadPlayHands,
         computerPlayMovingCards
-      } = reducerLogic.computerLeadPlay(state);
+      } = gamePlayLogic.computerLeadPlay(state);
       return {
         ...state,
         hands: [...computerLeadPlayHands],
@@ -829,7 +831,7 @@ const gameReducer = (state = initialState, action) => {
           calculateWinnerPlayPile,
           calculateWinnerPromptModal,
           calculateWinnerOffSuits,
-        } = reducerLogic.displayPlayWinner(
+        } = gamePlayLogic.displayPlayWinner(
           state.trumpSuit,
           state.players,
           state.playPile,
@@ -850,7 +852,7 @@ const gameReducer = (state = initialState, action) => {
         const {
           userFollowPlayerModal,
           userFollowPlayHands,
-        } = reducerLogic.userFollowPlay(
+        } = gamePlayLogic.userFollowPlay(
           state.hands,
           state.trumpSuit,
           state.players,
@@ -869,7 +871,7 @@ const gameReducer = (state = initialState, action) => {
       const {
         computerFollowHands,
         computerFollowMovingCards
-      } = reducerLogic.computerFollowPlay(state, nextPlayer);
+      } = gamePlayLogic.computerFollowPlay(state, nextPlayer);
       return {
         ...state,
         hands: [...computerFollowHands],
@@ -882,7 +884,7 @@ const gameReducer = (state = initialState, action) => {
         userPlayHands,
         userPlayMovingCards,
         userPlayPromptModal
-      } = reducerLogic.userPlay(state, action.cardIndex);
+      } = gamePlayLogic.userPlay(state, action.cardIndex);
       return {
         ...state,
         hands: [...userPlayHands],
@@ -896,7 +898,7 @@ const gameReducer = (state = initialState, action) => {
         resolveWinningPlay,
         resolvePromptModal,
         resolvePlayedCards
-      } = reducerLogic.resolvePlay(
+      } = gamePlayLogic.resolvePlay(
         state.players,
         state.playPile,
         state.trumpSuit,
@@ -919,7 +921,7 @@ const gameReducer = (state = initialState, action) => {
       const {
         playToDiscardMovingCards,
         playToDiscardPlayPile
-      } = reducerLogic.movePlayPileToDiscard(state);
+      } = gamePlayLogic.movePlayPileToDiscard(state);
       return {
         ...state,
         gameState: GAME_STATE.PLAY_PILE_TO_DISCARD,
@@ -931,7 +933,7 @@ const gameReducer = (state = initialState, action) => {
         nextPlayGameState,
         nextPlayPromptMessage,
         nextPlayDealToPlayer
-      } = reducerLogic.setUpNextPlay(
+      } = gamePlayLogic.setUpNextPlay(
         state.hands,
         state.promptModal,
         state.tookBid,
@@ -950,7 +952,7 @@ const gameReducer = (state = initialState, action) => {
         tallyDiscardPiles,
         tallyDealToPlayer,
         tallyGameState
-      } = reducerLogic.discardToMeldTally(state);
+      } = gamePlayLogic.discardToMeldTally(state);
       return {
         ...state,
         gameState: tallyGameState,
@@ -961,7 +963,7 @@ const gameReducer = (state = initialState, action) => {
     case actionTypes.ADD_COUNT_TO_TALLY:
       const {
         addCountBidModals
-      } = reducerLogic.addCountToTally(
+      } = gamePlayLogic.addCountToTally(
         state.bidModals,
         state.melds,
         state.tookPlay,
@@ -978,7 +980,7 @@ const gameReducer = (state = initialState, action) => {
         addScorePlayerModal,
         addScorePromptModal,
         addScoreGameWon
-      } = reducerLogic.addCountToScore(
+      } = gamePlayLogic.addCountToScore(
         state.teams,
         state.players,
         state.playScore,
@@ -987,7 +989,7 @@ const gameReducer = (state = initialState, action) => {
         state.tookBid,
         state.bidAmount
       );
-      const addScoreNewHand = reducerLogic.setGameValuesForNewHand(state.players);
+      const addScoreNewHand = preBidLogic.setGameValuesForNewHand(state.players);
       return {
         ...state,
         playScore: [...addScorePlayScore],
@@ -1003,7 +1005,7 @@ const gameReducer = (state = initialState, action) => {
         endHandPromptModal,
         endHandDealer,
         endHandGameWon
-      } = reducerLogic.resolveEndHand(
+      } = gamePlayLogic.resolveEndHand(
         state.teams,
         state.players,
         state.playScore,

@@ -25,6 +25,7 @@ import {
   getHandWinMessage,
   getWinner
 } from '../../utils/helpers';
+import * as colors from '../../utils/colors.js';
 
 export const playerDisplaySettingsLogic = (width, height, players) => {
   const playerHandLocations = [];
@@ -217,12 +218,11 @@ export const resolveCardMovement = (
     const landingSpot = id.split('to')[1];
     const objectType = landingSpot[0];
     const playerIndex = landingSpot.length > 1 ? Number(landingSpot[1]) : -1;
-    const subIndex = landingSpot.length > 2 ? Number(landingSpot.substring(2)) : -1;
     const newMovingCards = [...movingCards];
     changedValues.movingCards = newMovingCards;
     newMovingCards.splice(moveCardIndex, 1);
     changedValues.movingCards = [...newMovingCards];
-    const landingCard = createLandingCard(stoppedCard, objectType, playerIndex, subIndex);
+    const landingCard = createLandingCard(stoppedCard, objectType);
     switch(objectType) {
       case 'H':
         const newHands = [...hands];
@@ -918,15 +918,15 @@ export const setUpDiscards = (hands, tookBid, players, trumpSuit, bidAmount) => 
       const whereMatch = cardsUsed.findIndex(usedCard => usedCard === suitValue);
       if (whereMatch > -1) {
         cardsUsed.splice(whereMatch, 1);
-        discardHands[0][cardIndex].frontColor = '#eea';
+        discardHands[0][cardIndex].frontColor = colors.discardMeldColor;
       } else if (card.suit === trumpSuit) {
-        discardHands[0][cardIndex].frontColor = '#ffaf7a';
+        discardHands[0][cardIndex].frontColor = colors.discardTrumpColor;
       }
       discardHands[0][cardIndex].shown = true;
       discardHands[0][cardIndex].active = true;
       discardHands[0][cardIndex].clickable = true;
       discardHands[0][cardIndex].raised = false;
-      discardHands[0][cardIndex].rolloverColor = '#0f0';
+      discardHands[0][cardIndex].rolloverColor = colors.discardRolloverColor;
     });
   }
   return {
@@ -964,7 +964,7 @@ export const removeUserDiscard = (state) => {
       sources[sources.length - 1].index = i;
       removeUserHands[0].splice(i, 1);
     } else {
-      state.hands[0][i].frontColor = '#eee';
+      state.hands[0][i].frontColor = colors.cardDefaultFrontColor;
       state.hands[0][i].clickable = false;
       state.hands[0][i].rolloverColor = '';
     }
@@ -1167,10 +1167,9 @@ export const computerSelectTrump = (hands, tookBid, players, bidAmount) => {
 
 export const startMeldMessage = (trumpSuit, tookBid, bidAmount, players) => {
   const trumpHeader = getTrumpBidHeader(trumpSuit, tookBid, bidAmount, players);
-  const meldMessage = generalModalData('Lay down meld', {
+  return generalModalData('Lay down meld', {
     ...trumpHeader
   });
-  return meldMessage;
 };
 
 export const meldCards = (state) => {
@@ -1472,7 +1471,7 @@ export const userLeadPlay = (hands, trumpSuit, firstPlay, promptModal, players) 
     if (validCards.indexOf(cardIndex) > -1) {
       validHand[cardIndex].active = true;
       validHand[cardIndex].clickable = true;
-      validHand[cardIndex].rolloverColor = '#0f0';
+      validHand[cardIndex].rolloverColor = colors.cardDefaultRolloverColor;
     } else {
       validHand[cardIndex].active = false;
       validHand[cardIndex].clickable = false;
@@ -1510,7 +1509,7 @@ export const userFollowPlay = (hands, trumpSuit, players, playPile, winningPlay,
     if (validCards.indexOf(cardIndex) > -1) {
       validHand[cardIndex].active = true;
       validHand[cardIndex].clickable = true;
-      validHand[cardIndex].rolloverColor = '#0f0';
+      validHand[cardIndex].rolloverColor = colors.cardDefaultRolloverColor;
       validSuits[validHand[cardIndex].suit] = true;
     } else {
       validHand[cardIndex].active = false;
@@ -1921,7 +1920,7 @@ export const displayPlayWinner = (trumpSuit, players, playPile, winningPlay, pro
     }
   }
   const calculateWinnerPlayPile = [...playPile];
-  calculateWinnerPlayPile[winningPlay].frontColor = '#eea';
+  calculateWinnerPlayPile[winningPlay].frontColor = colors.countPointColor;
   const winCard = calculateWinnerPlayPile[winningPlay];
   const calculateWinnerPromptModal = {...promptModal};
   calculateWinnerPromptModal.message = getHandWinMessage(winCard.suit , winCard.value , players, winningPlay);
@@ -1997,7 +1996,7 @@ export const discardToMeldTally = (state) => {
     tallyGameState = 'nextTally';
     if (state.players.length === 3) {
       tallyDealToPlayer = (state.dealToPlayer + 1) % state.players.length;
-      if (tallyDealToPlayer === state.tookBid) {
+      if (tallyDealToPlayer === (state.tookBid + 1) % 3) {
         tallyGameState = 'doneCounting';
       }
     } else {
@@ -2021,7 +2020,7 @@ export const discardToMeldTally = (state) => {
       suit: selectedCard.suit,
       value: selectedCard.value,
       shown: true,
-      frontColor: (isCount ? '#eea' : '#eee'),
+      frontColor: (isCount ? colors.countPointColor : colors.cardDefaultFrontColor),
       speed: 2,
       source: sourceCard,
       target: targetCard,
@@ -2098,7 +2097,10 @@ export const addCountToScore = (teams, players, playScore, melds, bidModals, too
   });
   const teamIndex = tookBid % teams.length;
   const bidRows = addScorePlayScore[teamIndex].length;
-  const amount = Number(bidModals[tookBid].header) + Number(addScorePlayScore[teamIndex][bidRows - 1].meld);
+  let amount = Number(bidModals[tookBid].header) + Number(addScorePlayScore[teamIndex][bidRows - 1].meld);
+  if (Number.isNaN(amount)) {
+    amount = 0;
+  }
   let message = (<div><b>{players[tookBid]}</b> has made there bid of {bidAmount} with {amount}.</div>);
   if (amount < bidAmount) {
     message = (<div><b>{players[tookBid]}</b> failed to make the bid of {bidAmount} with {amount}.</div>);

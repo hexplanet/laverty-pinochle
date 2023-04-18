@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import PlayingCard from "../PlayingCard";
+import {CARD_PILE_X_DEPTH, CARD_PILE_Y_DEPTH} from "../../utils/constants";
 import './index.scss';
 
 function Pile({
@@ -23,14 +24,13 @@ function Pile({
         newCards.push(
           <PlayingCard
             key={`Pile${index}`}
-            xLocation={110 + (hasHeight ? (index * 0.2) : 0) + (card.xOffset ? card.xOffset : 0)}
-            yLocation={110 - (hasHeight ? (index * 0.5) : 0) + (card.yOffset ? card.yOffset : 0)}
+            xLocation={110 + (hasHeight ? (index * CARD_PILE_X_DEPTH) : 0) + (card.xOffset ? card.xOffset : 0)}
+            yLocation={110 - (hasHeight ? (index * CARD_PILE_Y_DEPTH) : 0) + (card.yOffset ? card.yOffset : 0)}
             suit={card.suit}
             value={card.value}
             frontColor={card.frontColor}
             shown={cardShown}
             rotation={card.rotation}
-            frontColor={card.frontColor}
             rolloverColor=''
             clickable={false}
           />

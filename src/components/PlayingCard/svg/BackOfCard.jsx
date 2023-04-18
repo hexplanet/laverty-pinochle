@@ -1,8 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
+import * as colors from '../../../utils/colors.js';
 
 function BackOfCard({ color, borderColor }) {
-  const strokeSize = (borderColor === '#aaa') ? "4" : "12";
+  const strokeSize = (borderColor === colors.cardBorderColor) ? "4" : "12";
   return (
     <svg width="100" height="140" viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">
       <g>
@@ -19,8 +20,8 @@ BackOfCard.propTypes = {
 };
 
 BackOfCard.defaultProps = {
-  color: '#231F20',
-  borderColor: '#aaa',
+  color: colors.cardBackDefaultColor,
+  borderColor: colors.cardBorderColor,
 };
 
 export default BackOfCard;

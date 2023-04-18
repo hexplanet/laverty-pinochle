@@ -1,3 +1,5 @@
+@import '../../utils/colors.scss';
+
 .lavpin-score-pad {
   position: absolute;
   width: 600px;
@@ -19,7 +21,7 @@
       top: 0;
       font-family: 'Brush Script MT', cursive;
       .score-column {
-        text-shadow: 1px 1px 3px #888;
+        text-shadow: 1px 1px 3px $score-pad-shadow;
         position: absolute;
         top: 8px;
         font-weight: 900;
@@ -83,7 +85,7 @@
 
         .meld.erased, .plus.erased, .counts.erased, {
           font-weight: 300;
-          color: #bb6;
+          color: $score-pad-erased-score;
         }
 
         .won-game {
@@ -131,7 +133,7 @@
     cursor: default;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, .75);
+    background-color: $score-pad-blocker;
     z-index: 10000;
   }
   .lavpin-score-pad {

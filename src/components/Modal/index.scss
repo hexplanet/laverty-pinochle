@@ -1,3 +1,5 @@
+@import '../../utils/colors.scss';
+
 .lavpin-modal {
   position: absolute;
   .blocker {
@@ -7,7 +9,7 @@
     width: 100vw;
     height: 100vh;
     cursor: default;
-    background-color: #000;
+    background-color: $modal-blocker-background;
     opacity: 0.85;
   }
   .box-container {
@@ -21,8 +23,8 @@
         -ms-user-select: none; /* IE 10 and IE 11 */
         user-select: none; /* Standard syntax */
         position: absolute;
-        background-color: #9b9;
-        border: 3px solid #888;
+        background-color: $modal-box-background;
+        border: 3px solid $modal-box-border;
         .x-button {
           position: absolute;
           right: 1px;
@@ -44,7 +46,7 @@
         }
         .header-separator {
           hr {
-            border-color: #888;
+            border-color: $modal-header-separator;
           }
         }
         .message-area {
@@ -73,8 +75,8 @@
         }
       }
       .modal-box.transparent-box {
-        background-color: transparent;
-        border-color: transparent;
+        background-color: $modal-box-transparent;
+        border-color: $modal-box-transparent;
       }
     }
   }

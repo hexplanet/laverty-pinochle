@@ -41,7 +41,7 @@ export const generalModalData = (lines, props = {}) => {
   } else {
     displayed = (<div>{lines}</div>);
   }
-  const promptModal = {
+  return {
     shown: true,
     width: 210,
     height: 140,
@@ -52,7 +52,6 @@ export const generalModalData = (lines, props = {}) => {
     hasHeaderSeparator: false,
     ...props
   };
-  return promptModal;
 };
 
 export const getCardLocation = (id, state, xAdjust = 0, yAdjust = 0) => {
@@ -125,7 +124,7 @@ export const getRandomRange = (min, max, step) => {
   return (min + (randomNumber * step));
 };
 
-export const createLandingCard = (stoppedCard, objectType, playerIndex, subIndex) => {
+export const createLandingCard = (stoppedCard, objectType) => {
   const returnedCard = {
     suit: stoppedCard.suit,
     value: stoppedCard.value,
@@ -388,30 +387,6 @@ export const getWinValue = (hand, index) => {
   };
 };
 
-export const getFormedSuitIcon = (suit) => {
-  let suitIcon;
-  switch(suit) {
-    case 'H':
-      suitIcon = (<Hearts />);
-      break;
-    case 'D':
-      suitIcon = (<Diamonds />);
-      break;
-    case 'C':
-      suitIcon = (<Clubs />);
-      break;
-    default:
-      suitIcon = (<Spades />);
-  }
-  const iconStyle = {
-    width: '24px',
-    height: '24px',
-    display: 'inline-block',
-    margin: '3px'
-  };
-  return (<div style={iconStyle}>{suitIcon}</div>);
-};
-
 export const suitIconSelector = (suit) => {
   let suitIcon;
   switch(suit) {
@@ -428,6 +403,16 @@ export const suitIconSelector = (suit) => {
       suitIcon = (<Spades />);
   }
   return suitIcon;
+};
+export const getFormedSuitIcon = (suit) => {
+  let suitIcon = suitIconSelector(suit);
+  const iconStyle = {
+    width: '24px',
+    height: '24px',
+    display: 'inline-block',
+    margin: '3px'
+  };
+  return (<div style={iconStyle}>{suitIcon}</div>);
 };
 
 export const getTrumpBidHeader = (trumpSuit, tookBid, bidAmount, players) => {
@@ -472,9 +457,7 @@ export const getHandWinMessage = (suitWin, winValue, players, winningPlayer) => 
   const winSuit = suitIconSelector(suitWin);
   const suitStyle = {width: 24, display: 'inline-flex'};
   const messageStyle = {display: 'inline-flex'};
-  const message =
-    (<div style={messageStyle}><b>{players[winningPlayer]}</b>&nbsp;wins&nbsp;<b>{winValue}</b><span style={suitStyle}>{winSuit}</span></div>);
-  return message;
+  return (<div style={messageStyle}><b>{players[winningPlayer]}</b>&nbsp;wins&nbsp;<b>{winValue}</b><span style={suitStyle}>{winSuit}</span></div>);
 }
 
 export const setValidCardIndexes = (
@@ -670,7 +653,7 @@ export const throwCardIntoMiddle = (state, player, selectedIndex) => {
   sourceCard.zoom = sourceCard.zoom * 2;
   const targetCardId = `P${player}`;
   const targetCard = getCardLocation(targetCardId, state);
-  const newMovingCard = {
+  return {
     id: `${sourceCardId}to${targetCardId}`,
     keyId: `${sourceCardId}to${targetCardId}${Date.now()}`,
     suit: selectedCard.suit,
@@ -680,7 +663,6 @@ export const throwCardIntoMiddle = (state, player, selectedIndex) => {
     source: sourceCard,
     target: targetCard,
   };
-  return newMovingCard;
 }
 
 export const getWinner = (playScore, tookBid) => {

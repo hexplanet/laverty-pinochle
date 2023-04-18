@@ -1,3 +1,5 @@
+@import '../../utils/colors.scss';
+
 .lavpin-input {
   .input-container {
     display: inline-flex;
@@ -16,8 +18,8 @@
         font-weight: 600;
       }
       input:focus {
-        background-color: #ffc;
-        color: #333;
+        background-color: $input-background;
+        color: $input-foreground;
       }
     }
   }

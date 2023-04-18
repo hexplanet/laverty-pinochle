@@ -1,3 +1,5 @@
+@import '../../utils/colors.scss';
+
 .lavpin-playing-card {
   position: absolute;
   width: 100px;
@@ -59,10 +61,10 @@
           user-select: none; /* Standard syntax */
         }
         .value-red {
-          color: #A00;
+          color: $card-suit-red;
         }
         .value-black {
-          color: #333;
+          color: $card-suit-black;
         }
       }
     }

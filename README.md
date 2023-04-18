@@ -1,3 +1,11 @@
+# Laverty Family Pinochle
+
+---
+## Overview
+This is a sample of code written by Keith Laverty to show understanding of how to create a complex React application.
+The application uses React 18.0.2, redux 4.2.1, and testing-library/react 4.13.0
+---
+### The project was initially created using the stand React Application start
 # Getting Started with Create React App and Redux
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), using the [Redux](https://redux.js.org/) and [Redux Toolkit](https://redux-toolkit.js.org/) template.

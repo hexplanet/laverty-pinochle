@@ -8,7 +8,7 @@ import Pile from "../../components/Pile";
 import ScorePad from "../../components/ScorePad";
 import Modal from "../../components/Modal";
 import { getRandomRange }  from "../../utils/helpers";
-import './index.scss';
+import * as CONSTANT from "../../utils/constants";
 
 function GamePlay() {
   const dispatch = useDispatch();
@@ -87,155 +87,155 @@ function GamePlay() {
   }, []);
   useEffect(() => {
     switch(gameState) {
-      case 'init':
+      case CONSTANT.GS_INIT:
         dispatch(gameActions.setupForNewGame());
         break;
-      case 'choseDealer':
+      case CONSTANT.GS_CHOSE_DEALER:
         dispatch(gameActions.throwForAce());
         break;
-      case 'waitForAce:complete':
+      case CONSTANT.GS_WAIT_FOR_ACE_COMPLETE:
         if (melds[dealer][melds[dealer].length - 1].value === "A") {
           dispatch(gameActions.selectedDealer());
         } else {
           dispatch(gameActions.throwForAce());
         }
         break;
-      case 'preMoveDeckToDealer':
-        dispatch(gameActions.storeGameState('waiting'));
+      case CONSTANT.GS_PRE_MOVE_DECK_TO_DEALER:
+        dispatch(gameActions.storeGameState(CONSTANT.GS_WAITING));
         setTimeout(() => {
-          dispatch(gameActions.storeGameState('moveDeckToDealer'));
-        }, 500);
+          dispatch(gameActions.storeGameState(CONSTANT.GS_MOVE_DECK_TO_DEALER));
+        }, CONSTANT.PREDEAL_DELAY);
         break;
-      case 'moveDeckToDealer':
+      case CONSTANT.GS_MOVE_DECK_TO_DEALER:
         dispatch(gameActions.moveCardsToDealer());
         const cardsToDealer = () => { dispatch(gameActions.moveCardsToDealer()); };
         setActionTimer(
           setInterval(
             cardsToDealer,
-            50
+            CONSTANT.DECK_TO_DEALER_DELAY
           )
         );
         break;
-      case 'moveDeckToDealer:complete':
+      case CONSTANT.GS_MOVE_DECK_TO_DEALER_COMPLETE:
         clearInterval(actionTimer);
         setActionTimer(null);
         dispatch(gameActions.preDeal());
         setTimeout(() => {
-          dispatch(gameActions.storeGameState('deal'));
-        }, 500);
+          dispatch(gameActions.storeGameState(CONSTANT.GS_DEAL));
+        }, CONSTANT.POST_DECK_TO_DEALER_DELAY);
         break;
-      case 'deal':
+      case CONSTANT.GS_DEAL:
         dispatch(gameActions.moveCardsToDealer());
         const dealingCards = () => { dispatch(gameActions.dealCards()); };
         setActionTimer(
           setInterval(
             dealingCards,
-            250
+            CONSTANT.DEAL_DELAY
           )
         );
         break;
-      case 'deal:complete':
+      case CONSTANT.GS_DEAL_COMPLETE:
         clearInterval(actionTimer);
         setActionTimer(null);
-        dispatch(gameActions.storeGameState('fanningOut'));
+        dispatch(gameActions.storeGameState(CONSTANT.GS_FANNING_OUT));
         for (let i = 0; i < 3.25; i = i + 0.25) {
           setTimeout(() => {
             dispatch(gameActions.setHandFanOut(i));
-          }, 125 * i);
+          }, CONSTANT.FANOUT_DELAY * i);
         }
         setTimeout(() => {
           dispatch(gameActions.checkForNines());
-        }, 500);
+        }, CONSTANT.NINE_CHECK_DELAY);
         break;
-      case 'ninesContinue':
-      case 'nextBid':
+      case CONSTANT.GS_NINES_CONTINUE:
+      case CONSTANT.GS_NEXT_BID:
         dispatch(gameActions.nextBid());
         break;
-      case 'computerBid':
-        dispatch(gameActions.storeGameState('waitingOnBid'));
-        timedDelay(getRandomRange(250, 2000, 1), () => {
+      case CONSTANT.GS_COMPUTER_BID:
+        dispatch(gameActions.storeGameState(CONSTANT.GS_WAITING_ON_BID));
+        timedDelay(getRandomRange(CONSTANT.COMPUTER_BID_MIN_DELAY, CONSTANT.COMPUTER_BID_MAX_DELAY, 1), () => {
           dispatch(gameActions.resolveComputerBid());
         });
         break;
-      case 'userBid':
+      case CONSTANT.GS_USER_BID:
         dispatch(gameActions.getUserBid());
         break;
-      case 'biddingComplete':
+      case CONSTANT.GS_BIDDING_COMPLETE:
         setTimeout(() => {
           dispatch(gameActions.decideBidWinner());
-        }, 1000);
+        }, CONSTANT.BID_COMPLETE_DELAY);
         break;
-      case 'showWidow':
+      case CONSTANT.GS_SHOW_WIDOW:
         for(let i = 0; i < hands.length + 1; i++) {
           setTimeout(() => {
             dispatch(gameActions.showTheWidow(i));
-          }, 1000 * i);
+          }, CONSTANT.WIDOW_FLIP_DELAY * i);
         }
         break;
-      case 'widowMoving:complete':
+      case CONSTANT.GS_WIDOW_MOVING_COMPLETE:
         dispatch(gameActions.decideThrowHand());
         break;
-      case 'computerWantsToThrowHand':
+      case CONSTANT.GS_COMPUTER_WANTS_TO_THROW_HAND:
         dispatch(gameActions.agreeThrowHand());
         break;
-      case 'throwHandDisagree':
+      case CONSTANT.GS_THROW_HAND_DISAGREE:
         dispatch(gameActions.disagreeThrowHand());
         break;
-      case 'throwHand':
+      case CONSTANT.GS_THROW_HAND:
         dispatch(gameActions.throwHand());
         break;
-      case 'startDiscards':
+      case CONSTANT.GS_START_DISCARDS:
         dispatch(gameActions.clearPlayerModal());
         dispatch(gameActions.startDiscards());
         break;
-      case 'computerDiscard':
+      case CONSTANT.GS_COMPUTER_DISCARD:
         dispatch(gameActions.computerDiscards());
         break;
-      case 'throwHandContinue':
-      case 'selectTrumpSuit':
+      case CONSTANT.GS_THROW_HAND_CONTINUE:
+      case CONSTANT.GS_SELECT_TRUMP_SUIT:
         dispatch(gameActions.declareTrumpSuit());
         break;
-      case 'waitRemoveDiscards:complete':
-      case 'startMeld':
+      case CONSTANT.GS_WAIT_REMOVE_DISCARDS_COMPLETE:
+      case CONSTANT.GS_START_MELD:
         dispatch(gameActions.startMeld());
         break;
-      case 'displayMeld':
+      case CONSTANT.GS_DISPLAY_MELD:
         dispatch(gameActions.displayMeld());
         break;
-      case 'meldDelay':
-        timedDelay(getRandomRange(250, 2000, 1), () => {
+      case CONSTANT.GS_MELD_DELAY:
+        timedDelay(getRandomRange(CONSTANT.MELD_MIN_DELAY, CONSTANT.MELD_MAX_DELAY, 1), () => {
           dispatch(gameActions.nextMeld());
         });
         break;
-      case 'movingMeldCardsBack:complete':
-      case 'startNextPlay':
+      case CONSTANT.GS_MOVING_MELD_CARDS_BACK_COMPLETE:
+      case CONSTANT.GS_START_NEXT_PLAY:
         dispatch(gameActions.playLead());
         break;
-      case 'cardToPlayPile:complete':
+      case CONSTANT.GS_CARD_TO_PLAY_PILE_COMPLETE:
         dispatch(gameActions.resolvePlay());
         break;
-      case 'waitToClearPlayPile':
-        timedDelay(getRandomRange(250, 1000, 1), () => {
+      case CONSTANT.GS_WAIT_TO_CLEAR_PLAY_PILE:
+        timedDelay(getRandomRange(CONSTANT.PLAY_PILE_CLEAR_MIN_DELAY, CONSTANT.PLAY_PILE_CLEAR_MAX_DELAY, 1), () => {
           dispatch(gameActions.playFollow());
         });
         break;
-      case 'waitMovePlayPileToDiscard':
-        timedDelay(2500, () => {
+      case CONSTANT.GS_WAIT_MOVE_PLAY_PILE_TO_DISCARD:
+        timedDelay(CONSTANT.PLAY_PILE_TO_DISCARD_DELAY, () => {
           dispatch(gameActions.movePlayPileToDiscard());
         });
         break;
-      case 'restMoveToDiscard:complete':
-      case 'playPileToDiscard:complete':
+      case CONSTANT.GS_REST_MOVE_TO_DISCARD_COMPLETE:
+      case CONSTANT.GS_PLAY_PILE_TO_DISCARD_COMPLETE:
         dispatch(gameActions.startNextPlay());
         break;
-      case 'tallyCounts':
-      case 'nextTally':
+      case CONSTANT.GS_TALLY_COUNTS:
+      case CONSTANT.GS_NEXT_TALLY:
         dispatch(gameActions.tallyCounts());
         break;
-      case 'moveDiscardToMeldTally:complete':
+      case CONSTANT.GS_MOVE_DISCARD_TO_MELD_TALLY_COMPLETE:
         dispatch(gameActions.addCountToTally());
         break;
-      case 'doneCounting':
+      case CONSTANT.GS_DONE_COUNTING:
         dispatch(gameActions.addCountToScore())
         break;
       default:
@@ -243,88 +243,88 @@ function GamePlay() {
   }, [gameState]);
   const handleModalInput = (type, event, message) => {
     switch(message) {
-      case 'ninesUserRedeal':
+      case CONSTANT.GS_NINES_USER_REDEAL:
         if (hands.length === 4) {
           dispatch(gameActions.partnerConfirmNinesRedeal());
         } else {
           dispatch(gameActions.clearPlayerModal());
           dispatch(gameActions.clearPromptModal());
-          dispatch(gameActions.storeGameState('preMoveDeckToDealer'));
+          dispatch(gameActions.storeGameState(CONSTANT.GS_PRE_MOVE_DECK_TO_DEALER));
         }
         break;
-      case 'ninesContinue':
+      case CONSTANT.GS_NINES_CONTINUE:
         dispatch(gameActions.clearPlayerModal());
-        dispatch(gameActions.storeGameState('nextBid'));
+        dispatch(gameActions.storeGameState(CONSTANT.GS_NEXT_BID));
         break;
-      case 'ninesRedeal':
+      case CONSTANT.GS_NINES_REDEAL:
         dispatch(gameActions.clearPlayerModal());
         dispatch(gameActions.clearPromptModal());
-        dispatch(gameActions.storeGameState('preMoveDeckToDealer'));
+        dispatch(gameActions.storeGameState(CONSTANT.GS_PRE_MOVE_DECK_TO_DEALER));
         break;
-      case 'postBidContinue':
+      case CONSTANT.GS_POST_BID_CONTINUE:
         dispatch(gameActions.showTheWidow());
         break;
-      case 'widowContinue':
+      case CONSTANT.GS_WIDOW_CONTINUE:
         dispatch(gameActions.clearPlayerModal());
         dispatch(gameActions.clearPromptModal());
         dispatch(gameActions.moveWidowToHand());
         break;
-      case 'throwHandContinue':
+      case CONSTANT.GS_THROW_HAND_CONTINUE:
         dispatch(gameActions.clearPlayerModal());
-        dispatch(gameActions.storeGameState('selectTrumpSuit'));
+        dispatch(gameActions.storeGameState(CONSTANT.GS_SELECT_TRUMP_SUIT));
         break;
-      case 'userThrowHand':
+      case CONSTANT.GS_USER_THROW_HAND:
         dispatch(gameActions.clearPlayerModal());
         dispatch(gameActions.agreeThrowHand());
         break;
-      case 'throwHandDisagree':
+      case CONSTANT.GS_THROW_HAND_DISAGREE:
         dispatch(gameActions.clearPlayerModal());
         dispatch(gameActions.disagreeThrowHand());
         break;
-      case 'throwHand':
+      case CONSTANT.GS_THROW_HAND:
         dispatch(gameActions.throwHand());
         break;
-      case 'userDiscard':
+      case CONSTANT.GS_USER_DISCARD:
         dispatch(gameActions.clearPlayerModal());
         dispatch(gameActions.removeUserDiscards());
         break;
-      case 'nameTrumpSuit':
-        dispatch(gameActions.storeGameState('selectTrumpSuit'));
+      case CONSTANT.GS_NAME_TRUMP_SUIT:
+        dispatch(gameActions.storeGameState(CONSTANT.GS_SELECT_TRUMP_SUIT));
         break;
-      case 'startGamePlay':
+      case CONSTANT.GS_START_GAME_PLAY:
         dispatch(gameActions.startGamePlay());
         break;
-      case 'postTrumpSuitContinue':
+      case CONSTANT.GS_POST_TRUMP_SUIT_CONTINUE:
         dispatch(gameActions.clearPlayerModal());
         dispatch(gameActions.startDiscards());
         break;
-      case 'postDiscardTrump':
+      case CONSTANT.GS_POST_DISCARD_TRUMP:
         dispatch(gameActions.clearPlayerModal());
-        dispatch(gameActions.storeGameState('waitRemoveDiscards:complete'));
+        dispatch(gameActions.storeGameState(CONSTANT.GS_WAIT_REMOVE_DISCARDS_COMPLETE));
         break;
-      case 'endOfHand':
+      case CONSTANT.GS_END_OF_HAND:
         dispatch(gameActions.clearPlayerModal());
         dispatch(gameActions.endHand());
         break;
-      case 'winRestContinue':
+      case CONSTANT.GS_WIN_REST_CONTINUE:
         dispatch(gameActions.clearPlayerModal());
         dispatch(gameActions.moveRestToDiscard());
         break;
       default:
-        if (message.substr(0,4) === 'bid_') {
+        if (message.substring(0,4) === 'bid_') {
           dispatch(gameActions.getUserBid(message));
         }
-        if (message.substr(0,8) === 'trumpIs_') {
+        if (message.substring(0,8) === 'trumpIs_') {
           dispatch(gameActions.clearPlayerModal());
           dispatch(gameActions.setTrumpSuit(message.split('trumpIs_')[1]));
         }
     }
   };
   const handleClickedCard = (id, index, suitValue) => {
-    if (gameState === 'waitUserDiscard') {
+    if (gameState === CONSTANT.GS_WAIT_USER_DISCARD) {
       dispatch(gameActions.userSelectDiscard(index));
     }
-    if (gameState === 'waitUserPlay') {
+    if (gameState === CONSTANT.GS_WAIT_USER_PLAY) {
       dispatch(gameActions.userSelectPlay(index));
     }
   };

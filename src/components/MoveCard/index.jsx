@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import './index.scss';
+import * as colors from '../../utils/colors.js';
 import PlayingCard from "../PlayingCard";
+import './index.scss';
 
 const keyTimes = {};
 function MoveCard({
@@ -104,7 +105,7 @@ MoveCard.defaultProps = {
   speed: 1,
   travelTime: 0,
   zLocation: 0,
-  frontColor: '#eee',
+  frontColor: colors.cardFrontColor,
 };
 
 export default MoveCard;

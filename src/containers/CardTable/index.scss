@@ -1,5 +1,7 @@
+@import '../../utils/colors.scss';
+
 .lavpin-card-table {
-  background: darkolivegreen;
+  background: $card-table-background;
   width: 100vw;
   height: 100vh;
   position: fixed;

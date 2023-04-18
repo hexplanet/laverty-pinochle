@@ -1,10 +1,11 @@
-import React, {useState, userEffect, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import BackOfCard from "./svg/BackOfCard";
 import {Hearts} from "./svg/Hearts";
 import {Spades} from "./svg/Spades";
 import {Diamonds} from "./svg/Diamonds";
 import {Clubs} from "./svg/Clubs";
+import * as colors from '../../utils/colors.js';
 import './index.scss';
 function PlayingCard({
   index,
@@ -23,10 +24,10 @@ function PlayingCard({
   clickable,
   handleClick,
 }) {
-  const [borderColor, setBorderColor] = useState('#aaa');
+  const [borderColor, setBorderColor] = useState(colors.cardBorderColor);
   useEffect(() => {
     if (rolloverColor === '') {
-      setBorderColor('#aaa');
+      setBorderColor(colors.cardBorderColor);
     }
   }, [rolloverColor]);
   if (hidden) {
@@ -39,7 +40,7 @@ function PlayingCard({
     'S': <Spades myWidth={24} myHeight={24}/>,
   };
   const valueColor = (suit === 'H' || suit === 'D') ? 'value-red' : 'value-black';
-  const cardFrontColor = active ? frontColor : '#afafaf';
+  const cardFrontColor = active ? frontColor : colors.cardInactiveFrontColor;
   const cardBodyClass = `card-body${clickable ? ' clickable': '' }`;
   const cardClicked = () => {
     if (clickable) {
@@ -54,7 +55,7 @@ function PlayingCard({
   };
   const exitCard= () => {
     if (borderColor === rolloverColor) {
-      setBorderColor('#aaa');
+      setBorderColor(colors.cardBorderColor);
     }
   };
   const cardFront = (
@@ -91,7 +92,7 @@ function PlayingCard({
         <div className='card-display' style={displayStyle}>
         {
           shown ? cardFront :
-            (<div className='card-body'> <BackOfCard color={'#228'}/> </div>)
+            (<div className='card-body'> <BackOfCard color={colors.cardBackColor}/> </div>)
         }
         </div>
       </div>
@@ -128,8 +129,8 @@ PlayingCard.defaultProps = {
   yLocation: 0,
   zLocation: 0,
   hidden: false,
-  rolloverColor: '#0f0',
-  frontColor: '#eee',
+  rolloverColor: colors.cardDefaultRolloverColor,
+  frontColor: colors.cardDefaultFrontColor,
   active: true,
   clickable: true,
   handleClick: () => {}

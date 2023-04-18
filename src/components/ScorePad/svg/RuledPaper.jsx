@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import * as colors from '../../../utils/colors.js';
 
 function RuledPaper({ color, divisionColor, lineColor, columns }) {
   const majorDivisionStyle = {
@@ -64,9 +65,9 @@ RuledPaper.propTypes = {
 };
 
 RuledPaper.defaultProps = {
-  color: '#dd8',
-  divisionColor: '#d88',
-  lineColor: '#888',
+  color: colors.scorePadColor,
+  divisionColor: colors.scorePadDivisionColor,
+  lineColor: colors.scorePadLineColor,
   columns: 2
 };
 

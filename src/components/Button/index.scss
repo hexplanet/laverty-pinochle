@@ -1,12 +1,14 @@
+@import '../../utils/colors.scss';
+
 .lavpin-button {
   .inner-button {
     font-size: 24px;
     border-radius: 5px;
     padding: 5px 10px;
     cursor: pointer;
-    border-color: #ffd;
-    background-color: #dd8;
-    color: #000;
+    border-color: $button-standard-border;
+    background-color: $button-standard-background;
+    color: $button-standard-foreground;
     font-weight:600;
     svg {
       width: 24px;
@@ -15,34 +17,34 @@
     }
   }
   .inner-button:hover {
-    background-color: #ffa;
+    background-color: $button-standard-background-hover;
     color: #333;
   }
   .inner-button.inactive {
     cursor: default;
-    background-color: #555;
-    border-color: #888;
-    color: #333;
+    background-color: $button-inactive-background;
+    border-color: $button-inactive-border;
+    color: $button-inactive-foreground;
   }
   .inner-button.inactive:hover {
-    background-color: #555;
+    background-color: $button-inactive-background-hover;
   }
   .inner-button.warning {
-    border-color: #fff;
-    background-color: #bbb;
-    color: #800;
+    border-color: $button-warning-border;
+    background-color: $button-warning-background;
+    color: $button-warning-foreground;
   }
   .inner-button.warning:hover {
-    background-color: #ddd;
-    color: #f00;
+    background-color: $button-warning-background-hover;
+    color: $button-warning-foreground-hover;
   }
   .inner-button.transparent {
-    border-color: transparent;
-    background-color: transparent;
-    color: #000;
+    border-color: $button-transparent-border;
+    background-color: $button-transparent-background;
+    color: $button-transparent-foreground;
   }
   .inner-button.transparent:hover {
-    background-color: transparent;
-    color: #333;
+    background-color: $button-transparent-background-hover;
+    color: $button-transparent-foreground-hover;
   }
 }

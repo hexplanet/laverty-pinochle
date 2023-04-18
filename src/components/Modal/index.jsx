@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 import Button from '../Button';
+import { MODAL_AUTO_CENTER_VALUE } from '../../utils/constants';
 import './index.scss';
 
 function Modal({
@@ -45,10 +46,10 @@ function Modal({
     left: `${xLocation}px`,
     top: `${yLocation}px`,
   };
-  if (xLocation === -10000) {
+  if (xLocation === MODAL_AUTO_CENTER_VALUE) {
     containerStyle.left = windowWidth / 2;
   }
-  if (yLocation === -10000) {
+  if (yLocation === MODAL_AUTO_CENTER_VALUE) {
     containerStyle.top = windowHeight / 2;
   }
   const transitionStyle = {
@@ -136,8 +137,8 @@ Modal.propTypes = {
 };
 
 Modal.defaultProps = {
-  xLocation: -10000,
-  yLocation: -10000,
+  xLocation: MODAL_AUTO_CENTER_VALUE,
+  yLocation: MODAL_AUTO_CENTER_VALUE,
   zLocation: 1000,
   zoom: 50,
   width: 400,

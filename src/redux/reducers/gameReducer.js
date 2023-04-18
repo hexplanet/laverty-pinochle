@@ -1,7 +1,7 @@
 import * as actionTypes from '../actions/gameActionTypes';
 import * as reducerLogic from './gameReducerLogic';
 import { generalModalData } from '../../utils/helpers';
-import * as CONSTANT from '../../utils/constants';
+import * as GAME_STATE from '../../utils/gameStates';
 
 const initialState = {
   gameState: 'init',
@@ -135,7 +135,7 @@ const gameReducer = (state = initialState, action) => {
       return {
         ...state,
         dealer: newDealer,
-        gameState: CONSTANT.GS_WAIT_FOR_ACE,
+        gameState: GAME_STATE.WAIT_FOR_ACE,
         discardPiles: newDiscards,
         movingCards: newMovingCards
       };
@@ -149,7 +149,7 @@ const gameReducer = (state = initialState, action) => {
       return {
         ...state,
         promptModal: dealerPromptModal,
-        gameState: CONSTANT.GS_PRE_MOVE_DECK_TO_DEALER,
+        gameState: GAME_STATE.PRE_MOVE_DECK_TO_DEALER,
       };
     case actionTypes.MOVE_CARD_TO_DEALER:
       const {
@@ -276,7 +276,7 @@ const gameReducer = (state = initialState, action) => {
         });
         return {
           ...state,
-          gameState: CONSTANT.GS_BIDDING_COMPLETE,
+          gameState: GAME_STATE.BIDDING_COMPLETE,
           bids: [...forcedBid],
           promptModal: nextBidPrompt,
           bidModals: [...shownForcedBid]
@@ -286,7 +286,7 @@ const gameReducer = (state = initialState, action) => {
         ...state,
         dealToPlayer: nextBid,
         promptModal: nextBidPrompt,
-        gameState: (nextBid === 0) ? CONSTANT.GS_USER_BID : CONSTANT.GS_COMPUTER_BID,
+        gameState: (nextBid === 0) ? GAME_STATE.USER_BID : GAME_STATE.COMPUTER_BID,
       };
     case actionTypes.GET_USER_BID:
       let initialBidOffset = state.bidOffset;
@@ -296,7 +296,7 @@ const gameReducer = (state = initialState, action) => {
           const userBids = state.bids;
           userBids[0] = Number(splitBid);
           const userBidGameState = (state.dealToPlayer === state.dealer)
-            ? CONSTANT.GS_BIDDING_COMPLETE : CONSTANT.GS_NEXT_BID;
+            ? GAME_STATE.BIDDING_COMPLETE : GAME_STATE.NEXT_BID;
           const userBidPlayerModal = state.playerModal;
           userBidPlayerModal.shown = false;
           const shownUserBid = state.bidModals;
@@ -326,7 +326,7 @@ const gameReducer = (state = initialState, action) => {
       );
       return {
         ...state,
-        gameState: CONSTANT.GS_WAIT_FOR_USER_BID,
+        gameState: GAME_STATE.WAIT_FOR_USER_BID,
         bidOffset: maxedBidOffset,
         playerModal: bidPlayerModal,
       };
@@ -355,7 +355,7 @@ const gameReducer = (state = initialState, action) => {
       const newBids = [...state.bids];
       newBids[state.dealToPlayer] = computerBid;
       const bidGameState = (state.dealToPlayer === state.dealer)
-        ? CONSTANT.GS_BIDDING_COMPLETE : CONSTANT.GS_NEXT_BID;
+        ? GAME_STATE.BIDDING_COMPLETE : GAME_STATE.NEXT_BID;
       return {
         ...state,
         bids: [...newBids],
@@ -383,7 +383,7 @@ const gameReducer = (state = initialState, action) => {
         tookBid: wonTheBid,
         tookPlay: wonTheBid,
         bidAmount: wonBidWith,
-        gameState: CONSTANT.GS_WAIT_DISPLAY_WIDOW,
+        gameState: GAME_STATE.WAIT_DISPLAY_WIDOW,
         thrownHand: false,
       };
     case actionTypes.SHOW_THE_WIDOW:
@@ -392,16 +392,16 @@ const gameReducer = (state = initialState, action) => {
           hasBox: false,
           buttons: [{
             label: 'Continue',
-            returnMessage: CONSTANT.GS_WIDOW_CONTINUE
+            returnMessage: GAME_STATE.WIDOW_CONTINUE
           }],
         });
         return {
           ...state,
           playerModal: widowContinueModal,
-          gameState: CONSTANT.GS_WAIT_MOVE_WIDOW_TO_HAND,
+          gameState: GAME_STATE.WAIT_MOVE_WIDOW_TO_HAND,
         }
       }
-      const widowGameState = action.widowCardIndex === -1 ? CONSTANT.GS_SHOW_WIDOW : CONSTANT.GS_WIDOW_WAIT;
+      const widowGameState = action.widowCardIndex === -1 ? GAME_STATE.SHOW_WIDOW : GAME_STATE.WIDOW_WAIT;
       const widowBidModels = [];
       for(let i = 0; i <state.players.length; i++) {
         widowBidModels.push({shown:false});
@@ -428,7 +428,7 @@ const gameReducer = (state = initialState, action) => {
       }= reducerLogic.movingWidow(state);
       return {
         ...state,
-        gameState: CONSTANT.GS_WIDOW_MOVING,
+        gameState: GAME_STATE.WIDOW_MOVING,
         movingCards: [...widowMovingCards],
         playPile: [...widowEmptyPlayPile],
         seenWidow: [...widowSeen],
@@ -471,18 +471,18 @@ const gameReducer = (state = initialState, action) => {
             buttons: [
               {
                 label: 'Play Hand',
-                returnMessage: CONSTANT.GS_THROW_HAND_DISAGREE,
+                returnMessage: GAME_STATE.THROW_HAND_DISAGREE,
               },
               {
                 label: 'Throw Hand',
-                returnMessage: CONSTANT.GS_THROW_HAND,
+                returnMessage: GAME_STATE.THROW_HAND,
               }
             ]
           }
         );
         return {
           ...state,
-          gameState: CONSTANT.GS_WAIT_AGREE_THROW_HAND,
+          gameState: GAME_STATE.WAIT_AGREE_THROW_HAND,
           playerModal: throwModal,
         };
       }
@@ -499,7 +499,7 @@ const gameReducer = (state = initialState, action) => {
         thrownHand: (computerAgreeThrowHand === 'throwHand')
       };
     case actionTypes.DISAGREE_THROW_HAND:
-      let disagreeGameState = CONSTANT.GS_WAIT_AFTER_THROW_DISAGREE;
+      let disagreeGameState = GAME_STATE.WAIT_AFTER_THROW_DISAGREE;
       const bidder = state.players[state.tookBid];
       const disagrees = state.players[(state.tookBid + 2) % 4];
       const throwText = (
@@ -512,11 +512,11 @@ const gameReducer = (state = initialState, action) => {
           hasBox: false,
           buttons: [{
             label: 'Continue',
-            returnMessage: CONSTANT.GS_THROW_HAND_CONTINUE
+            returnMessage: GAME_STATE.THROW_HAND_CONTINUE
           }],
         });
       } else {
-        disagreeGameState = CONSTANT.GS_SELECT_TRUMP_SUIT;
+        disagreeGameState = GAME_STATE.SELECT_TRUMP_SUIT;
       }
       return {
         ...state,
@@ -525,7 +525,7 @@ const gameReducer = (state = initialState, action) => {
         playerModal: disagreeThrowPlayerModal
       };
     case actionTypes.THROW_HAND:
-      let throwGameState = CONSTANT.GS_WAIT_AFTER_THROW_HAND;
+      let throwGameState = GAME_STATE.WAIT_AFTER_THROW_HAND;
       const throwHandText = (
         <span><b>{state.players[state.tookBid]}</b> throws the hand</span>
       );
@@ -539,11 +539,11 @@ const gameReducer = (state = initialState, action) => {
           hasBox: false,
           buttons: [{
             label: 'Continue',
-            returnMessage: CONSTANT.GS_NAME_TRUMP_SUIT
+            returnMessage: GAME_STATE.NAME_TRUMP_SUIT
           }],
         });
       } else {
-        throwGameState = CONSTANT.GS_SELECT_TRUMP_SUIT;
+        throwGameState = GAME_STATE.SELECT_TRUMP_SUIT;
       }
       return {
         ...state,
@@ -595,7 +595,7 @@ const gameReducer = (state = initialState, action) => {
       } = reducerLogic.removeUserDiscard(state);
       return {
         ...state,
-        gameState: CONSTANT.GS_WAIT_REMOVE_DISCARDS,
+        gameState: GAME_STATE.WAIT_REMOVE_DISCARDS,
         hands: [...removeUserHands],
         movingCards: removeUserMovingCards,
         promptModal: removeUserPrompt
@@ -627,7 +627,7 @@ const gameReducer = (state = initialState, action) => {
         );
         return {
           ...state,
-          gameState: CONSTANT.GS_USER_TRUMP_WAIT,
+          gameState: GAME_STATE.USER_TRUMP_WAIT,
           playerModal: userTrumpPlayer,
           promptModal: userTrumpPrompt
         };
@@ -645,12 +645,12 @@ const gameReducer = (state = initialState, action) => {
       return {
         ...state,
         trumpSuit: computerTrumpSuit,
-        gameState: CONSTANT.GS_USER_TRUMP_WAIT,
+        gameState: GAME_STATE.USER_TRUMP_WAIT,
         playerModal: computerTrumpPlayer,
         promptModal: computerTrumpPrompt
       };
     case actionTypes.SET_TRUMP_SUIT:
-      const setTrumpGameState = state.thrownHand ? CONSTANT.GS_START_MELD : CONSTANT.GS_START_DISCARDS;
+      const setTrumpGameState = state.thrownHand ? GAME_STATE.START_MELD : GAME_STATE.START_DISCARDS;
       return {
         ...state,
         gameState: setTrumpGameState,
@@ -672,7 +672,7 @@ const gameReducer = (state = initialState, action) => {
         meldScores: [...newMeldScores],
         dealToPlayer: state.tookBid,
         promptModal: meldMessage,
-        gameState: CONSTANT.GS_DISPLAY_MELD
+        gameState: GAME_STATE.DISPLAY_MELD
       };
     case actionTypes.DISPLAY_MELD:
       const shownMeld = state.bidModals;
@@ -687,7 +687,7 @@ const gameReducer = (state = initialState, action) => {
             });
           return {
             ...state,
-            gameState: CONSTANT.GS_MELD_DELAY,
+            gameState: GAME_STATE.MELD_DELAY,
             bidModals: [...shownMeld],
           };
         }
@@ -709,7 +709,7 @@ const gameReducer = (state = initialState, action) => {
         hands: [...meldHands],
         melds: [...meldPlacedCards],
         meldScores: [...meldPlaceScores],
-        gameState: CONSTANT.GS_MELD_DELAY,
+        gameState: GAME_STATE.MELD_DELAY,
         bidModals: [...shownMeld],
         seenCards: [...meldSeenCards]
       };
@@ -769,7 +769,7 @@ const gameReducer = (state = initialState, action) => {
         movingCards: [...restDiscardMovingCards],
         showHands: [...restDiscardShowHands],
         hands: [...restDiscardHands],
-        gameState: CONSTANT.GS_REST_MOVE_TO_DISCARD
+        gameState: GAME_STATE.REST_MOVE_TO_DISCARD
       };
     case actionTypes.PLAY_LEAD:
       const {
@@ -808,7 +808,7 @@ const gameReducer = (state = initialState, action) => {
           promptModal: {...userLeadPromptModal},
           hands: [...userLeadPlayHands],
           winningPlay: state.tookPlay,
-          gameState: CONSTANT.GS_WAIT_USER_PLAY,
+          gameState: GAME_STATE.WAIT_USER_PLAY,
         };
       }
       const {
@@ -820,7 +820,7 @@ const gameReducer = (state = initialState, action) => {
         hands: [...computerLeadPlayHands],
         movingCards: [...computerPlayMovingCards],
         winningPlay: state.tookPlay,
-        gameState: CONSTANT.GS_CARD_TO_PLAY_PILE
+        gameState: GAME_STATE.CARD_TO_PLAY_PILE
       };
     case actionTypes.PLAY_FOLLOW:
       const nextPlayer = (state.dealToPlayer + 1)  % state.players.length;
@@ -840,7 +840,7 @@ const gameReducer = (state = initialState, action) => {
         );
         return {
           ...state,
-          gameState: CONSTANT.GS_WAIT_MOVE_PLAY_PILE_TO_DISCARD,
+          gameState: GAME_STATE.WAIT_MOVE_PLAY_PILE_TO_DISCARD,
           playPile: [...calculateWinnerPlayPile],
           promptModal: {...calculateWinnerPromptModal},
           offSuits: [...calculateWinnerOffSuits]
@@ -862,7 +862,7 @@ const gameReducer = (state = initialState, action) => {
           ...state,
           playerModal: {...userFollowPlayerModal},
           hands: [...userFollowPlayHands],
-          gameState: CONSTANT.GS_WAIT_USER_PLAY,
+          gameState: GAME_STATE.WAIT_USER_PLAY,
           dealToPlayer: nextPlayer,
         }
       }
@@ -874,7 +874,7 @@ const gameReducer = (state = initialState, action) => {
         ...state,
         hands: [...computerFollowHands],
         movingCards: [...computerFollowMovingCards],
-        gameState: CONSTANT.GS_CARD_TO_PLAY_PILE,
+        gameState: GAME_STATE.CARD_TO_PLAY_PILE,
         dealToPlayer: nextPlayer,
       };
     case actionTypes.USER_PLAY:
@@ -889,7 +889,7 @@ const gameReducer = (state = initialState, action) => {
         movingCards: [...userPlayMovingCards],
         playerModal: {shown: false},
         promptModal: {...userPlayPromptModal},
-        gameState: CONSTANT.GS_CARD_TO_PLAY_PILE
+        gameState: GAME_STATE.CARD_TO_PLAY_PILE
       };
     case actionTypes.RESOLVE_PLAY:
       const {
@@ -909,7 +909,7 @@ const gameReducer = (state = initialState, action) => {
       );
       return {
         ...state,
-        gameState: CONSTANT.GS_WAIT_TO_CLEAR_PLAY_PILE,
+        gameState: GAME_STATE.WAIT_TO_CLEAR_PLAY_PILE,
         winningPlay: resolveWinningPlay,
         promptModal: resolvePromptModal,
         firstPlay: false,
@@ -922,7 +922,7 @@ const gameReducer = (state = initialState, action) => {
       } = reducerLogic.movePlayPileToDiscard(state);
       return {
         ...state,
-        gameState: CONSTANT.GS_PLAY_PILE_TO_DISCARD,
+        gameState: GAME_STATE.PLAY_PILE_TO_DISCARD,
         playPile: [...playToDiscardPlayPile],
         movingCards: [...playToDiscardMovingCards]
       };
@@ -969,7 +969,7 @@ const gameReducer = (state = initialState, action) => {
       );
       return {
         ...state,
-        gameState: CONSTANT.GS_TALLY_COUNTS,
+        gameState: GAME_STATE.TALLY_COUNTS,
         bidModals: [...addCountBidModals]
       };
     case actionTypes.ADD_COUNT_TO_SCORE:

@@ -26,6 +26,8 @@ import {
   getWinner
 } from '../../utils/helpers';
 import * as colors from '../../utils/colors.js';
+import * as GAME_STATE from '../../utils/gameStates';
+import * as CARD_ORDER from '../../utils/cardOrder';
 
 export const playerDisplaySettingsLogic = (width, height, players) => {
   const playerHandLocations = [];
@@ -257,7 +259,7 @@ export const setGameValuesForNewGame = (teams, players) => {
   const throwAcesForDealerModal =
     generalModalData('Dealer is chosen by the first player to get an ace');
   const initedValues = {
-    gameState: 'choseDealer',
+    gameState: GAME_STATE.CHOSE_DEALER,
     discardPiles: [],
     showHands: [],
     hands: [],
@@ -467,7 +469,7 @@ export const dealing = (state) => {
 export const checkForNines = (hands, players) => {
   let ninesPromptModal;
   let ninesPlayerModal;
-  let ninesGameState = 'ninesContinue';
+  let ninesGameState = GAME_STATE.NINES_CONTINUE;
   let ninesPlayer = -1;
   let promptWording;
   let playerWording;
@@ -487,7 +489,7 @@ export const checkForNines = (hands, players) => {
     const playerWordingChange = ninesPlayer === 0 ? 'have' : 'has';
     if (ninesPlayer > 0) {
       const bid = getHandBid(hands[ninesPlayer], players);
-      ninesGameState = 'ninesContinue';
+      ninesGameState = GAME_STATE.NINES_CONTINUE;
       if (bid < 21) {
         if (players.length === 4) {
           if (ninesPlayer === 2) {
@@ -495,15 +497,15 @@ export const checkForNines = (hands, players) => {
             playerWording = (<div>Do you agree to a re-deal?</div>);
             playerButtons = { buttons: [{
                 label: 'No',
-                returnMessage: 'ninesContinue'
+                returnMessage: GAME_STATE.NINES_CONTINUE
               },
                 {
                   label: 'Yes',
                   status: 'warning',
-                  returnMessage: 'ninesRedeal'
+                  returnMessage: GAME_STATE.NINES_REDEAL
                 }
               ]};
-            ninesGameState = 'ninesUserAgree';
+            ninesGameState = GAME_STATE.NINES_USER_AGREE;
           } else {
             const ninesPartner = (ninesPlayer + 2) % 4;
             const partnerBid = getHandBid(hands[ninesPartner], players);
@@ -519,10 +521,10 @@ export const checkForNines = (hands, players) => {
                 buttons: [{
                   label: 'Re-deal',
                   status: 'warning',
-                  returnMessage: 'ninesRedeal'
+                  returnMessage: GAME_STATE.NINES_REDEAL
                 }],
               };
-              ninesGameState = 'waitRedeal';
+              ninesGameState = GAME_STATE.WAIT_REDEAL;
             } else {
               promptWording = (
                 <div>
@@ -530,12 +532,12 @@ export const checkForNines = (hands, players) => {
                   <b>{players[ninesPartner]}</b> disagrees with re-deal.
                 </div>
               );
-              ninesGameState = 'waitNinesContinue';
+              ninesGameState = GAME_STATE.WAIT_NINES_CONTINUE;
               playerButtons = {
                 hasBox: false,
                 buttons: [{
                   label: 'Continue',
-                  returnMessage: 'ninesContinue'
+                  returnMessage: GAME_STATE.NINES_CONTINUE
                 }],
               };
             }
@@ -547,10 +549,10 @@ export const checkForNines = (hands, players) => {
             buttons: [{
               label: 'Re-deal',
               status: 'warning',
-              returnMessage: 'ninesRedeal'
+              returnMessage: GAME_STATE.NINES_REDEAL
             }],
           };
-          ninesGameState = 'waitRedeal';
+          ninesGameState = GAME_STATE.WAIT_REDEAL;
         }
       }
     } else {
@@ -558,15 +560,15 @@ export const checkForNines = (hands, players) => {
       playerWording = (<div>Do you want a re-deal for 9s?</div>);
       playerButtons = { buttons: [{
           label: 'No',
-          returnMessage: 'ninesContinue'
+          returnMessage: GAME_STATE.NINES_CONTINUE
         },
         {
           label: 'Yes',
           status: 'warning',
-          returnMessage: 'ninesUserRedeal'
+          returnMessage: GAME_STATE.NINES_USER_REDEAL
         }
       ]};
-      ninesGameState = 'ninesUserRedealWait';
+      ninesGameState = GAME_STATE.NINES_USER_REDEAL_WAIT;
     }
     if (promptWording) {
       ninesPromptModal = generalModalData(promptWording, {});
@@ -594,7 +596,7 @@ export const checkPostNines = (
     buttons: [{
       label: 'Re-deal',
       status: 'warning',
-      returnMessage: 'ninesRedeal'
+      returnMessage: GAME_STATE.NINES_REDEAL
     }],
   };
   if (bid > 20) {
@@ -604,11 +606,11 @@ export const checkPostNines = (
       hasBox: false,
       buttons: [{
         label: 'Continue',
-        returnMessage: 'ninesContinue'
+        returnMessage: GAME_STATE.NINES_CONTINUE
       }],
     };
   }
-  const postNinesGameState = 'postNinesWait';
+  const postNinesGameState = GAME_STATE.POST_NINES_WAIT;
   const postNinesPromptModal = generalModalData(promptWording, {});
   const postNinesPlayerModal = generalModalData('', playerButtons);
   return {
@@ -636,7 +638,7 @@ export const computerBid = (hands, dealToPlayer, players, bids) => {
     }
   });
   let bid = 0;
-  const suits = ['H', 'S', 'D', 'C'];
+  const suits = CARD_ORDER.SUITS;
   let suitBid;
   suits.forEach(suit => {
     const { points, nearMiss } = getHandMeld(hands[dealToPlayer], suit);
@@ -730,7 +732,7 @@ export const resolveBidding = (
     hasBox: false,
     buttons: [{
       label: 'Continue',
-      returnMessage: 'postBidContinue',
+      returnMessage: GAME_STATE.POST_BID_CONTINUE,
     }]
   });
   const bidColumn = wonTheBid % teams.length;
@@ -808,8 +810,8 @@ export const movingWidow = (state) => {
   };
 };
 export const shouldComputerThrowHand = (hands, tookBid, bidAmount, players) => {
-  let computerThrowGameState = 'throwHandContinue';
-  const suits = ['D', 'S', 'C', 'H'];
+  let computerThrowGameState = GAME_STATE.THROW_HAND_CONTINUE;
+  const suits = CARD_ORDER.SUITS;
   let high = 0;
   let meld = 0;
   suits.forEach(suit => {
@@ -829,24 +831,24 @@ export const shouldComputerThrowHand = (hands, tookBid, bidAmount, players) => {
   }
   if (mayFail || willFail) {
     computerThrowGameState =
-      (hands.length === 4) ? 'computerWantsToThrowHand' : 'throwHand';
+      (hands.length === 4) ? GAME_STATE.COMPUTER_WANTS_TO_THROW_HAND : GAME_STATE.THROW_HAND;
   }
   return { computerThrowGameState };
 };
 
 export const shouldComputerAgreeThrowHand = (hands, tookBid, players) => {
-  let computerAgreeThrowHand = 'throwHand';
+  let computerAgreeThrowHand = GAME_STATE.THROW_HAND;
   const { points } = getHandMeld(hands[tookBid], '');
   const { totalWins } = getProjectedCount(hands[tookBid], '', players, false);
   if (points >= 12 || totalWins.length >= 6) {
-    computerAgreeThrowHand = 'throwHandDisagree';
+    computerAgreeThrowHand = GAME_STATE.THROW_HAND_DISAGREE;
   }
   return { computerAgreeThrowHand };
 };
 
 export const shouldUserThrowHand = (hands, bidAmount, players) => {
   let throwPlayerModal = {shown: false};
-  const suits = ['D', 'S', 'C', 'H'];
+  const suits = CARD_ORDER.SUITS;
   let high = 0;
   let meld = 0;
   suits.forEach(suit => {
@@ -879,17 +881,17 @@ export const shouldUserThrowHand = (hands, bidAmount, players) => {
         buttons: [
           {
             label: 'Play Hand',
-            returnMessage: 'throwHandContinue',
+            returnMessage: GAME_STATE.THROW_HAND_CONTINUE,
           },
           {
             label: 'Throw Hand',
-            returnMessage: (players.length === 4) ? 'userThrowHand' : 'throwHand',
+            returnMessage: (players.length === 4) ? GAME_STATE.USER_THROW_HAND : GAME_STATE.THROW_HAND,
           }
         ]
       }
     );
   }
-  const throwGameState = (mayFail || willFail) ? 'waitUserThrowHand' : 'throwHandContinue';
+  const throwGameState = (mayFail || willFail) ? GAME_STATE.WAIT_USER_THROW_HAND : GAME_STATE.THROW_HAND_CONTINUE;
   return {
     throwPlayerModal,
     throwGameState
@@ -898,7 +900,7 @@ export const shouldUserThrowHand = (hands, bidAmount, players) => {
 
 export const setUpDiscards = (hands, tookBid, players, trumpSuit, bidAmount) => {
   const discardHands = [...hands];
-  let discardGameState = 'computerDiscard';
+  let discardGameState = GAME_STATE.COMPUTER_DISCARD;
   let discardPlayerModal = {shown: false};
   const trumpHeader = getTrumpBidHeader(trumpSuit, tookBid, bidAmount, players);
   const flexWord = (tookBid === 0) ? 'have' : 'has';
@@ -909,9 +911,9 @@ export const setUpDiscards = (hands, tookBid, players, trumpSuit, bidAmount) => 
     discardPlayerModal = generalModalData(userDiscardMessage, {
       width: 450,
       height: 105,
-      buttons: [{ label: 'Discard', status: 'inactive', returnMessage: 'userDiscard' }],
+      buttons: [{ label: 'Discard', status: 'inactive', returnMessage: GAME_STATE.USER_DISCARD }],
     });
-    discardGameState = 'waitUserDiscard';
+    discardGameState = GAME_STATE.WAIT_USER_DISCARD;
     const { cardsUsed } = getHandMeld(hands[0], trumpSuit);
     discardHands[0].forEach((card, cardIndex) => {
       const suitValue = `${discardHands[0][cardIndex].suit}${discardHands[0][cardIndex].value}`;
@@ -999,7 +1001,7 @@ export const removeUserDiscard = (state) => {
 };
 
 export const calculateComputerDiscard = (state) => {
-  let removeComputerGameState = 'waitRemoveDiscards';
+  let removeComputerGameState = GAME_STATE.WAIT_REMOVE_DISCARDS;
   let removeComputerPlayer = state.playerModal;
   let removeComputerHands = [...state.hands];
   let removeComputerMovingCards = [];
@@ -1041,7 +1043,7 @@ export const calculateComputerDiscard = (state) => {
       possibleDiscards.push(unheldCard[0]);
     }
   }
-  const valueKeepRanking = ['K', '10', '9', 'J', 'Q', 'A'];
+  const valueKeepRanking = CARD_ORDER.KEEP_RANKING;
   while (possibleDiscards.length > state.hands.length) {
     let highest = 0;
     let highestIndex = 0;
@@ -1094,9 +1096,9 @@ export const calculateComputerDiscard = (state) => {
     removeComputerPrompt = generalModalData(computerDiscardMessage, {...trumpHeader});
     removeComputerPlayer = generalModalData('', {
       hasBox: false,
-      buttons: [{ label: 'Continue', returnMessage: 'postDiscardTrump'}],
+      buttons: [{ label: 'Continue', returnMessage: GAME_STATE.POST_DISCARD_TRUMP}],
     });
-    removeComputerGameState = 'waitRemoveDiscardsWithMessage';
+    removeComputerGameState = GAME_STATE.WAIT_REMOVE_DISCARDS_WITH_MESSAGE;
   }
   return {
     removeComputerHands,
@@ -1141,7 +1143,7 @@ export const computerSelectTrump = (hands, tookBid, players, bidAmount) => {
   const computerTrumpSuit = getTrumpSuit(hands[tookBid], players);
   const computerTrumpPlayer = generalModalData('', {
     hasBox: false,
-    buttons: [{ label: 'Continue', returnMessage: 'postTrumpSuitContinue'}],
+    buttons: [{ label: 'Continue', returnMessage: GAME_STATE.POST_TRUMP_SUIT_CONTINUE}],
   });
   const suitIcon = suitIconSelector(computerTrumpSuit);
   const messageStyle = {
@@ -1191,10 +1193,12 @@ export const meldCards = (state) => {
       }
     });
   }
-  const values = ['A', '10', 'K', 'Q', 'J', '9'];
-  const suits = ['C', 'H', 'S', 'D'];
-  const valueColumns = {'A':0, '10':0, 'K':0, 'Q':0, 'J':0, '9':0};
-  const suitRows = {'C':0, 'H':0, 'S':0, 'D':0};
+  const values = CARD_ORDER.HIGH_TO_LOW;
+  const suits = CARD_ORDER.MELD_SUITS;
+  const valueColumns = {};
+  const suitRows = {};
+  values.forEach(value => { valueColumns[value] = 0; });
+  suits.forEach(suit => { suitRows[suit] = 0; });
   suits.forEach(suit => {
     const suitMatches = cardsUsed.filter(cardUsed => cardUsed[0] === suit);
     suitRows[suit] = suitMatches.length;
@@ -1261,7 +1265,7 @@ export const postMeldLaydown = (
   teams
 ) => {
   const meldDealToPlayer = (dealToPlayer + 1) % players.length;
-  let meldGameState = 'displayMeld';
+  let meldGameState = GAME_STATE.DISPLAY_MELD;
   const meldPlayScore = playScore;
   let meldPlayerModal = { shown:false };
   let meldPromptModal = promptModal;
@@ -1281,7 +1285,7 @@ export const postMeldLaydown = (
     }
     const trumpHeader = getTrumpBidHeader(trumpSuit, tookBid, bidAmount, players);
     if (blankTeam > -1) {
-      meldGameState = 'finalThrownHandWait';
+      meldGameState = GAME_STATE.FINAL_THROWN_HAND_WAIT;
       meldPlayerModal = generalModalData(
         '',
         {
@@ -1289,7 +1293,7 @@ export const postMeldLaydown = (
           buttons: [{
             label: 'End Hand',
             status: 'warning',
-            returnMessage: 'endOfHand'
+            returnMessage: GAME_STATE.END_OF_HAND
           }],
         }
       );
@@ -1297,14 +1301,14 @@ export const postMeldLaydown = (
         ...trumpHeader
       });
     } else {
-      meldGameState = 'startGamePlayWait';
+      meldGameState = GAME_STATE.START_GAME_PLAY_WAIT;
       meldPlayerModal = generalModalData(
         '',
         {
           hasBox: false,
           buttons: [{
             label: 'Start Play',
-            returnMessage: 'startGamePlay'
+            returnMessage: GAME_STATE.START_GAME_PLAY
           }],
         }
       );
@@ -1335,12 +1339,12 @@ export const startGamePlay = (state) => {
   const startBidModals = [];
   let startMovingCards = [];
   let startMelds = [];
-  let startGameState = 'movingMeldCardsBack:complete';
+  let startGameState = GAME_STATE.MOVING_MELD_CARDS_BACK_COMPLETE;
   const trumpHeader = getTrumpBidHeader(state.trumpSuit, state.tookBid, state.bidAmount, state.players);
   const startPromptModal = generalModalData('', { ...trumpHeader });
   for (let i = 0; i < state.players.length; i++) {
     state.melds[i].forEach((card, cardIndex) => {
-      startGameState = 'movingMeldCardsBack';
+      startGameState = GAME_STATE.MOVING_MELD_CARDS_BACK;
       const sourceCardId = `M${i}${cardIndex}`;
       const sourceCard = getCardLocation(sourceCardId, state);
       const targetCardId = `H${i}${cardIndex}`;
@@ -1435,7 +1439,7 @@ export const gotTheRest = (state) => {
         for (let i = 0; i < state.players.length; i++) {
           gotRestShowHands.push(true);
         }
-        gotRestGameState = 'gotRestContinue';
+        gotRestGameState = GAME_STATE.GOT_REST_CONTINUE;
         gotRestPromptModal.message = (<span><b>{state.players[p]}</b> wins rest</span>);
         const message = (<span><b>{state.players[p]}</b> wins the rest</span>);
         gotRestPlayerModal = generalModalData(message, {
@@ -1444,7 +1448,7 @@ export const gotTheRest = (state) => {
           height: 105,
           buttons: [{
             label: 'Continue',
-            returnMessage: 'winRestContinue'
+            returnMessage: GAME_STATE.WIN_REST_CONTINUE
           }],
         });
       }
@@ -1685,7 +1689,7 @@ export const computerLeadPlay = (state) => {
     }
     if (playCard === null) {
       // give and just play lowest card with a preference to non-trump
-      const lowValues = ['A', '10', 'K', 'Q', 'J', '9'];
+      const lowValues = CARD_ORDER.HIGH_TO_LOW;
       let isTrump = true;
       let lowIndex = -1;
       validHand.forEach(card => {
@@ -1731,7 +1735,7 @@ export const computerFollowPlay = (state, nextPlayer) => {
   const winningCard = state.playPile[state.winningPlay];
   const beenTrumped = (winningCard.suit === state.trumpSuit && ledCard.suit !== state.trumpSuit);
   const widowDiscards = [];
-  const values = ['9', 'J', 'Q', 'K', '10', 'A'];
+  const values = CARD_ORDER.LOW_TO_HIGH;
   if (nextPlayer === state.tookBid) {
     for (let i = 0; i < state.players.length; i++) {
       widowDiscards.push(state.discardPiles[state.tookBid][i]);
@@ -1875,7 +1879,7 @@ export const resolvePlay = (
 ) => {
 
   const resolvePlayedCards = [...playedCards];
-  const values = ['9', 'J', 'Q', 'K', '10', 'A'];
+  const values = CARD_ORDER.LOW_TO_HIGH;
   let resolveWinningPlay = winningPlay;
   const playedCard = playPile[dealToPlayer];
   if (dealToPlayer === tookPlay) {
@@ -1933,12 +1937,11 @@ export const displayPlayWinner = (trumpSuit, players, playPile, winningPlay, pro
 
 export const setUpNextPlay = (hands, promptModal, tookBid, winningPlay) => {
   let nextPlayDealToPlayer = winningPlay;
-  let nextPlayGameState = 'startNextPlay';
+  let nextPlayGameState = GAME_STATE.START_NEXT_PLAY;
   const nextPlayPromptMessage = {...promptModal};
   if (hands[0].length === 0) {
-    nextPlayGameState = 'tallyCounts';
-    const newMessage = (<div>{nextPlayPromptMessage.message}<br/><div>+1 for last trick</div></div>);
-    nextPlayPromptMessage.message = newMessage;
+    nextPlayGameState = GAME_STATE.TALLY_COUNTS;
+    nextPlayPromptMessage.message = (<div>{nextPlayPromptMessage.message}<br/><div>+1 for last trick</div></div>);
     nextPlayDealToPlayer = (tookBid + 1) % hands.length;
   }
   return {
@@ -1990,20 +1993,20 @@ export const discardToMeldTally = (state) => {
   const tallyDiscardPiles = [...state.discardPiles];
   const valuePile = tallyDiscardPiles[state.dealToPlayer];
   let tallyMovingCards = [];
-  let tallyGameState = 'moveDiscardToMeldTally';
+  let tallyGameState = GAME_STATE.MOVE_DISCARD_TO_MELD_TALLY;
   let tallyDealToPlayer = state.dealToPlayer;
   if (valuePile.length === 0) {
-    tallyGameState = 'nextTally';
+    tallyGameState = GAME_STATE.NEXT_TALLY;
     if (state.players.length === 3) {
       tallyDealToPlayer = (state.dealToPlayer + 1) % state.players.length;
       if (tallyDealToPlayer === (state.tookBid + 1) % 3) {
-        tallyGameState = 'doneCounting';
+        tallyGameState = GAME_STATE.DONE_COUNTING;
       }
     } else {
       if (state.dealToPlayer === (state.tookBid + 1) % 4) {
         tallyDealToPlayer = state.tookBid;
       } else {
-        tallyGameState = 'doneCounting';
+        tallyGameState = GAME_STATE.DONE_COUNTING;
       }
     }
   } else {
@@ -2013,7 +2016,7 @@ export const discardToMeldTally = (state) => {
     sourceCard.zoom = sourceCard.zoom * 2;
     const targetCardId = `M${state.dealToPlayer}`;
     const targetCard = getCardLocation(targetCardId, state);
-    const isCount = (selectedCard.value === 'K' || selectedCard.value === '10' ||selectedCard.value === 'A');
+    const isCount = CARD_ORDER.COUNTS.indexOf(selectedCard.value) > -1;
     const newMovingCard = {
       id: `${sourceCardId}to${targetCardId}`,
       keyId: `${sourceCardId}to${targetCardId}${Date.now()}`,
@@ -2040,7 +2043,7 @@ export const addCountToTally = (bidModals, melds, tookPlay, dealToPlayer) => {
   const addCountBidModals = [...bidModals];
   let counts = (melds.length === 3 && dealToPlayer === tookPlay) ? 1 : 0;
   counts = (melds.length === 4 && dealToPlayer % 2 === tookPlay % 2) ? 1 : counts;
-  const countValues = ['A', '10', 'K'];
+  const countValues = CARD_ORDER.COUNTS;
   melds[dealToPlayer].forEach(card => {
     if (countValues.indexOf(card.value) > -1) {
       counts = counts + 1;
@@ -2092,7 +2095,7 @@ export const addCountToScore = (teams, players, playScore, melds, bidModals, too
     buttons: [{
       label: 'End Hand',
       status: 'warning',
-      returnMessage: 'endOfHand'
+      returnMessage: GAME_STATE.END_OF_HAND
     }],
   });
   const teamIndex = tookBid % teams.length;
@@ -2122,7 +2125,7 @@ export const addCountToScore = (teams, players, playScore, melds, bidModals, too
 };
 
 export const resolveEndHand = (teams, players, playScore, tookBid, dealer) => {
-  let endHandGameState = 'moveDeckToDealer';
+  let endHandGameState = GAME_STATE.MOVE_DECK_TO_DEALER;
   let endHandGameWon = '';
   let endHandPlayerModal = {shown: false};
   let endHandPromptModal = generalModalData('');
@@ -2165,7 +2168,7 @@ export const resolveEndHand = (teams, players, playScore, tookBid, dealer) => {
     }
   }
   if (won > -1) {
-    endHandGameState = 'waitEndOfGame';
+    endHandGameState = GAME_STATE.WAIT_END_OF_GAME;
     endHandGameWon = teams[won];
     endHandPlayerModal = generalModalData(message, {
       hasBox: (message !== ''),
@@ -2173,7 +2176,7 @@ export const resolveEndHand = (teams, players, playScore, tookBid, dealer) => {
       buttons: [{
         label: 'End Game',
         status: 'warning',
-        returnMessage: 'endOfGame'
+        returnMessage: GAME_STATE.END_OF_GAME
       }],
     });
     endHandPromptModal = generalModalData((<span><b>{teams[won]}</b> won the game!</span>));

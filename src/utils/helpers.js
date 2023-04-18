@@ -1,12 +1,13 @@
-import {Hearts} from "../components/PlayingCard/svg/Hearts";
-import {Diamonds} from "../components/PlayingCard/svg/Diamonds";
-import {Clubs} from "../components/PlayingCard/svg/Clubs";
-import {Spades} from "../components/PlayingCard/svg/Spades";
+import {Hearts} from '../components/PlayingCard/svg/Hearts';
+import {Diamonds} from '../components/PlayingCard/svg/Diamonds';
+import {Clubs} from '../components/PlayingCard/svg/Clubs';
+import {Spades} from '../components/PlayingCard/svg/Spades';
+import * as CARD_ORDER from './cardOrder';
 
 export const generateShuffledDeck = (shuffles = 1000) => {
   const cards = [];
-  const suits = ['H', 'S', 'D', 'C'];
-  const values = ['A', '10', 'K', 'Q', 'J', '9'];
+  const suits = CARD_ORDER.SUITS;
+  const values = CARD_ORDER.HIGH_TO_LOW;
   suits.forEach(suit => {
     values.forEach(value => {
       cards.push({ suit, value});
@@ -66,7 +67,6 @@ export const getCardLocation = (id, state, xAdjust = 0, yAdjust = 0) => {
   const location = {};
   const objectType = id[0];
   const playerIndex = id.length > 1 ? Number(id[1]) : -1;
-  const subIndex = id.length > 2 ? Number(id.substring(2)) : -1;
   let rotation = 0;
   let zoom = 0;
   let xLocation = 0;
@@ -153,8 +153,8 @@ export const createLandingCard = (stoppedCard, objectType) => {
 };
 
 export const sortCardHand = (hand) => {
-  const suitOrder = ['S', 'H', 'C', 'D'];
-  const valueOrder = ['A','10','K','Q','J','9'];
+  const suitOrder = CARD_ORDER.SUITS;
+  const valueOrder = CARD_ORDER.HIGH_TO_LOW;
   const sortedHand = [];
   const cardOrdering = [];
   hand.forEach((card, index) => {
@@ -169,25 +169,6 @@ export const sortCardHand = (hand) => {
   return sortedHand;
 };
 export const getHandMeld = (hand, trump) => {
-  const fullSuit = {
-    'H': 'Hearts',
-    'C': 'Clubs',
-    'D': 'Diamonds',
-    'S': 'Spades',
-  };
-  const meldCombinations = [
-    { cards: [`${trump}A`,`${trump}10`,`${trump}K`,`${trump}Q`,`${trump}J`], value: 15, title: 'Run'},
-    { cards: [`${trump}9`], value: 1, title: '9 of Trump'},
-    { cards: ['HA', 'DA', 'SA', 'CA'], value: 10, title: 'Aces'},
-    { cards: ['HK', 'DK', 'SK', 'CK'], value: 8, title: 'Kings'},
-    { cards: ['HQ', 'DQ', 'SQ', 'CQ'], value: 6, title: 'Queens'},
-    { cards: ['HJ', 'DJ', 'SJ', 'CJ'], value: 4, title: 'Jacks'},
-    { cards: ['SQ', 'DJ'], value: 4, title: 'Pinochle'},
-    { cards: ['HK', 'HQ'], value: 2, title: 'Marriage in Hearts'},
-    { cards: ['DK', 'DQ'], value: 2,title: 'Marriage in Diamonds'},
-    { cards: ['CK', 'CQ'], value: 2,title: 'Marriage in Clubs'},
-    { cards: ['SK', 'SQ'], value: 2,title: 'Marriage in Spades'},
-  ];
   const cardsUsed = [];
   let nearMiss = 0;
   let cardsRequired;
@@ -200,15 +181,19 @@ export const getHandMeld = (hand, trump) => {
   let totalMatches;
   let displayLine;
   let misses;
-  meldCombinations.forEach((meldCombination, meldIndex) => {
+  CARD_ORDER.MELD_COMBINATIONS.forEach((meldCombination, meldIndex) => {
+    const combinationCards = [...meldCombination.cards];
+    combinationCards.forEach((card, cardIndex) => {
+      combinationCards[cardIndex] = card.replace('*', trump);
+    });
     matches = [];
-    meldCards = meldCombination.cards.length;
+    meldCards = combinationCards.length;
     for (let i = 0; i < meldCards; i ++) {
       matches.push(0);
     }
     hand.forEach(card => {
       handCard = `${card.suit}${card.value}`;
-      meldCombination.cards.forEach((meldCard, index) => {
+      combinationCards.forEach((meldCard, index) => {
         if (meldCard === handCard) {
           matches[index] = matches[index] + 1;
         }
@@ -232,11 +217,12 @@ export const getHandMeld = (hand, trump) => {
     }
     if (totalMatches > 0) {
       cardsRequired = [];
-      if (meldIndex > 6 && meldCombination.cards[0][0] === trump) {
+      if (meldIndex > 6 && combinationCards[0][0] === trump) {
         if (totalMatches > runs) {
           points = points + ((totalMatches - runs) * 4);
           displayLine = (totalMatches - runs > 1)
-            ? `2 Royal Marriages in ${fullSuit[trump]}` : `Royal Marriage in ${fullSuit[trump]}`;
+            ? `2 Royal Marriages in ${CARD_ORDER.FULL_SUIT_NAMES[trump]}`
+            : `Royal Marriage in ${CARD_ORDER.FULL_SUIT_NAMES[trump]}`;
           textDisplay = `${textDisplay}<br/>${displayLine}`;
         }
       } else {
@@ -245,7 +231,7 @@ export const getHandMeld = (hand, trump) => {
         textDisplay = `${textDisplay}<br/>${displayLine}`;
       }
       if (totalMatches > 0) {
-        meldCombination.cards.forEach(card => {
+        combinationCards.forEach(card => {
           cardsRequired = cardsUsed.filter(usedCard => usedCard === card);
           for (let c = 0; c < totalMatches - cardsRequired.length; c++) {
             cardsUsed.push(card);
@@ -266,8 +252,8 @@ export const getHandMeld = (hand, trump) => {
 export const getProjectedCount = (hand, trump, players, preWidow = true) => {
   const numPlayers = players.length;
   const winAdjustment = (25 / ((numPlayers === 3) ?  15 : 11));
-  const suits = ['H', 'C', 'D', 'S'];
-  const valueStrength = ['A','10','K','Q','J','9'];
+  const suits = CARD_ORDER.SUITS;
+  const valueStrength = CARD_ORDER.HIGH_TO_LOW;
   let isTrump;
   let projectedCounts = 0;
   let lostCounts = 0;
@@ -281,7 +267,8 @@ export const getProjectedCount = (hand, trump, players, preWidow = true) => {
     isTrump = (suit === trump);
     wins = 0;
     howMany = 0;
-    whichCards = {'A': 0, '10': 0, 'K': 0, 'Q': 0, 'J': 0, '9': 0};
+    whichCards = {};
+    CARD_ORDER.HIGH_TO_LOW.forEach(value => { whichCards[value] = 0; });
     hand.forEach(card => {
       if (suit === card.suit) {
         whichCards[card.value] = whichCards[card.value] + 1;
@@ -325,7 +312,7 @@ export const getProjectedCount = (hand, trump, players, preWidow = true) => {
 };
 
 export const getHandBid = (hand, players) => {
-  const suits = ['S','D','C','H']
+  const suits = CARD_ORDER.SUITS;
   let highBid = 0;
   suits.forEach(suit => {
     const { points, nearMiss } = getHandMeld(hand, suit);
@@ -339,7 +326,7 @@ export const getHandBid = (hand, players) => {
 };
 
 export const getTrumpSuit = (hand, players) => {
-  const suits = ['S','D','C','H']
+  const suits = CARD_ORDER.SUITS;
   let highSuit = 0;
   let trumpSuit = 'H';
   suits.forEach(suit => {
@@ -360,7 +347,7 @@ export const getWinValue = (hand, index) => {
   const checkHand = [...hand];
   const suitCards = checkHand.filter(check => check.suit === filterSuit);
   const cardsInSuit = suitCards.length;
-  const winValues = ['A', 'A', '10', '10', 'K', 'K', 'Q', 'Q', 'J', '10', '9', '9'];
+  const winValues = CARD_ORDER.FULL_SUIT_HIGH_TO_LOW;
   let win = 0;
   let lose = 0;
   let isDone = false;
@@ -467,7 +454,7 @@ export const setValidCardIndexes = (
   firstPlay,
   ledValue = ''
 ) => {
-  const values = ['9', 'J', 'Q', 'K', '10', 'A'];
+  const values = CARD_ORDER.LOW_TO_HIGH;
   const validHand = [...hand];
   let validSuit = (ledSuit === '' && firstPlay) ? trumpSuit : ledSuit;
   if (validSuit !== '') {
@@ -526,8 +513,8 @@ export const getUnplayedCards = (validHand, playedCards, widowDiscards) => {
 
 export const getWinningCards = (hands, unplayedCards, offSuits, trumpSuit, tookPlay, firstPlay) => {
   const winners = [];
-  const suits = ['H','C','D','S'];
-  const values = ['9','J','Q','K','10','A'];
+  const suits = CARD_ORDER.SUITS;
+  const values = CARD_ORDER.LOW_TO_HIGH;
   suits.forEach(suit => {
     if (suit === trumpSuit || !firstPlay) {
       let highUnplayed = -1;
@@ -574,16 +561,16 @@ export const getWinningCards = (hands, unplayedCards, offSuits, trumpSuit, tookP
 };
 
 export const getHighestNonCount = (hand, suit, limitToNonCount = false) => {
-  const nonCounterValue = ['A', '10', 'K', '9', 'J', 'Q'];
+  const nonCounterValue = CARD_ORDER.HIGHEST_NON_COUNT;
   return getCardValueByArray(hand, suit, nonCounterValue, (limitToNonCount ? 2: -1));
 };
 
 export const getLowestNonCount = (hand, suit, limitToNonCount = false) => {
-  const lowestCounterValue = ['A', '10', 'K', 'Q', 'J', '9'];
+  const lowestCounterValue = CARD_ORDER.HIGH_TO_LOW;
   return getCardValueByArray(hand, suit, lowestCounterValue, (limitToNonCount ? 2: -1));
 };
 export const getBestCounter = (hand, suit, limitToCount = false) => {
-  const counterValue = ['A', 'Q', 'J', '9', '10', 'K'];
+  const counterValue = CARD_ORDER.BEST_COUNTER;
   return getCardValueByArray(hand, suit, counterValue, (limitToCount ? 3 : -1));
 };
 
@@ -604,7 +591,7 @@ export const getCardValueByArray = (hand, suit, valueArray, arraylimit = -1) => 
 
 export const getTrumpPullingSuits = (offSuits, trumpSuit, tookPlay) => {
   const pullSuits = [];
-  const suits = ['H', 'C', 'D', 'S'];
+  const suits = CARD_ORDER.SUITS;
   offSuits.forEach((offSuit, player) => {
     if (player !== tookPlay && (offSuits.length === 3 || player !== (tookPlay + 2) % 4 )) {
       suits.forEach(suit => {
@@ -622,7 +609,7 @@ export const getTrumpPullingSuits = (offSuits, trumpSuit, tookPlay) => {
 export const getPartnerPassSuits = (offSuits, trumpSuit, tookPlay, unplayedCards, seenCards) => {
   const partner = (tookPlay + 2) % 4;
   const blocker = (tookPlay + 1) % 4;
-  const suits = ['H', 'C', 'D', 'S'];
+  const suits = CARD_ORDER.SUITS;
   let passSuits = [];
   let doneChecking = false;
   suits.forEach(suit => {

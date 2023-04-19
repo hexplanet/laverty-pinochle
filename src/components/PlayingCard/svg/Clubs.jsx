@@ -1,4 +1,11 @@
 import React from "react";
+
+/**
+ * The clubs icon
+ *
+ * @prop myWidth {number} Width of the icon.
+ * @prop myHeight {number} Height of the icon.
+ */
 export const Clubs = ({myWidth, myHeight}) => {
   return (
     <svg width={myWidth} height={myHeight} viewBox="1278 315 37 36" xmlns="http://www.w3.org/2000/svg">

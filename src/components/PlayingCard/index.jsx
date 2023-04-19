@@ -7,6 +7,28 @@ import {Diamonds} from "./svg/Diamonds";
 import {Clubs} from "./svg/Clubs";
 import * as colors from '../../utils/colors.js';
 import './index.scss';
+/**
+ * Displays and operates a playing card. This can either show the front or back of the card. The suit and value
+ * of the card are displayed on the front. You can enable clicking of the card which will return index and suit value
+ * combination to the parent. You may move, rotate, and zoom the card to change its display.
+ *
+ * @prop index {number} This is an index to be used along with a container like a hand or pile.
+ * @prop suit {string} This is the suit of the card. Valid values are "H", "D", "S", and "C".
+ * @prop value {string} This is the value of the card. Valid values are "A", "10", "K", "Q", "J", and "9".
+ * @prop shown {bool} Is the front of the card shown?
+ * @prop zoom {number} This is the percentage at which the card is scaled. Normal is 100.
+ * @prop rotation {number} This is the rotation applied to the card. 0 to 360 are valid values.
+ * @prop xLocation {number} This is the global left location of the card within the browser or within container.
+ * @prop yLocation {number} This is the global top location of the hand within the browser or within container.
+ * @prop zLocation {number} This the z-index of the card.
+ * @prop hidden {boolean} Is the card visible?
+ * @prop rolloverColor {string} This is the hex rollover color of the card.
+ * @prop frontColor {string} This is the hex front color of the card.
+ * @prop active {boolean} Is the card displayed as active?
+ * @prop clickable {boolean} Is the card clickable?
+ * @prop handleClick {function} This is the click handler for the card if clickable. If clicked this will send
+ *                              to the parent the index and combination suit and value of the card.
+ */
 function PlayingCard({
   index,
   suit,
@@ -26,6 +48,7 @@ function PlayingCard({
 }) {
   const [borderColor, setBorderColor] = useState(colors.cardBorderColor);
   useEffect(() => {
+    // reset border color on rollover reset
     if (rolloverColor === '') {
       setBorderColor(colors.cardBorderColor);
     }
@@ -42,17 +65,26 @@ function PlayingCard({
   const valueColor = (suit === 'H' || suit === 'D') ? 'value-red' : 'value-black';
   const cardFrontColor = active ? frontColor : colors.cardInactiveFrontColor;
   const cardBodyClass = `card-body${clickable ? ' clickable': '' }`;
+  /**
+   * Handles card click and returns index and suit value combination if card is clickable
+   */
   const cardClicked = () => {
     if (clickable) {
       const suitValue = `${suit}${value}`;
       handleClick(index, suitValue);
     }
   };
+  /**
+   * Handles mouse enter and sets the border color for rollover if present
+   */
   const enterCard = () => {
     if (rolloverColor !== '' && borderColor !== rolloverColor) {
       setBorderColor(rolloverColor);
     }
   };
+  /**
+   * Handles mouse exit and resets the rollover color
+   */
   const exitCard= () => {
     if (borderColor === rolloverColor) {
       setBorderColor(colors.cardBorderColor);

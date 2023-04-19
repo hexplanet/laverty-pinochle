@@ -2,6 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 import * as colors from '../../../utils/colors.js';
 
+/**
+ * Displays what appears to the back of the playing card.
+ *
+ * @prop color {string} Main hex color of the solid playing card back.
+ * @prop borderColor {string} Hex color of the border of the playing card back.
+ */
 function BackOfCard({ color, borderColor }) {
   const strokeSize = (borderColor === colors.cardBorderColor) ? "4" : "12";
   return (

@@ -3,6 +3,26 @@ import PropTypes from 'prop-types';
 import './index.scss';
 import RuledPaper from "./svg/RuledPaper";
 
+/**
+ * Displays and operates a button. The button may show icon and/or label inside of it.
+ * Button will send a callback message if clicked and not inactive status.
+ *
+ * @prop xLocation {number} This is the global left location of the scorepad within the browser.
+ * @prop yLocation {number} This is the global top location of the scorepad within the browser.
+ * @prop zoom {number} This is the percentage at which the scorepad is scaled. Normal is 100.
+ * @prop teams {array} REQUIRED. This is an array of team names to be display at the top of the sheet.
+ * @prop won {string} THis is the team name of the winning team. If no one has won the value should be "".
+ * @prop scores {array} REQUIRED. This is an array(teams) of arrays(score rows) of objects.
+ *                      The properties of the score rows are as follows:
+ *                      bid {string} This is the bid value for that team for this row
+ *                      meld {string} This is the meld value for that team for this row
+ *                      counts {string} This is the counts value for that team for this row
+ *                      score {string} This is the score value for that team for this row
+ *                      gotSet {boolean} Was the team set this for this row. If so, X over bid and meld and counts
+ *                                       appear with erased effect.
+ * @prop handleClick {function} This is a click handler for the scorepad that tells the parent that is has been clicked.
+ * @prop hasBlocker {boolean}  Is a full screen click blocking element under the modal. Default is false.
+ */
 function ScorePad({
   xLocation,
   yLocation,
@@ -18,6 +38,7 @@ function ScorePad({
     const columnWidth = 600 / teams.length;
     const columns = teams.length;
     const columnClassName = `score-column of-${columns}-columns`;
+    // The below loop sets up data for each team to have its score column displayed
     teams.forEach((team, index) => {
       const leftColumn = { left: `${columnWidth * index}px`, width: `${columnWidth}px`};
       const columnSize = { width: `${columnWidth}px`};
@@ -28,6 +49,7 @@ function ScorePad({
       const scoreLines = [];
       scoreLines.push(<div className='team-name' style={columnSize} key={`teamName${index}`}>{team}</div>);
       const points = scores[index];
+      // The below loop displays the score rows for the current team
       points.forEach((point, pointIndex) => {
         const topRowStyle = { top: ((pointIndex + 1) * 50) - 5};
         scoreLines.push(<div className='bid' style={topRowStyle} key={`bid${index}${pointIndex}`}>{point.bid}</div>);
@@ -51,6 +73,11 @@ function ScorePad({
     });
     return scoreElements;
   }, [teams, won, scores, scoreElements]);
+  /**
+   * Function to block all mouse events from bubbling past the score pad
+   *
+   * @param {mouseEvent} event The mouseEvent to be blocked through stopPropagation.
+   */
   const blockAll = (event) => {
     event.stopPropagation();
   }
@@ -69,6 +96,7 @@ function ScorePad({
     transform: `scale(${(zoom * 4)/100})`,
   };
   if (hasBlocker) {
+    // Display of scorepad with click blocker
     return (
       <div className='lavpin-global-score-pad'>
         <button className='scorepad-blocker' onClick={blockAll} />
@@ -83,6 +111,7 @@ function ScorePad({
       </div>
     );
   }
+  // Display of scorepad without click blocker
   return (
     <div className='lavpin-score-pad' style={location}>
       <button onClick={handleClick} className={'score-pad-transform'} style={transformStyle}>

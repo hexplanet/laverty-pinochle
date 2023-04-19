@@ -4,6 +4,10 @@ import * as colors from '../../utils/colors.js';
 import PlayingCard from "../PlayingCard";
 import './index.scss';
 
+/**
+ * Moves a PlayingCard component around the screen.
+ * TODO: Refactor this to use the useAnimation hook
+ */
 const keyTimes = {};
 function MoveCard({
   id,

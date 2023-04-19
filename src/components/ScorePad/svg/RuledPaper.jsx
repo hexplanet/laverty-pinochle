@@ -2,6 +2,14 @@ import React from "react";
 import PropTypes from "prop-types";
 import * as colors from '../../../utils/colors.js';
 
+/**
+ * This displays the score pad background with a varaible number of columns for teams.
+ *
+ * @prop color {object} Hex color of the paper
+ * @prop divisionColor {string} Hex color of the column dividers
+ * @prop lineColor {string} Hex color of the score dividers
+ * @prop columns {string} Number of columns to be drawn on the score card. Valid values are 2 and 3.
+ */
 function RuledPaper({ color, divisionColor, lineColor, columns }) {
   const majorDivisionStyle = {
     stroke: divisionColor,

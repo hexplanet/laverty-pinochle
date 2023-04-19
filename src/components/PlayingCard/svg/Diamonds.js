@@ -1,4 +1,10 @@
 import React from "react";
+/**
+ * The diamonds icon
+ *
+ * @prop myWidth {number} Width of the icon.
+ * @prop myHeight {number} Height of the icon.
+ */
 export const Diamonds = ({myWidth, myHeight}) => {
   return (
     <svg width={myWidth} height={myHeight} viewBox="160 98 28 39" xmlns="http://www.w3.org/2000/svg">

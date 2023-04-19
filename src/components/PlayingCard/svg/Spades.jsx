@@ -1,4 +1,10 @@
 import React from "react";
+/**
+ * The spades icon
+ *
+ * @prop myWidth {number} Width of the icon.
+ * @prop myHeight {number} Height of the icon.
+ */
 export const Spades = ({myWidth, myHeight}) => {
   return (
     <svg width={myWidth} height={myHeight} viewBox="1284 778 32 37" xmlns="http://www.w3.org/2000/svg">

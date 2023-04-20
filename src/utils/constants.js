@@ -1,3 +1,4 @@
+// Global constants
 export const MODAL_AUTO_CENTER_VALUE = -10000;
 export const CARD_PILE_X_DEPTH = 0.2;
 export const CARD_PILE_Y_DEPTH = 0.5;

@@ -1,3 +1,4 @@
+// Game State Constants
 export const INIT = 'init';
 export const CHOSE_DEALER = 'choseDealer';
 export const WAIT_FOR_ACE_COMPLETE = 'waitForAce:complete';

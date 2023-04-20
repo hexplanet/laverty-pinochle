@@ -1,3 +1,4 @@
+// Color constants
 export const cardFrontColor = '#eee';
 export const cardBorderColor = '#aaa';
 export const cardDefaultRolloverColor = '#0f0';

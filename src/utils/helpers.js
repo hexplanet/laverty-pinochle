@@ -4,6 +4,11 @@ import {Clubs} from '../components/PlayingCard/svg/Clubs';
 import {Spades} from '../components/PlayingCard/svg/Spades';
 import * as CARD_ORDER from './cardOrder';
 
+/**
+ *
+ * @param shuffles
+ * @returns {*[]}
+ */
 export const generateShuffledDeck = (shuffles = 1000) => {
   const cards = [];
   const suits = CARD_ORDER.SUITS;
@@ -30,7 +35,13 @@ export const generateShuffledDeck = (shuffles = 1000) => {
   }
   return cards;
 };
-
+/**
+ *
+ * @param lines
+ * @param props
+ * @returns {{hasCloseButton: boolean, shown: boolean, width: number, header: string, zoom: number,
+ *          message: JSX.Element, hasHeaderSeparator: boolean, height: number}}
+ */
 export const generalModalData = (lines, props = {}) => {
   let displayed;
   if (Array.isArray(lines)) {
@@ -54,11 +65,15 @@ export const generalModalData = (lines, props = {}) => {
     ...props
   };
 };
-
+/**
+ *
+ * @param id
+ * @param state
+ * @param xAdjust
+ * @param yAdjust
+ * @returns {{}}
+ */
 export const getCardLocation = (id, state, xAdjust = 0, yAdjust = 0) => {
-  // id char(0): H, D, M, P,
-  // id char(1): player
-  // id char(2+): index
   const threeHandPlayOffsets = [
     {x: 0, y: 150, r: 0},
     {x: -106, y: -106, r: 135},
@@ -112,7 +127,13 @@ export const getCardLocation = (id, state, xAdjust = 0, yAdjust = 0) => {
   location.zoom = zoom;
   return location;
 };
-
+/**
+ *
+ * @param min
+ * @param max
+ * @param step
+ * @returns {*}
+ */
 export const getRandomRange = (min, max, step) => {
   if (min === max) {
     return min;
@@ -123,7 +144,12 @@ export const getRandomRange = (min, max, step) => {
   if (randomNumber > max) { randomNumber = max; }
   return (min + (randomNumber * step));
 };
-
+/**
+ *
+ * @param stoppedCard
+ * @param objectType
+ * @returns {{shown, clickable: boolean, suit, value, rolloverColor: string}}
+ */
 export const createLandingCard = (stoppedCard, objectType) => {
   const returnedCard = {
     suit: stoppedCard.suit,
@@ -151,7 +177,11 @@ export const createLandingCard = (stoppedCard, objectType) => {
   returnedCard.frontColor = stoppedCard.frontColor;
   return returnedCard;
 };
-
+/**
+ *
+ * @param hand
+ * @returns {*[]}
+ */
 export const sortCardHand = (hand) => {
   const suitOrder = CARD_ORDER.SUITS;
   const valueOrder = CARD_ORDER.HIGH_TO_LOW;
@@ -168,6 +198,12 @@ export const sortCardHand = (hand) => {
   });
   return sortedHand;
 };
+/**
+ *
+ * @param hand
+ * @param trump
+ * @returns {{cardsUsed: *[], textDisplay: string, nearMiss: number, points: number}}
+ */
 export const getHandMeld = (hand, trump) => {
   const cardsUsed = [];
   let nearMiss = 0;
@@ -181,7 +217,11 @@ export const getHandMeld = (hand, trump) => {
   let totalMatches;
   let displayLine;
   let misses;
+  let pinochleIndex = 999;
   CARD_ORDER.MELD_COMBINATIONS.forEach((meldCombination, meldIndex) => {
+    if (meldCombination.title === 'Pinochle') {
+      pinochleIndex = meldIndex;
+    }
     const combinationCards = [...meldCombination.cards];
     combinationCards.forEach((card, cardIndex) => {
       combinationCards[cardIndex] = card.replace('*', trump);
@@ -217,7 +257,7 @@ export const getHandMeld = (hand, trump) => {
     }
     if (totalMatches > 0) {
       cardsRequired = [];
-      if (meldIndex > 6 && combinationCards[0][0] === trump) {
+      if (meldIndex > pinochleIndex && combinationCards[0][0] === trump) {
         if (totalMatches > runs) {
           points = points + ((totalMatches - runs) * 4);
           displayLine = (totalMatches - runs > 1)
@@ -248,7 +288,14 @@ export const getHandMeld = (hand, trump) => {
     textDisplay
   };
 };
-
+/**
+ *
+ * @param hand
+ * @param trump
+ * @param players
+ * @param preWidow
+ * @returns {{totalWins: *[], howManyTrump, projectedCounts: (number|number)}}
+ */
 export const getProjectedCount = (hand, trump, players, preWidow = true) => {
   const numPlayers = players.length;
   const winAdjustment = (25 / ((numPlayers === 3) ?  15 : 11));
@@ -310,7 +357,12 @@ export const getProjectedCount = (hand, trump, players, preWidow = true) => {
     totalWins,
   };
 };
-
+/**
+ *
+ * @param hand
+ * @param players
+ * @returns {number}
+ */
 export const getHandBid = (hand, players) => {
   const suits = CARD_ORDER.SUITS;
   let highBid = 0;
@@ -324,7 +376,12 @@ export const getHandBid = (hand, players) => {
   });
   return highBid;
 };
-
+/**
+ *
+ * @param hand
+ * @param players
+ * @returns {string}
+ */
 export const getTrumpSuit = (hand, players) => {
   const suits = CARD_ORDER.SUITS;
   let highSuit = 0;
@@ -340,7 +397,12 @@ export const getTrumpSuit = (hand, players) => {
   });
   return trumpSuit;
 };
-
+/**
+ *
+ * @param hand
+ * @param index
+ * @returns {{cardsInSuit: number, winValue: number}}
+ */
 export const getWinValue = (hand, index) => {
   const filterSuit = hand[index].suit;
   const targetValue = hand[index].value;
@@ -373,7 +435,11 @@ export const getWinValue = (hand, index) => {
     cardsInSuit
   };
 };
-
+/**
+ *
+ * @param suit
+ * @returns {JSX.Element}
+ */
 export const suitIconSelector = (suit) => {
   let suitIcon;
   switch(suit) {
@@ -391,6 +457,11 @@ export const suitIconSelector = (suit) => {
   }
   return suitIcon;
 };
+/**
+ *
+ * @param suit
+ * @returns {JSX.Element}
+ */
 export const getFormedSuitIcon = (suit) => {
   let suitIcon = suitIconSelector(suit);
   const iconStyle = {
@@ -401,7 +472,14 @@ export const getFormedSuitIcon = (suit) => {
   };
   return (<div style={iconStyle}>{suitIcon}</div>);
 };
-
+/**
+ *
+ * @param trumpSuit
+ * @param tookBid
+ * @param bidAmount
+ * @param players
+ * @returns {{header: JSX.Element, hasHeaderSeparator: boolean}}
+ */
 export const getTrumpBidHeader = (trumpSuit, tookBid, bidAmount, players) => {
   const trumpIcon = getFormedSuitIcon(trumpSuit);
   const trumpStyle = {
@@ -428,7 +506,17 @@ export const getTrumpBidHeader = (trumpSuit, tookBid, bidAmount, players) => {
     hasHeaderSeparator: true
   };
 };
-
+/**
+ *
+ * @param suitLed
+ * @param ledValue
+ * @param suitWin
+ * @param winValue
+ * @param players
+ * @param tookPlay
+ * @param winningPlayer
+ * @returns {JSX.Element}
+ */
 export const getHandLeaderMessage = (suitLed, ledValue, suitWin, winValue, players, tookPlay, winningPlayer) => {
   const ledSuit = suitIconSelector(suitLed);
   const winSuit = suitIconSelector(suitWin);
@@ -439,14 +527,29 @@ export const getHandLeaderMessage = (suitLed, ledValue, suitWin, winValue, playe
     (<div style={messageStyle}><b>{players[winningPlayer]}</b>&nbsp;with&nbsp;<b>{winValue}</b><span style={suitStyle}>{winSuit}</span></div>);
   return (<div>{line1}<br/>{line2}</div>);
 }
-
+/**
+ *
+ * @param suitWin
+ * @param winValue
+ * @param players
+ * @param winningPlayer
+ * @returns {JSX.Element}
+ */
 export const getHandWinMessage = (suitWin, winValue, players, winningPlayer) => {
   const winSuit = suitIconSelector(suitWin);
   const suitStyle = {width: 24, display: 'inline-flex'};
   const messageStyle = {display: 'inline-flex'};
   return (<div style={messageStyle}><b>{players[winningPlayer]}</b>&nbsp;wins&nbsp;<b>{winValue}</b><span style={suitStyle}>{winSuit}</span></div>);
 }
-
+/**
+ *
+ * @param hand
+ * @param ledSuit
+ * @param trumpSuit
+ * @param firstPlay
+ * @param ledValue
+ * @returns {*[]}
+ */
 export const setValidCardIndexes = (
   hand,
   ledSuit,
@@ -485,7 +588,13 @@ export const setValidCardIndexes = (
   }
   return validIndexes;
 };
-
+/**
+ *
+ * @param validHand
+ * @param playedCards
+ * @param widowDiscards
+ * @returns {*[]}
+ */
 export const getUnplayedCards = (validHand, playedCards, widowDiscards) => {
   const cards = generateShuffledDeck(0);
   validHand.forEach(handCard => {
@@ -510,7 +619,16 @@ export const getUnplayedCards = (validHand, playedCards, widowDiscards) => {
   });
   return [...cards];
 };
-
+/**
+ *
+ * @param hands
+ * @param unplayedCards
+ * @param offSuits
+ * @param trumpSuit
+ * @param tookPlay
+ * @param firstPlay
+ * @returns {*[]}
+ */
 export const getWinningCards = (hands, unplayedCards, offSuits, trumpSuit, tookPlay, firstPlay) => {
   const winners = [];
   const suits = CARD_ORDER.SUITS;
@@ -559,21 +677,47 @@ export const getWinningCards = (hands, unplayedCards, offSuits, trumpSuit, tookP
   });
   return winners;
 };
-
+/**
+ *
+ * @param hand
+ * @param suit
+ * @param limitToNonCount
+ * @returns {null|{suit: string, value: *}}
+ */
 export const getHighestNonCount = (hand, suit, limitToNonCount = false) => {
   const nonCounterValue = CARD_ORDER.HIGHEST_NON_COUNT;
   return getCardValueByArray(hand, suit, nonCounterValue, (limitToNonCount ? 2: -1));
 };
-
+/**
+ *
+ * @param hand
+ * @param suit
+ * @param limitToNonCount
+ * @returns {null|{suit: string, value: *}}
+ */
 export const getLowestNonCount = (hand, suit, limitToNonCount = false) => {
   const lowestCounterValue = CARD_ORDER.HIGH_TO_LOW;
   return getCardValueByArray(hand, suit, lowestCounterValue, (limitToNonCount ? 2: -1));
 };
+/**
+ *
+ * @param hand
+ * @param suit
+ * @param limitToCount
+ * @returns {null|{suit: string, value: *}}
+ */
 export const getBestCounter = (hand, suit, limitToCount = false) => {
   const counterValue = CARD_ORDER.BEST_COUNTER;
   return getCardValueByArray(hand, suit, counterValue, (limitToCount ? 3 : -1));
 };
-
+/**
+ *
+ * @param hand
+ * @param suit
+ * @param valueArray
+ * @param arraylimit
+ * @returns {null|{suit: string, value: *}}
+ */
 export const getCardValueByArray = (hand, suit, valueArray, arraylimit = -1) => {
   let bestIndex = -1;
   let selectedSuit = '';
@@ -588,7 +732,13 @@ export const getCardValueByArray = (hand, suit, valueArray, arraylimit = -1) => 
   });
   return (bestIndex === -1) ? null : {suit: selectedSuit, value: valueArray[bestIndex]};
 };
-
+/**
+ *
+ * @param offSuits
+ * @param trumpSuit
+ * @param tookPlay
+ * @returns {*[]}
+ */
 export const getTrumpPullingSuits = (offSuits, trumpSuit, tookPlay) => {
   const pullSuits = [];
   const suits = CARD_ORDER.SUITS;
@@ -605,7 +755,15 @@ export const getTrumpPullingSuits = (offSuits, trumpSuit, tookPlay) => {
   });
   return pullSuits;
 };
-
+/**
+ *
+ * @param offSuits
+ * @param trumpSuit
+ * @param tookPlay
+ * @param unplayedCards
+ * @param seenCards
+ * @returns {*[]}
+ */
 export const getPartnerPassSuits = (offSuits, trumpSuit, tookPlay, unplayedCards, seenCards) => {
   const partner = (tookPlay + 2) % 4;
   const blocker = (tookPlay + 1) % 4;
@@ -632,7 +790,13 @@ export const getPartnerPassSuits = (offSuits, trumpSuit, tookPlay, unplayedCards
   });
   return passSuits;
 };
-
+/**
+ *
+ * @param state
+ * @param player
+ * @param selectedIndex
+ * @returns {{shown: boolean, keyId: string, id: string, suit, source: {}, value, speed: number, target: {}}}
+ */
 export const throwCardIntoMiddle = (state, player, selectedIndex) => {
   const selectedCard = state.hands[player][selectedIndex];
   const sourceCardId = `H${player}${selectedIndex}`;
@@ -651,7 +815,12 @@ export const throwCardIntoMiddle = (state, player, selectedIndex) => {
     target: targetCard,
   };
 }
-
+/**
+ *
+ * @param playScore
+ * @param tookBid
+ * @returns {number}
+ */
 export const getWinner = (playScore, tookBid) => {
   const scores = [];
   playScore.forEach(teamScore => {

@@ -20,6 +20,13 @@ import * as GAME_STATE from "../../utils/gameStates";
 import * as colors from "../../utils/colors";
 import * as CARD_ORDER from "../../utils/cardOrder";
 
+/**
+ *
+ * @param state {object} Pointer to reduder state
+ * @returns {{startMelds: *[], startMovingCards: *[], startGameState: string, startPromptModal:
+ *          {hasCloseButton: boolean, shown: boolean, width: number, header: string, zoom: number,
+ *          message: *, hasHeaderSeparator: boolean, height: number}, startBidModals: *[]}}
+ */
 export const startGamePlay = (state) => {
   const startBidModals = [];
   let startMovingCards = [];
@@ -58,7 +65,11 @@ export const startGamePlay = (state) => {
     startMelds
   };
 };
-
+/**
+ *
+ * @param state
+ * @returns {{restDiscardMovingCards: *[], restDiscardHands: *[], restDiscardShowHands: *[]}}
+ */
 export const moveRestToDiscardPile = (state) => {
   const restDiscardShowHands = [];
   let restDiscardMovingCards = [];
@@ -100,7 +111,12 @@ export const moveRestToDiscardPile = (state) => {
     restDiscardHands
   };
 };
-
+/**
+ *
+ * @param state
+ * @returns {{gotRestShowHands: *[], gotRestPromptModal, gotRestGameState: string, gotRestPlayerModal:
+ *          {shown: boolean}, gotRestWinningPlay: number}}
+ */
 export const gotTheRest = (state) => {
   let gotRestGameState = '';
   let gotRestPlayerModal = {shown: false};
@@ -147,7 +163,17 @@ export const gotTheRest = (state) => {
     gotRestWinningPlay
   };
 };
-
+/**
+ *
+ * @param hands
+ * @param trumpSuit
+ * @param firstPlay
+ * @param promptModal
+ * @param players
+ * @returns {{userLeadPromptModal, userLeadPlayHands: *[], userLeadPlayerModal: {hasCloseButton: boolean,
+ *          shown: boolean, width: number, header: string, zoom: number, message: *,
+ *          hasHeaderSeparator: boolean, height: number}}}
+ */
 export const userLeadPlay = (hands, trumpSuit, firstPlay, promptModal, players) => {
   const userLeadPlayHands = [...hands];
   let userLeadPlayerModal = {shown: false};
@@ -182,7 +208,17 @@ export const userLeadPlay = (hands, trumpSuit, firstPlay, promptModal, players) 
     userLeadPlayHands
   };
 };
-
+/**
+ *
+ * @param hands
+ * @param trumpSuit
+ * @param players
+ * @param playPile
+ * @param winningPlay
+ * @param tookPlay
+ * @returns {{userFollowPlayerModal: {hasCloseButton: boolean, shown: boolean, width: number, header: string,
+ *          zoom: number, message: *, hasHeaderSeparator: boolean, height: number}, userFollowPlayHands: *[]}}
+ */
 export const userFollowPlay = (hands, trumpSuit, players, playPile, winningPlay, tookPlay) => {
   const userFollowPlayHands = [...hands];
   let userFollowPlayerModal = {shown: false};
@@ -237,7 +273,13 @@ export const userFollowPlay = (hands, trumpSuit, players, playPile, winningPlay,
     userFollowPlayHands,
   };
 };
-
+/**
+ *
+ * @param state
+ * @param selectedIndex
+ * @returns {{userPlayMovingCards: {shown: boolean, keyId: string, id: string, suit, source: WorkerLocation | Location,
+ *          value, speed: number, target: WorkerLocation | Location}[], userPlayHands: *[], userPlayPromptModal}}
+ */
 export const userPlay = (state, selectedIndex) => {
   const userPlayPromptModal = {...state.promptModal};
   userPlayPromptModal.message = '';
@@ -273,7 +315,11 @@ export const userPlay = (state, selectedIndex) => {
     userPlayPromptModal
   };
 };
-
+/**
+ *
+ * @param state
+ * @returns {{computerPlayMovingCards: *[], computerLeadPlayHands: *[]}}
+ */
 export const computerLeadPlay = (state) => {
   const computerLeadPlayHands = [...state.hands];
   const validHand = computerLeadPlayHands[state.tookPlay];
@@ -409,7 +455,12 @@ export const computerLeadPlay = (state) => {
     computerPlayMovingCards
   };
 };
-
+/**
+ *
+ * @param state
+ * @param nextPlayer
+ * @returns {{computerFollowMovingCards: *[], computerFollowHands: *[]}}
+ */
 export const computerFollowPlay = (state, nextPlayer) => {
   const computerFollowHands = [...state.hands];
   const validHand = computerFollowHands[nextPlayer];
@@ -550,7 +601,21 @@ export const computerFollowPlay = (state, nextPlayer) => {
     computerFollowMovingCards
   };
 };
-
+/**
+ *
+ * @param players
+ * @param playPile
+ * @param trumpSuit
+ * @param dealToPlayer
+ * @param tookPlay
+ * @param winningPlay
+ * @param tookBid
+ * @param bidAmount
+ * @param playedCards
+ * @returns {{resolvePromptModal: {hasCloseButton: boolean, shown: boolean, width: number, header: string,
+ *          zoom: number, message: *, hasHeaderSeparator: boolean, height: number}, resolvePlayedCards: *[],
+ *          resolveWinningPlay}}
+ */
 export const resolvePlay = (
   players,
   playPile,
@@ -598,7 +663,17 @@ export const resolvePlay = (
     resolvePlayedCards
   };
 };
-
+/**
+ *
+ * @param trumpSuit
+ * @param players
+ * @param playPile
+ * @param winningPlay
+ * @param promptModal
+ * @param tookPlay
+ * @param offSuits
+ * @returns {{calculateWinnerPromptModal, calculateWinnerPlayPile: *[], calculateWinnerOffSuits: *[]}}
+ */
 export const displayPlayWinner = (trumpSuit, players, playPile, winningPlay, promptModal, tookPlay, offSuits) => {
   const calculateWinnerOffSuits = [...offSuits];
   for (let i = 0; i < players.length; i++) {
@@ -619,7 +694,14 @@ export const displayPlayWinner = (trumpSuit, players, playPile, winningPlay, pro
     calculateWinnerOffSuits
   };
 };
-
+/**
+ *
+ * @param hands
+ * @param promptModal
+ * @param tookBid
+ * @param winningPlay
+ * @returns {{nextPlayGameState: string, nextPlayPromptMessage, nextPlayDealToPlayer: number}}
+ */
 export const setUpNextPlay = (hands, promptModal, tookBid, winningPlay) => {
   let nextPlayDealToPlayer = winningPlay;
   let nextPlayGameState = GAME_STATE.START_NEXT_PLAY;
@@ -635,7 +717,11 @@ export const setUpNextPlay = (hands, promptModal, tookBid, winningPlay) => {
     nextPlayDealToPlayer
   };
 };
-
+/**
+ *
+ * @param state
+ * @returns {{playToDiscardMovingCards: *[], playToDiscardPlayPile: *[]}}
+ */
 export const movePlayPileToDiscard = (state) => {
   let playToDiscardMovingCards = [];
   let discardPile = state.winningPlay;
@@ -673,7 +759,11 @@ export const movePlayPileToDiscard = (state) => {
     playToDiscardPlayPile
   };
 }
-
+/**
+ *
+ * @param state
+ * @returns {{tallyDealToPlayer: (*|number), tallyMovingCards: *[], tallyDiscardPiles: *[], tallyGameState: string}}
+ */
 export const discardToMeldTally = (state) => {
   const tallyDiscardPiles = [...state.discardPiles];
   const valuePile = tallyDiscardPiles[state.dealToPlayer];
@@ -723,7 +813,14 @@ export const discardToMeldTally = (state) => {
     tallyGameState
   };
 };
-
+/**
+ *
+ * @param bidModals
+ * @param melds
+ * @param tookPlay
+ * @param dealToPlayer
+ * @returns {{addCountBidModals: *[]}}
+ */
 export const addCountToTally = (bidModals, melds, tookPlay, dealToPlayer) => {
   const addCountBidModals = [...bidModals];
   let counts = (melds.length === 3 && dealToPlayer === tookPlay) ? 1 : 0;
@@ -743,7 +840,17 @@ export const addCountToTally = (bidModals, melds, tookPlay, dealToPlayer) => {
     addCountBidModals
   };
 };
-
+/**
+ *
+ * @param teams
+ * @param players
+ * @param playScore
+ * @param melds
+ * @param bidModals
+ * @param tookBid
+ * @param bidAmount
+ * @returns {{addScorePromptModal: {hasCloseButton: boolean, shown: boolean, width: number, header: string, zoom: number, message: *, hasHeaderSeparator: boolean, height: number}, addScoreGameWon: (*|string), addScorePlayerModal: {hasCloseButton: boolean, shown: boolean, width: number, header: string, zoom: number, message: *, hasHeaderSeparator: boolean, height: number}, addScorePlayScore: *[]}}
+ */
 export const addCountToScore = (teams, players, playScore, melds, bidModals, tookBid, bidAmount) => {
   const addScorePlayScore = [...playScore];
   let cabbageMessage = '';
@@ -808,7 +915,17 @@ export const addCountToScore = (teams, players, playScore, melds, bidModals, too
     addScoreGameWon
   };
 };
-
+/**
+ *
+ * @param teams 
+ * @param players
+ * @param playScore
+ * @param tookBid
+ * @param dealer
+ * @returns {{endHandPromptModal: {hasCloseButton: boolean, shown: boolean, width: number, header: string,
+ *          zoom: number, message: *, hasHeaderSeparator: boolean, height: number}, endHandPlayerModal:
+ *          {shown: boolean}, endHandDealer: number, endHandGameState: string, endHandGameWon: string}}
+ */
 export const resolveEndHand = (teams, players, playScore, tookBid, dealer) => {
   let endHandGameState = GAME_STATE.MOVE_DECK_TO_DEALER;
   let endHandGameWon = '';

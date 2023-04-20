@@ -5,51 +5,51 @@ import * as gamePlayLogic from './gameReducerGamePlayLogic';
 import * as GAME_STATE from '../../utils/gameStates';
 import { generalModalData } from '../../utils/helpers';
 
-// Inital values for the gameReducer
+// Initial values for the gameReducer
 const initialState = {
-  gameState: 'init',
-  teams: ['Us', 'Them', 'Jessica'],
-  players: ['You', 'Steven', 'Ellen'],
-  playerDisplaySettings: [],
-  discardPiles: [],
-  discardDisplaySettings: [],
-  showHands: [],
-  handFanOut: -1,
-  hands: [],
-  seenWidow: [],
-  seenCards: [],
-  playedCards: [],
-  offSuits: [],
-  bids: [],
-  tookBid: 0,
-  bidAmount: 0,
-  thrownHand: false,
-  firstPlay: true,
-  tookPlay: 0,
-  winningPlay: 0,
-  bidModals: [],
-  bidOffset: 21,
-  trumpSuit: '',
-  meldDisplaySettings: [],
-  melds: [],
-  meldScores: [],
-  miscDisplaySettings: {
-    scorePad: {},
-    playArea: {},
-    playerModal: {},
-    promptModal: {},
-    gameBidModals: [],
+  gameState: 'init', /* This is a string that holds the game state that drives the state based part of the app */
+  teams: ['Us', 'Them', 'Jessica'], /* This is an array of team names. There can either 2 or 3 teams */
+  players: ['You', 'Steven', 'Ellen'], /* This is an array of player names. There can either 3 or 4 teams */
+  playerDisplaySettings: [], /* array, by player, of locations to place the hand components */
+  discardPiles: [], /* array, by player, of cards that are in the discard pile components */
+  discardDisplaySettings: [], /* array, by player, of locations to place discard piles */
+  showHands: [], /* array, by player, of booleans. If boolean is true, player hand is shown face up */
+  handFanOut: -1, /* number, this is the degrees of fan out in all hands. If -1, no fan out. */
+  hands: [], /* array, by player, of cards for the hand components */
+  seenWidow: [], /* array that holds the seen widow cards for AI usage */
+  seenCards: [], /* array, by player, that holds all cards seen as meld for AI usage */
+  playedCards: [], /* array that holds all card suit/values that have been played in this hand */
+  offSuits: [], /* array, by player, that stores all suits that the player is know to be out of, for AI usage */
+  bids: [], /* array, by player, of the bids for this hand */
+  tookBid: 0, /* number, index into players for who took the bid this hand */
+  bidAmount: 0, /* number, amount of the winning bid */
+  thrownHand: false, /* boolean, did the bid winner throw the hand? */
+  firstPlay: true, /* boolean, is this the first trick of the hand? */
+  tookPlay: 0, /* number, index into players for who took the last trick */
+  winningPlay: 0, /* number, index into players for who currently is winning the trick */
+  bidModals: [], /* array, by player, properties for the modal components that display either the bid or the count */
+  bidOffset: 21, /* number, the offset in bid value for the paginated user bidding */
+  trumpSuit: '', /* string, this is the trump suit selected for the current hand */
+  meldDisplaySettings: [], /* array, by player, of the locations of the pile components used to display meld */
+  melds: [], /* array, by player, cards in the pile components used to display meld */
+  meldScores: [], /* array, by player, of the score recorded for the meld */
+  miscDisplaySettings: { /* object, locations of one-off components */
+    scorePad: {}, /* object, locations of the scorepad component */
+    playArea: {}, /* object, location of the pile component used for the trick play area */
+    playerModal: {}, /* object, location of the player modal component */
+    promptModal: {}, /* object, location of the prompt modal component */
+    gameBidModals: [], /* array, by player, location of the bid modal components */
   },
-  movingCards: [],
-  zoomRatio: 1,
-  dealer: 0,
-  dealToPlayer: 0,
-  playPile: [],
-  playPileShown: true,
-  playScore: [],
-  gameWon: '',
-  playerModal: {shown: false},
-  promptModal: {shown: false},
+  movingCards: [], /* array of props for MoveCard components for animation */
+  zoomRatio: 1, /* number, global zoom level of the game page */
+  dealer: 0, /* number, index into players for who the current dealer is */
+  dealToPlayer: 0, /* number, index into players for who the current target player is */
+  playPile: [], /* array, cards that are currently displayed in the play pile component */
+  playPileShown: true, /* boolean, is the play pile currently visible? */
+  playScore: [], /* array, by team, of arrays of object that make up the game score. See ScorePad component for more */
+  gameWon: '', /* string, the name of the team that won the game */
+  playerModal: {shown: false}, /* modal properties for player modal components */
+  promptModal: {shown: false},/* modal properties for prompt modal components */
 };
 
 const gameReducer = (state = initialState, action) => {

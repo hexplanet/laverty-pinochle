@@ -5,6 +5,7 @@ import * as gamePlayLogic from './gameReducerGamePlayLogic';
 import * as GAME_STATE from '../../utils/gameStates';
 import { generalModalData } from '../../utils/helpers';
 
+// Inital values for the gameReducer
 const initialState = {
   gameState: 'init',
   teams: ['Us', 'Them', 'Jessica'],
@@ -52,8 +53,10 @@ const initialState = {
 };
 
 const gameReducer = (state = initialState, action) => {
+  // The below massive switch statement operates all actions for the gameReducer
   switch (action.type) {
     case actionTypes.SET_CARD_TABLE_LAYOUT:
+      // This action sets the layout of the card table for the given width and height
       const {
         playerHandLocations,
         playerDiscardLocations,
@@ -74,11 +77,13 @@ const gameReducer = (state = initialState, action) => {
         zoomRatio
       };
     case actionTypes.STORE_GAME_STATE:
+      // This action will update the gameState
       return {
         ...state,
         gameState: action.gameState,
       };
     case actionTypes.CLEAR_PLAYER_MODAL:
+      // This action clears and may hide the player modal
       if (!action.hide) {
         return {
           ...state,
@@ -95,6 +100,7 @@ const gameReducer = (state = initialState, action) => {
         playerModal: {...state.playerModal, ...blankedPlayerModal},
       };
     case actionTypes.CLEAR_PROMPT_MODAL:
+      // This action clear the prompt modal
       const blankedPromptModal = {
         message: '',
         textInputs: [],
@@ -105,6 +111,8 @@ const gameReducer = (state = initialState, action) => {
         playerModal: {...state.playerModal, ...blankedPromptModal},
       };
     case actionTypes.RESOLVE_CARD_MOVEMENT:
+      // This action places a moved card into a container based on it's id and adds :complete to the gameState
+      // if all cards are done moving
       const modifiedValues = preBidLogic.resolveCardMovement(
         action.id,
         action.keyId,
@@ -122,12 +130,14 @@ const gameReducer = (state = initialState, action) => {
         ...modifiedValues,
       };
     case actionTypes.SETUP_FOR_NEW_GAME:
+      // This action sets up game values for a new game
       const clearedValues = preBidLogic.setGameValuesForNewGame(state.teams, state.players);
       return {
         ...state,
         ...clearedValues
       };
     case actionTypes.THROW_FOR_ACE:
+      // This action moves cards to next player on the deal order
       const {
         newDealer,
         newDiscards,
@@ -142,6 +152,7 @@ const gameReducer = (state = initialState, action) => {
         movingCards: newMovingCards
       };
     case actionTypes.SELECTED_DEALER:
+      // This action sets the dealer and display it in the prompt modal
       const {
         dealerPromptModal,
       } = preBidLogic.declareDealer(
@@ -154,6 +165,7 @@ const gameReducer = (state = initialState, action) => {
         gameState: GAME_STATE.PRE_MOVE_DECK_TO_DEALER,
       };
     case actionTypes.MOVE_CARD_TO_DEALER:
+      // This action starts the move of all cards to the dealer
       const {
         toDealerMovingCards,
         toDealerMelds,
@@ -172,6 +184,7 @@ const gameReducer = (state = initialState, action) => {
         bidModals: [...toDealerBidModels]
       };
     case actionTypes.PRE_DEAL:
+      // This action sets data for the begining of the dealing. Also resets showHands and offSuits for all players.
       const {
         shuffledCards,
         clearPlayerPrompt
@@ -195,6 +208,7 @@ const gameReducer = (state = initialState, action) => {
         offSuits: newOffSuits
       };
     case actionTypes.DEAL_CARDS:
+      // This action sets up a deal of the cards to the players
       const {
         dealDeck,
         dealCards,
@@ -207,11 +221,14 @@ const gameReducer = (state = initialState, action) => {
         bidOffset: 21,
       };
     case actionTypes.SET_HAND_FAN_OUT:
+      // This action fans out the cards in all hands
       return {
         ...state,
         handFanOut: action.fanOut,
       };
     case actionTypes.CHECK_FOR_NINES:
+      // This action checks for too many nines in all hands. And then displays messages in modals if that exists
+      // Also sets the showHands to display the user hand.
       const {
         ninesPromptModal,
         ninesPlayerModal,
@@ -244,6 +261,8 @@ const gameReducer = (state = initialState, action) => {
       }
       return ninesState;
     case actionTypes.PARTNER_CONFIRM_NINES_REDEAL:
+      // This action either sets up modals for user UI to confirm partner request to redeal for nines or the
+      // computer calculation to allow redeal
       const {
         postNinesPromptModal,
         postNinesPlayerModal,
@@ -259,6 +278,8 @@ const gameReducer = (state = initialState, action) => {
         playerModal: postNinesPlayerModal
       }
     case actionTypes.NEXT_BID:
+      // This action will either continue bidding or force the dealer to take then bid for 20 if no one else has bid.
+      // This will also channel the bid to the user or computer based on next seat.
       const nextBid = (state.dealToPlayer + 1) % (state.players.length);
       const {
         nextBidPrompt
@@ -291,8 +312,11 @@ const gameReducer = (state = initialState, action) => {
         gameState: (nextBid === 0) ? GAME_STATE.USER_BID : GAME_STATE.COMPUTER_BID,
       };
     case actionTypes.GET_USER_BID:
+      // This action executes the user UI selection to either scroll bid buttons, pass, or set bid.
+      // If no UI input, then the display of the bidding button is done
       let initialBidOffset = state.bidOffset;
       if (action.selection !== '') {
+        // UI select took place, execute user UI selection
         const splitBid = action.selection.split('bid_')[1];
         if (splitBid !== 'left' && splitBid !== 'right') {
           const userBids = state.bids;
@@ -317,6 +341,7 @@ const gameReducer = (state = initialState, action) => {
         }
         initialBidOffset = initialBidOffset + (splitBid === 'left' ? -5 : 5);
       }
+      // Update the user UI
       const {
         bidPlayerModal,
         maxedBidOffset
@@ -333,6 +358,7 @@ const gameReducer = (state = initialState, action) => {
         playerModal: bidPlayerModal,
       };
     case actionTypes.RESOLVE_COMPUTER_BID:
+      // Action to save and display the computer generated bid
       let computerBid = bidMeldLogic.computerBid(
         state.hands,
         state.dealToPlayer,
@@ -340,6 +366,7 @@ const gameReducer = (state = initialState, action) => {
         state.bids
       );
       if (state.dealToPlayer === state.dealer && computerBid > 0) {
+        // Calculate computer bid if last bidder
         computerBid = 0;
         state.bids.forEach(bid => {
           if (bid + 1 > computerBid) {
@@ -365,6 +392,7 @@ const gameReducer = (state = initialState, action) => {
         bidModals: [...shownComputerBid],
       };
     case actionTypes.DECIDE_BID_WINNER:
+      // Action to select and display bid winner
       const {
         tookBidPlayerModal,
         tookBidPromptModal,
@@ -389,6 +417,7 @@ const gameReducer = (state = initialState, action) => {
         thrownHand: false,
       };
     case actionTypes.SHOW_THE_WIDOW:
+      // Action to display the widow cards and set up player modal for contiue if all cards displayed
       if (action.widowCardIndex === state.players.length) {
         const widowContinueModal = generalModalData('', {
           hasBox: false,
@@ -423,6 +452,7 @@ const gameReducer = (state = initialState, action) => {
         playPileShown: true,
       };
     case actionTypes.MOVE_WIDOW_TO_HAND:
+      // Action to move all widow cards to the bid winners hand
       const {
         widowMovingCards,
         widowSeen,
@@ -436,7 +466,9 @@ const gameReducer = (state = initialState, action) => {
         seenWidow: [...widowSeen],
       };
     case actionTypes.DECIDE_THROW_HAND:
+      // Action to decide if the hand should be thrown
       if (state.tookBid === 0) {
+        // Set up interface for user if throw formula if true
         const {
           throwPlayerModal,
           throwGameState
@@ -451,6 +483,7 @@ const gameReducer = (state = initialState, action) => {
           playerModal: throwPlayerModal,
         };
       }
+      // Calculate if the computer should throw the hand
       const {
         computerThrowGameState
       } = bidMeldLogic.shouldComputerThrowHand(
@@ -464,7 +497,9 @@ const gameReducer = (state = initialState, action) => {
         gameState: computerThrowGameState,
       };
     case actionTypes.AGREE_THROW_HAND:
+      // Action to agree to throw the hand
       if (state.players.length === 4 && state.tookBid === 2) {
+        // Set up UI for user if they have to agree to throw hand
         const throwModal = generalModalData(
           (<span><b>{state.players[2]}</b> wants to throw the hand</span>) ,
           {
@@ -488,6 +523,7 @@ const gameReducer = (state = initialState, action) => {
           playerModal: throwModal,
         };
       }
+      // Run calculation of computer if it has to agree to throw hand
       const {
         computerAgreeThrowHand
       } = bidMeldLogic.shouldComputerAgreeThrowHand(
@@ -501,6 +537,7 @@ const gameReducer = (state = initialState, action) => {
         thrownHand: (computerAgreeThrowHand === 'throwHand')
       };
     case actionTypes.DISAGREE_THROW_HAND:
+      // Action for the display of the disagreement to throw the hand with player modal continue button
       let disagreeGameState = GAME_STATE.WAIT_AFTER_THROW_DISAGREE;
       const bidder = state.players[state.tookBid];
       const disagrees = state.players[(state.tookBid + 2) % 4];
@@ -510,6 +547,7 @@ const gameReducer = (state = initialState, action) => {
       const disagreeThrowPromptModal = generalModalData(throwText, {});
       let disagreeThrowPlayerModal = {shown:false};
       if (state.tookBid !== 2) {
+        // Set up UI for user to continue
         disagreeThrowPlayerModal = generalModalData('', {
           hasBox: false,
           buttons: [{
@@ -527,6 +565,7 @@ const gameReducer = (state = initialState, action) => {
         playerModal: disagreeThrowPlayerModal
       };
     case actionTypes.THROW_HAND:
+      // Action that displays that the hand was throw and either passes to trump suit selection or sets up user UI
       let throwGameState = GAME_STATE.WAIT_AFTER_THROW_HAND;
       const throwHandText = (
         <span><b>{state.players[state.tookBid]}</b> throws the hand</span>
@@ -537,6 +576,7 @@ const gameReducer = (state = initialState, action) => {
       throwPlayScore[playTeamIndex][throwPlayScore[playTeamIndex].length - 1].gotSet = true;
       let throwPlayerModal = {shown: false};
       if (state.tookBid !== 2) {
+        // User UI for continuing after the hand is thrown
         throwPlayerModal = generalModalData('', {
           hasBox: false,
           buttons: [{
@@ -545,6 +585,7 @@ const gameReducer = (state = initialState, action) => {
           }],
         });
       } else {
+        // Move to trump selection
         throwGameState = GAME_STATE.SELECT_TRUMP_SUIT;
       }
       return {
@@ -556,6 +597,7 @@ const gameReducer = (state = initialState, action) => {
         playScore: [...throwPlayScore],
       };
     case actionTypes.START_DISCARDS:
+      // Action to start discard phase
       const {
         discardGameState,
         discardPlayerModal,
@@ -576,6 +618,7 @@ const gameReducer = (state = initialState, action) => {
         hands: [...discardHands],
       };
     case actionTypes.USER_SELECT_DISCARD:
+      // Action to set up UI and modals for the user discards
       const {
         discardUserHands,
         discardUserModal
@@ -590,6 +633,7 @@ const gameReducer = (state = initialState, action) => {
         hands: [...discardUserHands],
       };
     case actionTypes.REMOVE_USER_DISCARDS:
+      // Action to move the cards from the bid winners hand to their discard pile.
       const {
         removeUserHands,
         removeUserMovingCards,
@@ -603,6 +647,7 @@ const gameReducer = (state = initialState, action) => {
         promptModal: removeUserPrompt
       };
     case actionTypes.COMPUTER_DISCARDS:
+      // Action to calculate the cards the computer should discard
       const {
         removeComputerHands,
         removeComputerMovingCards,
@@ -619,7 +664,9 @@ const gameReducer = (state = initialState, action) => {
         playerModal: removeComputerPlayer
       };
     case actionTypes.DECLARE_TRUMP_SUIT:
+      // Action that either sets up user UI for trump suit selection or has the computer select the trump suit
       if (state.tookBid === 0) {
+        // Sets up UI for user to select the trump suit
         const {
           userTrumpPrompt,
           userTrumpPlayer
@@ -634,6 +681,7 @@ const gameReducer = (state = initialState, action) => {
           promptModal: userTrumpPrompt
         };
       }
+      // Computer selects the trump suit
       const {
         computerTrumpSuit,
         computerTrumpPlayer,
@@ -652,6 +700,7 @@ const gameReducer = (state = initialState, action) => {
         promptModal: computerTrumpPrompt
       };
     case actionTypes.SET_TRUMP_SUIT:
+      // Action to take the user input and set trump suit from that
       const setTrumpGameState = state.thrownHand ? GAME_STATE.START_MELD : GAME_STATE.START_DISCARDS;
       return {
         ...state,
@@ -659,6 +708,7 @@ const gameReducer = (state = initialState, action) => {
         trumpSuit: action.suit,
       };
     case actionTypes.START_MELD:
+      // Action to start the meld display process and the clearing of the meld values.
       const meldMessage = bidMeldLogic.startMeldMessage(
         state.trumpSuit,
         state.tookBid,
@@ -677,10 +727,12 @@ const gameReducer = (state = initialState, action) => {
         gameState: GAME_STATE.DISPLAY_MELD
       };
     case actionTypes.DISPLAY_MELD:
+      // Action to display the meld on meld piles. Also reset bid modals for X if hand thrown for proper players.
       const shownMeld = state.bidModals;
       if (state.thrownHand) {
         if (state.dealToPlayer === state.tookBid ||
           (state.players.length === 4 && state.dealToPlayer === ((state.tookBid + 2) % 4))) {
+          // Does not display meld and shows X for meld value if the hand was thrown, for the thrown team
           shownMeld[state.dealToPlayer] =
             generalModalData('', {
               header: 'X',
@@ -694,6 +746,7 @@ const gameReducer = (state = initialState, action) => {
           };
         }
       }
+      // Display meld cards on meld pile and the meld value in the bid modal for current player
       const {
         meldHands,
         meldPlacedCards,
@@ -716,6 +769,7 @@ const gameReducer = (state = initialState, action) => {
         seenCards: [...meldSeenCards]
       };
     case actionTypes.NEXT_MELD:
+      // Action to advance meld display to the next player, or finish the display of meld
       const {
         meldDealToPlayer,
         meldGameState,
@@ -743,6 +797,7 @@ const gameReducer = (state = initialState, action) => {
         promptModal: meldPromptModal
       };
     case actionTypes.START_GAME_PLAY:
+      // Action that starts game play phase
       const {
         startMovingCards,
         startGameState,
@@ -761,6 +816,7 @@ const gameReducer = (state = initialState, action) => {
         melds: [...startMelds]
       };
     case actionTypes.MOVE_REST_TO_DISCARD:
+      // Action that will start movement of all cards left in hands to the winners discard pile
       const {
         restDiscardMovingCards,
         restDiscardShowHands,
@@ -774,6 +830,8 @@ const gameReducer = (state = initialState, action) => {
         gameState: GAME_STATE.REST_MOVE_TO_DISCARD
       };
     case actionTypes.PLAY_LEAD:
+      // Action that check if the lead player has the rest of the tricks, else sets up UI for user if they have the
+      // lead, else calculates the lead card to play for the computer
       const {
         gotRestGameState,
         gotRestPlayerModal,
@@ -782,6 +840,7 @@ const gameReducer = (state = initialState, action) => {
         gotRestWinningPlay
       } = gamePlayLogic.gotTheRest(state);
       if (gotRestGameState !== '') {
+        // If the lead player has the rest of the tricks, make statement in player modal
         return {
           ...state,
           playerModal: {...gotRestPlayerModal},
@@ -793,6 +852,7 @@ const gameReducer = (state = initialState, action) => {
         };
       }
       if (state.dealToPlayer === 0) {
+        // If the lead player is the user, set up the UI for their card selection
         const {
           userLeadPlayerModal,
           userLeadPromptModal,
@@ -813,6 +873,7 @@ const gameReducer = (state = initialState, action) => {
           gameState: GAME_STATE.WAIT_USER_PLAY,
         };
       }
+      // Computer calculates the card to lead from its hand
       const {
         computerLeadPlayHands,
         computerPlayMovingCards
@@ -825,8 +886,11 @@ const gameReducer = (state = initialState, action) => {
         gameState: GAME_STATE.CARD_TO_PLAY_PILE
       };
     case actionTypes.PLAY_FOLLOW:
+      // Action to advance the current player, calculate the winner and display that if the hand is done, else
+      // set up the user UI for the follow card selection, else the computer calculates the follow card from hand
       const nextPlayer = (state.dealToPlayer + 1)  % state.players.length;
       if (nextPlayer === state.tookPlay) {
+        // Trick is over, calculate the winner and display
         const {
           calculateWinnerPlayPile,
           calculateWinnerPromptModal,
@@ -849,6 +913,7 @@ const gameReducer = (state = initialState, action) => {
         };
       }
       if (nextPlayer === 0) {
+        // The current player to follow is the user, set up UI for card selection
         const {
           userFollowPlayerModal,
           userFollowPlayHands,
@@ -868,6 +933,7 @@ const gameReducer = (state = initialState, action) => {
           dealToPlayer: nextPlayer,
         }
       }
+      // The following player is a computer player, calculate the proper following card.
       const {
         computerFollowHands,
         computerFollowMovingCards
@@ -880,6 +946,7 @@ const gameReducer = (state = initialState, action) => {
         dealToPlayer: nextPlayer,
       };
     case actionTypes.USER_PLAY:
+      // Action to send the user selected card from hand to play pile
       const {
         userPlayHands,
         userPlayMovingCards,
@@ -894,6 +961,7 @@ const gameReducer = (state = initialState, action) => {
         gameState: GAME_STATE.CARD_TO_PLAY_PILE
       };
     case actionTypes.RESOLVE_PLAY:
+      // Action to resove the play by calculation of winner
       const {
         resolveWinningPlay,
         resolvePromptModal,
@@ -918,6 +986,7 @@ const gameReducer = (state = initialState, action) => {
         playedCards: [...resolvePlayedCards]
       };
     case actionTypes.MOVE_PLAY_PILE_TO_DISCARD:
+      // Action that moves the cards in the play pile to the discard pile of the winning team
       const {
         playToDiscardMovingCards,
         playToDiscardPlayPile
@@ -929,6 +998,7 @@ const gameReducer = (state = initialState, action) => {
         movingCards: [...playToDiscardMovingCards]
       };
     case actionTypes.START_NEXT_PLAY:
+      // Action to start the next trick
       const {
         nextPlayGameState,
         nextPlayPromptMessage,
@@ -947,6 +1017,7 @@ const gameReducer = (state = initialState, action) => {
         promptModal: {...nextPlayPromptMessage},
       };
     case actionTypes.TALLY_COUNTS:
+      // Action to move the next card from the discard to the meld pile to tally count points
       const {
         tallyMovingCards,
         tallyDiscardPiles,
@@ -961,6 +1032,7 @@ const gameReducer = (state = initialState, action) => {
         discardPiles: [...tallyDiscardPiles],
       };
     case actionTypes.ADD_COUNT_TO_TALLY:
+      // Action to add point to tally if the card finished moving to the meld pile was a counter
       const {
         addCountBidModals
       } = gamePlayLogic.addCountToTally(
@@ -975,6 +1047,8 @@ const gameReducer = (state = initialState, action) => {
         bidModals: [...addCountBidModals]
       };
     case actionTypes.ADD_COUNT_TO_SCORE:
+      // Action to add the count points to the score, calculate if the bid was made, and reset game play values
+      // for the next hand
       const {
         addScorePlayScore,
         addScorePlayerModal,
@@ -999,6 +1073,7 @@ const gameReducer = (state = initialState, action) => {
         ...addScoreNewHand
       };
     case actionTypes.END_HAND:
+      // Action to end the hand for the next hand and figure out if the game was won
       const {
         endHandGameState,
         endHandPlayerModal,

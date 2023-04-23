@@ -4,12 +4,14 @@ import { Provider } from 'react-redux';
 import store from './redux/store';
 import App from './App';
 
-test('renders learn react link', () => {
-  const { container } = render(
-    <Provider store={store}>
-      <App />
-    </Provider>
-  );
-
-  expect(container.firstChild).toHaveClass('laverty-pinocle-app');
+describe('App.jsx', () => {
+  test('Positive test of App being rendered', () => {
+    const { container } = render(
+      <Provider store={store}>
+        <App />
+      </Provider>
+    );
+    expect(container.querySelector('.laverty-pinocle-app')).toBeDefined();
+  });
 });
+

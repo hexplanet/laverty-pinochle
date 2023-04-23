@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import PropTypes from 'prop-types';
 import './index.scss';
 
@@ -36,29 +36,42 @@ function Input({
   handleEnter,
   handleFocus,
 }) {
-  const [currentValue, setCurrentValue] = useState(value);
+  const [currentValue, _setCurrentValue] = useState(value);
+  const currentValueRef = React.useRef(currentValue);
+  const setCurrentValue = data => {
+    currentValueRef.current = data;
+    _setCurrentValue(data);
+  };
   const [enterKeyListener, setEnterKeyListener] = useState(false);
+  const [focused, _setFocused] = useState(false);
+  const focusedRef = React.useRef(focused);
+  const setFocused = data => {
+    focusedRef.current = data;
+    _setFocused(data);
+  };
   const inputClassNames = `lavpin-input ${inputCLass}}`;
   const inputBoxWidth={width:`${width}px`};
-  let focused = false;
   /**
    * Handles the keyEvent from keydown listener for enter key to send callback function for entered value
    *
    * @param {keyEvent} event The keyEvent from the document keydown listener
    */
-  const handleEnterKey = (event) => {
-    if (event?.keyCode === 13 && focused) {
-      handleEnter(currentValue);
+  const handleEnterKey = useCallback((event) => {
+    if (event?.keyCode === 13 && focusedRef.current) {
+      handleEnter(id, currentValueRef.current);
     }
-  };
+  });
+  // sets and removes keydown listener on init of component and close of component respectively
   useEffect(() => {
     if (handleEnter !== null) {
       document.addEventListener("keydown", handleEnterKey);
       setEnterKeyListener(true);
     }
-    return (() => { if (enterKeyListener) {
-      document.removeEventListener("keydown", handleEnterKey);
-    } });
+    return (() => {
+      if (enterKeyListener) {
+        document.removeEventListener("keydown", handleEnterKey);
+      }
+    });
   }, []);
   /**
    * Handles the keyEvent from the input element and trims it to the maximum allowed characters
@@ -70,13 +83,25 @@ function Input({
     if (event.target.value.length <= maxChars) {
       setCurrentValue(event.target.value);
       if (handleChange !== null) {
-        handleChange(event.target.value);
+        handleChange(id, event.target.value);
       }
     }
   };
   const labelStyle = labelWidth === 0 ? {} : { width: labelWidth };
-  const onFocus = () => { handleFocus(id, true); };
-  const onBlur = () => { handleFocus(id, false); };
+  /**
+   * Sets the focus of the input to true and informs parent via callback function
+   */
+  const onFocus = () => {
+    setFocused(true);
+    handleFocus(id, true);
+  };
+  /**
+   * Sets the focus of the input to false and informs parent via callback function
+   */
+  const onBlur = () => {
+    setFocused(false);
+    handleFocus(id, false);
+  };
   return (
     <div className={inputClassNames}>
       <div className={'input-container'}>

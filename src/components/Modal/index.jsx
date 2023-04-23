@@ -67,7 +67,8 @@ function Modal({
     width,
   };
   const blockerStyle = { zIndex: zLocation };
-  const containerStyle = { zIndex: zLocation,
+  const containerStyle = {
+    zIndex: zLocation,
     height,
     width,
     left: `${xLocation}px`,
@@ -111,7 +112,7 @@ function Modal({
   buttons.forEach((modalButton, buttonIndex) => {
     generatedButtons.push(
       <Button
-        key={`modalButton_${baseTime + buttonIndex}`}
+        key={`modalButton_${baseTime}${buttonIndex}`}
         icon={modalButton.icon}
         buttonClass={modalButton.buttonClass}
         status={modalButton.status}

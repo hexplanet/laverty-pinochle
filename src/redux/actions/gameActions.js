@@ -4,15 +4,13 @@ import * as actionTypes from './gameActionTypes';
  * Returns action to set up the card table positions
  * @param width {number} Width of the browser display
  * @param height {number} Height of the browser display
- * @param players {array} Contains the names of the players. Used for length to determine number of hands.
  * @returns {{players, width, type: string, height}} The action with data
  */
-export const setCardTableLayout = (width, height, players) => {
+export const setCardTableLayout = (width, height) => {
   return {
     type: actionTypes.SET_CARD_TABLE_LAYOUT,
     width,
-    height,
-    players,
+    height
   };
 };
 /**

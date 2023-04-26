@@ -38,7 +38,7 @@ function GamePlay() {
     showHands,
     handFanOut,
     bidModals
-  } = useSelector((state) => state.app);
+  } = useSelector((state) => state.game);
   const [windowWidth, setWindowWidth]   = useState(window.innerWidth);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
   const [gameHands, setGameHands] = useState([]);
@@ -94,7 +94,7 @@ function GamePlay() {
     }
     if (window.delayWait !== null) {
       (window.delayWait)();
-       window.delayWait = null;
+      window.delayWait = null;
     }
   };
   // This sets the click listener to drive the delay click through

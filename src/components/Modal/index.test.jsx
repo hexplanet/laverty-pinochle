@@ -32,13 +32,13 @@ describe("Modal Component", () => {
   };
   test('renders basic modal correctly', () => {
     const { container } = setup();
-    expect(container.querySelector('.lavpin-modal')).toBeDefined();
-    expect(container.querySelector('.modal-box')).toBeDefined();
-    expect(container.querySelector('.header-line')).toBeDefined();
-    expect(container.querySelector('.box-container')).toBeDefined();
-    expect(container.querySelector('.box-transition')).toBeDefined();
-    expect(container.querySelector('.x-button')).toBeDefined();
-    expect(container.querySelector('.message-area')).toBeDefined();
+    expect(container.querySelectorAll('.lavpin-modal').length).toEqual(1);
+    expect(container.querySelectorAll('.modal-box').length).toEqual(1);
+    expect(container.querySelectorAll('.header-line').length).toEqual(1);
+    expect(container.querySelectorAll('.box-container').length).toEqual(1);
+    expect(container.querySelectorAll('.box-transition').length).toEqual(1);
+    expect(container.querySelectorAll('.x-button').length).toEqual(1);
+    expect(container.querySelectorAll('.message-area').length).toEqual(1);
     expect(container.querySelector('.box-container')).toHaveStyle({
       height: '200px',
       width: '400px',
@@ -92,7 +92,7 @@ describe("Modal Component", () => {
       hasBlocker: true,
       zLocation: 700,
     });
-    expect(container.querySelector('.blocker')).toBeDefined();
+    expect(container.querySelectorAll('.blocker').length).toEqual(1);
     expect(container.querySelector('.blocker')).toHaveStyle({
       zIndex: 700,
     });
@@ -107,15 +107,15 @@ describe("Modal Component", () => {
   });
   test('renders without the close if hasCloseButton is false', () => {
     const { container } = setup({ hasCloseButton: false });
-    expect(container.querySelector('.x-button')).toEqual(null);
+    expect(container.querySelectorAll('.x-button').length).toEqual(0);
   });
   test('renders without a background box if hasBox is false', () => {
     const { container } = setup({ hasBox: false });
-    expect(container.querySelector('.transparent-box')).toBeDefined();
+    expect(container.querySelectorAll('.transparent-box').length).toEqual(1);
   });
   test('renders with additional class name', () => {
     const { container } = setup({ boxStyleClass: 'extra-modal-style' });
-    expect(container.querySelector('.extra-modal-style')).toBeDefined();
+    expect(container.querySelectorAll('.extra-modal-style').length).toEqual(1);
   });
   test('renders header from a string', async() => {
     setup({ header: 'Header Title' });
@@ -126,8 +126,8 @@ describe("Modal Component", () => {
       header: (<span className={'sub-header'}>Span Text</span>),
       hasHeaderSeparator: true
     });
-    expect(container.querySelector('.sub-header')).toBeDefined();
-    expect(container.querySelector('.header-separator')).toBeDefined();
+    expect(container.querySelectorAll('.sub-header').length).toEqual(1);
+    expect(container.querySelectorAll('.header-separator').length).toEqual(1);
     expect(await screen.findByText('Span Text')).toBeVisible();
   });
   test('renders message from a string', async() => {
@@ -138,7 +138,7 @@ describe("Modal Component", () => {
     const { container } = setup({
       message: (<span className={'message-class'}>Message Span Text</span>),
     });
-    expect(container.querySelector('.message-class')).toBeDefined();
+    expect(container.querySelectorAll('.message-class').length).toEqual(1);
     expect(await screen.findByText('Message Span Text')).toBeVisible();
   });
   test('renders Input components from parent and receives callback', async () => {

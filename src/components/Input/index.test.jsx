@@ -27,9 +27,9 @@ describe("Input Component", () => {
   };
   test('renders basic input correctly', () => {
     const { container } = setup();
-    expect(container.querySelector('.lavpin-input')).toBeDefined();
-    expect(container.querySelector('.input-container')).toBeDefined();
-    expect(container.querySelector('.input-element')).toBeDefined();
+    expect(container.querySelectorAll('.lavpin-input').length).toEqual(1);
+    expect(container.querySelectorAll('.input-container').length).toEqual(1);
+    expect(container.querySelectorAll('.input-element').length).toEqual(1);
     expect(container.querySelector('input')).toHaveStyle({ width: '200px' });
     expect(container.querySelector('input')).toHaveProperty('type', 'text');
     expect(container.querySelector('input')).toHaveProperty('placeholder', '');
@@ -43,9 +43,9 @@ describe("Input Component", () => {
       width: '300px'
     });
   });
-  test('renders additional class name if given', async () => {
+  test('renders additional class name if given', () => {
     const { container } = setup({ inputClass: 'extra-input-class'});
-    expect(container.querySelector('.extra-input-class')).toBeDefined();
+    expect(container.querySelectorAll('.extra-input-class').length).toEqual(1);
   });
   test('renders placeholder if given', async () => {
     const { container } = setup({ prompt: 'Enter Text'});

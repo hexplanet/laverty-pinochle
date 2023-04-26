@@ -60,7 +60,7 @@ function Modal({
     window.addEventListener("resize", updateDimensions);
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
-  const modalClassNames = `lavpin-modal ${boxStyleClass}}`;
+  const modalClassNames = `lavpin-modal ${boxStyleClass}`;
   const boxClassNames = `modal-box${hasBox ? '' : ' transparent-box'}`;
   const headerClassNames = `header-line${hasHeaderSeparator ? '' : ' without-separator'}`;
   const modalStyle = { height,

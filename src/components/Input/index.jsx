@@ -24,7 +24,7 @@ import './index.scss';
 function Input({
   id,
   inputType,
-  inputCLass,
+  inputClass,
   width,
   maxChars,
   label,
@@ -49,7 +49,7 @@ function Input({
     focusedRef.current = data;
     _setFocused(data);
   };
-  const inputClassNames = `lavpin-input ${inputCLass}}`;
+  const inputClassNames = `lavpin-input ${inputClass}`;
   const inputBoxWidth={width:`${width}px`};
   /**
    * Handles the keyEvent from keydown listener for enter key to send callback function for entered value
@@ -126,7 +126,7 @@ function Input({
 Input.propTypes = {
   id: PropTypes.string,
   inputType: PropTypes.string,
-  inputCLass: PropTypes.string,
+  inputClass: PropTypes.string,
   width: PropTypes.number,
   maxChars: PropTypes.number,
   label: PropTypes.string,
@@ -142,7 +142,7 @@ Input.propTypes = {
 Input.defaultProps = {
   id: '',
   inputType: 'text',
-  inputCLass: '',
+  inputClass: '',
   width: 200,
   maxChars: 15,
   label: '',

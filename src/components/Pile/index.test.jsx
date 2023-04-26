@@ -76,9 +76,9 @@ describe("Modal Component", () => {
   };
   test('renders basic pile correctly', () => {
     const { container } = setup();
-    expect(container.querySelector('.lavpin-pile')).toBeDefined();
-    expect(container.querySelector('.pile-transformer')).toBeDefined();
-    expect(container.querySelector('.pile-container')).toBeDefined();
+    expect(container.querySelectorAll('.lavpin-pile').length).toEqual(1);
+    expect(container.querySelectorAll('.pile-transformer').length).toEqual(1);
+    expect(container.querySelectorAll('.pile-container').length).toEqual(1);
     expect(container.querySelector('.lavpin-pile')).toHaveStyle({
       left: '1000px',
       top: '1000px',
@@ -119,7 +119,7 @@ describe("Modal Component", () => {
     const { container } = setup({
       hidden: true
     });
-    expect(container.querySelector('.lavpin-pile')).toEqual(null);
+    expect(container.querySelectorAll('.lavpin-pile').length).toEqual(0);
   });
   test('renders the cards in the pile with card backs only', () => {
     const { container } = setup({

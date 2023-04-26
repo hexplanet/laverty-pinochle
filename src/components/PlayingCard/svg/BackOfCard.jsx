@@ -18,7 +18,7 @@ function BackOfCard({ color, borderColor }) {
       </g>
     </svg>
   );
-};
+}
 
 BackOfCard.propTypes = {
   color: PropTypes.string,

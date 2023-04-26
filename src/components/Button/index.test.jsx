@@ -18,12 +18,12 @@ describe("Button Component", () => {
   };
   test('renders button correctly', () => {
     const { container } = setup();
-    expect(container.querySelector('.lavpin-button')).toBeDefined();
-    expect(container.querySelector('.inner-button')).toBeDefined();
+    expect(container.querySelectorAll('.lavpin-button').length).toEqual(1);
+    expect(container.querySelectorAll('.inner-button').length).toEqual(1);
   });
   test('renders icon if icon given', () => {
     const { container } = setup({ icon: (<div className={'button-icon'} />)});
-    expect(container.querySelector('.button-icon')).toBeDefined();
+    expect(container.querySelectorAll('.button-icon').length).toEqual(1);
   });
   test('renders label if label given', async () => {
     setup({ label: 'Button Label'});
@@ -31,17 +31,17 @@ describe("Button Component", () => {
   });
   test('has additional class name if given', () => {
     const { container } = setup({ buttonClass: 'extra-button-class'});
-    expect(container.querySelector('.extra-button-class')).toBeDefined();
+    expect(container.querySelectorAll('.extra-button-class').length).toEqual(1);
   });
   test('renders disabled if status is inactive, does not click', async () => {
     const { container } = setup({ status: 'inactive'});
-    expect(container.querySelector('.inactive')).toBeDefined();
+    expect(container.querySelectorAll('.inactive').length).toEqual(1);
     fireEvent.click(screen.getByRole('button'));
     expect(mockHandleClick).toHaveBeenCalledTimes(0);
   });
   test('call be clicked if status is not inactive', () => {
     const { container } = setup({ returnMessage: 'hello' });
-    expect(container.querySelector('.inactive')).toEqual(null);
+    expect(container.querySelectorAll('.inactive').length).toEqual(0);
     fireEvent.click(screen.getByRole('button'));
     expect(mockHandleClick).toHaveBeenCalledWith('hello');
   });

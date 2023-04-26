@@ -81,16 +81,16 @@ describe("Hand Component", () => {
   };
   test('renders basic hand correctly', () => {
     const { container } = setup();
-    expect(container.querySelector('.lavpin-hand')).toBeDefined();
-    expect(container.querySelector('.hand-transformer')).toBeDefined();
-    expect(container.querySelector('.hand-container')).toBeDefined();
+    expect(container.querySelectorAll('.lavpin-hand').length).toEqual(1);
+    expect(container.querySelectorAll('.hand-transformer').length).toEqual(1);
+    expect(container.querySelectorAll('.hand-container').length).toEqual(1);
     expect(container.querySelectorAll('.lavpin-playing-card').length).toEqual(0);
   });
   test('does not render basic hand if hidden', () => {
     const { container } = setup({hidden:true});
-    expect(container.querySelector('.lavpin-hand')).toEqual(null);
-    expect(container.querySelector('.hand-transformer')).toEqual(null);
-    expect(container.querySelector('.hand-container')).toEqual(null);
+    expect(container.querySelectorAll('.lavpin-hand').length).toEqual(0);
+    expect(container.querySelectorAll('.hand-transformer').length).toEqual(0);
+    expect(container.querySelectorAll('.hand-container').length).toEqual(0);
     expect(container.querySelectorAll('.lavpin-playing-card').length).toEqual(0);
   });
   test('hand gets rendered at the right locations', () => {

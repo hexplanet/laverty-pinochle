@@ -2,12 +2,11 @@ import React from 'react';
 import thunk from 'redux-thunk';
 import configureMockStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
-import { render, fireEvent, act } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import GamePlay from './index';
 import * as actionType from '../../redux/actions/gameActionTypes';
 import * as GAME_STATE from "../../utils/gameStates";
 import * as CONSTANT from "../../utils/constants";
-import * as gameActions from "../../redux/actions/gameActions";
 
 describe('GamePlay Container', () => {
   jest.mock('../../redux/store.js');

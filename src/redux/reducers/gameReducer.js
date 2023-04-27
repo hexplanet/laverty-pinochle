@@ -108,7 +108,7 @@ const gameReducer = (state = initialState, action) => {
       };
       return {
         ...state,
-        playerModal: {...state.playerModal, ...blankedPromptModal},
+        promptModal: {...state.promptModal, ...blankedPromptModal},
       };
     case actionTypes.RESOLVE_CARD_MOVEMENT:
       // This action places a moved card into a container based on it's id and adds :complete to the gameState

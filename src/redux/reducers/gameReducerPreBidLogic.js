@@ -386,7 +386,7 @@ export const throwCardForDeal = (state) => {
   newDiscard0.pop();
   const newDiscards = [...state.discardPiles];
   newDiscards[0] = [...newDiscard0];
-  // Creatw props for new moving card
+  // Create props for new moving card
   const newMovingCard = {
     id: `${sourceCardId}to${targetCardId}`,
     keyId: `${sourceCardId}to${targetCardId}${Date.now()}`,

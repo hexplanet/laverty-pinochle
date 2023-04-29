@@ -6,12 +6,7 @@ import * as actionTypes from '../actions/gameActionTypes';
 import * as GAME_STATE from '../../utils/gameStates';
 
 describe('gameReducer', () => {
-  beforeEach(() => {
-    //jest.useFakeTimers();
-  });
   afterEach(() => {
-    //jest.runOnlyPendingTimers();
-    //jest.useRealTimers();
     jest.clearAllMocks();
   });
   test('SET_CARD_TABLE_LAYOUT', ()=> {

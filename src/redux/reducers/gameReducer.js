@@ -417,7 +417,7 @@ const gameReducer = (state = initialState, action) => {
         thrownHand: false,
       };
     case actionTypes.SHOW_THE_WIDOW:
-      // Action to display the widow cards and set up player modal for contiue if all cards displayed
+      // Action to display the widow cards and set up player modal for continue if all cards displayed
       if (action.widowCardIndex === state.players.length) {
         const widowContinueModal = generalModalData('', {
           hasBox: false,

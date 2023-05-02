@@ -2,7 +2,7 @@ import * as preBidLogic from './gameReducerPreBidLogic';
 import * as helpers from '../../utils/helpers';
 import {SUITS, HIGH_TO_LOW} from "../../utils/cardOrder";
 
-describe('gameReducer', () => {
+describe('gameReducerPreBidLogic', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });

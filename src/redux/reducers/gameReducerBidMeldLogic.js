@@ -780,7 +780,7 @@ export const meldCards = (state) => {
   const meldSeenCards = [...state.seenCards];
   meldSeenCards[state.dealToPlayer] = [...cardsUsed];
   if (state.dealToPlayer === state.tookBid) {
-    // belwo loop adds likely kept cards from the widow to the seen cards
+    // below loop adds likely kept cards from the widow to the seen cards
     state.seenWidow.forEach(widow => {
       if (widow[0] === state.trumpSuit || widow[1] === 'A') {
         if (cardsUsed.indexOf(widow) === -1) {

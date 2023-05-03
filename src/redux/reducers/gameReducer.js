@@ -8,8 +8,8 @@ import { generalModalData } from '../../utils/helpers';
 // Initial values for the gameReducer
 const initialState = {
   gameState: 'init', /* This is a string that holds the game state that drives the state based part of the app */
-  teams: ['Us', 'Them', 'Jessica'], /* This is an array of team names. There can either 2 or 3 teams */
-  players: ['You', 'Steven', 'Ellen'], /* This is an array of player names. There can either 3 or 4 teams */
+  teams: ['Us', 'Them'], /* This is an array of team names. There can either 2 or 3 teams */
+  players: ['You', 'Steven', 'Ellen', 'Jessica'], /* This is an array of player names. There can either 3 or 4 teams */
   playerDisplaySettings: [], /* array, by player, of locations to place the hand components */
   discardPiles: [], /* array, by player, of cards that are in the discard pile components */
   discardDisplaySettings: [], /* array, by player, of locations to place discard piles */

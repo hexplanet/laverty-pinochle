@@ -21,7 +21,6 @@ export const MELD_COMBINATIONS = [
   { cards: ['HK', 'DK', 'SK', 'CK'], value: 8, title: 'Kings'},
   { cards: ['HQ', 'DQ', 'SQ', 'CQ'], value: 6, title: 'Queens'},
   { cards: ['HJ', 'DJ', 'SJ', 'CJ'], value: 4, title: 'Jacks'},
-  { cards: ['H9', 'D9', 'S9', 'C9'], value: 2, title: 'Sad Nines'},
   { cards: ['SQ', 'DJ'], value: 4, title: 'Pinochle'},
   { cards: ['HK', 'HQ'], value: 2, title: 'Marriage in Hearts'},
   { cards: ['DK', 'DQ'], value: 2,title: 'Marriage in Diamonds'},

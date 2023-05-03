@@ -1,6 +1,5 @@
 import * as bidMeldLogic from './gameReducerBidMeldLogic';
 import * as helpers from '../../utils/helpers';
-import {getHandMeld, getTrumpBidHeader, getTrumpSuit, suitIconSelector} from "../../utils/helpers";
 
 describe('gameReducerBidMeldLogic', () => {
   afterEach(() => {

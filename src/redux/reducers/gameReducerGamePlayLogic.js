@@ -407,12 +407,11 @@ export const computerLeadPlay = (state) => {
     const trumpInHand = validHand.filter(card => card.suit === state.trumpSuit);
     const trumpWin = winningCards.filter(card => card.suit === state.trumpSuit);
     if (trumpWin.length === 1) {
-      if (trumpLeft < trumpInHand && trumpInHand > validHand.length + 2 && trumpLeft > 0 ) {
+      if (trumpLeft.length < trumpInHand.length && trumpInHand.length + 2 >= validHand.length && trumpLeft.length > 0 ) {
         // Control Trump Cards
         playCard = trumpWin[0];
       }
     }
-
     if (playCard === null) {
       if (winningCards.length > trumpWin.length) {
         // Play winning card
@@ -434,7 +433,7 @@ export const computerLeadPlay = (state) => {
         const trumpPullingSuits = getTrumpPullingSuits(state.offSuits, state.trumpSuit, state.tookPlay);
         if (trumpPullingSuits.length > 0) {
           // There is a suit(s) to pull trump, do it
-          suitIndex = getRandomRange(0, getTrumpPullingSuits.length - 1, 1);
+          suitIndex = getRandomRange(0, trumpPullingSuits.length - 1, 1);
           stepIndex = suitIndex;
           stopCheck = false;
           while (playCard === null && !stopCheck) {
@@ -447,7 +446,8 @@ export const computerLeadPlay = (state) => {
     }
     if (playCard === null) {
       // Pull trump with Trump
-      const pullWithTrump = (trumpInHand > trumpLeft) || (trumpInHand + 2) >= validHand.length;
+      const pullWithTrump = trumpLeft.length > 0 &&
+        ((trumpInHand.length > trumpLeft.length) || (trumpInHand.length + 2) >= validHand.length);
       if (pullWithTrump) {
         playCard = getHighestNonCount(validHand, state.trumpSuit, true);
       }
@@ -493,11 +493,6 @@ export const computerLeadPlay = (state) => {
       });
     }
   }
-  if (playCard === null) {
-    // No logical play, throw random card
-    const randomCard = getRandomRange(0, validHand.length, 1);
-    playCard = validHand[randomCard];
-  }
   if (playCard !== null) {
     // start selected card moving to the play pile and remove it from the player's hand
     const selectedIndex = validHand.findIndex(card => playCard.suit === card.suit && playCard.value === card.value);
@@ -511,6 +506,27 @@ export const computerLeadPlay = (state) => {
     computerPlayMovingCards
   };
 };
+
+const giveUnitTestVariables = (state, nextPlayer, unplayedCards) => {
+  console.log('---------------------');
+  console.log(JSON.stringify({
+    hands: state.hands,
+    players: state.players,
+    playPile: state.playPile,
+    tookPlay: state.tookPlay,
+    tookBid: state.tookBid,
+    offSuits: state.offSuits,
+    trumpSuit: state.trumpSuit,
+    winningPlay: state.winningPlay,
+    playedCards: state.playedCards,
+    discardPiles: state.discardPiles
+  }));
+  console.log(nextPlayer);
+  console.log(JSON.stringify(unplayedCards));
+  console.log('---------------------');
+};
+
+
 /**
  * Calculates the card the computer player should follow with and starts its movement to the play pile
  * @param state {object} Pointer to reducer state

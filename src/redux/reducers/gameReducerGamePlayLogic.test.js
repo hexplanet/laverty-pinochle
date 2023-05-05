@@ -26,7 +26,8 @@ import {
   computerFollowUnplayGiveNonCount,
   computerFollowResultGiveNonCount
 } from './gameReducerGamePlayLogicTestData';
-import {getWinningCards} from "../../utils/helpers";
+import { Clubs } from '../../components/PlayingCard/svg/Clubs';
+
 describe('gameReducerGamePLayLogic', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -929,6 +930,743 @@ describe('gameReducerGamePLayLogic', () => {
       expect(JSON.stringify(returned)).toEqual(computerFollowResultGiveNonCount);
       expect(spiedGetUnplayedCards).toHaveBeenCalledTimes(1);
       expect(spiedGetWinningCards).toHaveBeenCalledTimes(1);
+    });
+  });
+  describe('resolvePlay', () => {
+    it('Current player wins with on suit higher card', () => {
+      const spiedGetTrumpBidHeader = jest.spyOn(helpers, 'getTrumpBidHeader')
+        .mockReturnValue({'header': 'trumpHeader'});
+      const spiedGetHandLeaderMessage = jest.spyOn(helpers, 'getHandLeaderMessage')
+        .mockReturnValue('HandLeaderMessage');
+      const returned = gamePlayLogic.resolvePlay(
+        ['a','b','c'],
+        [{suit: 'C', value: 'Q'}, {suit: 'C', value: 'A'}, null],
+        'H',
+        1,
+        0,
+        0,
+        0,
+        28,
+        [[],[],[]]
+      );
+      expect(returned).toEqual({
+        "resolvePlayedCards": [
+          [],
+          [
+            {"suit": "C", "value": "A"}
+          ],
+          []
+        ],
+        "resolvePromptModal": {
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "trumpHeader",
+          "height": 140,
+          "message": <div>HandLeaderMessage</div>,
+          "shown": true,
+          "width": 210,
+          "zoom": 100
+        },
+        "resolveWinningPlay": 1
+      });
+      expect(spiedGetTrumpBidHeader).toHaveBeenCalledTimes(1);
+      expect(spiedGetHandLeaderMessage).toHaveBeenCalledTimes(1);
+    });
+    it('Current player wins with trump', () => {
+      const spiedGetTrumpBidHeader = jest.spyOn(helpers, 'getTrumpBidHeader')
+        .mockReturnValue({'header': 'trumpHeader'});
+      const spiedGetHandLeaderMessage = jest.spyOn(helpers, 'getHandLeaderMessage')
+        .mockReturnValue('HandLeaderMessage');
+      const returned = gamePlayLogic.resolvePlay(
+        ['a','b','c'],
+        [{suit: 'C', value: 'A'}, {suit: 'H', value: '9'}, null],
+        'H',
+        1,
+        0,
+        0,
+        0,
+        28,
+        [[],[],[]]
+      );
+      expect(returned).toEqual({
+        "resolvePlayedCards": [
+          [],
+          [
+            {"suit": "H", "value": "9"}
+          ],
+          []
+        ],
+        "resolvePromptModal": {
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "trumpHeader",
+          "height": 140,
+          "message": <div>HandLeaderMessage</div>,
+          "shown": true,
+          "width": 210,
+          "zoom": 100
+        },
+        "resolveWinningPlay": 1
+      });
+      expect(spiedGetTrumpBidHeader).toHaveBeenCalledTimes(1);
+      expect(spiedGetHandLeaderMessage).toHaveBeenCalledTimes(1);
+    });
+    it('Current player loses with lower card in suit', () => {
+      const spiedGetTrumpBidHeader = jest.spyOn(helpers, 'getTrumpBidHeader')
+        .mockReturnValue({'header': 'trumpHeader'});
+      const spiedGetHandLeaderMessage = jest.spyOn(helpers, 'getHandLeaderMessage')
+        .mockReturnValue('HandLeaderMessage');
+      const returned = gamePlayLogic.resolvePlay(
+        ['a','b','c'],
+        [{suit: 'C', value: 'A'}, {suit: 'C', value: '9'}, null],
+        'H',
+        1,
+        0,
+        0,
+        0,
+        28,
+        [[],[],[]]
+      );
+      expect(returned).toEqual({
+        "resolvePlayedCards": [
+          [],
+          [
+            {"suit": "C", "value": "9"}
+          ],
+          []
+        ],
+        "resolvePromptModal": {
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "trumpHeader",
+          "height": 140,
+          "message": <div>HandLeaderMessage</div>,
+          "shown": true,
+          "width": 210,
+          "zoom": 100
+        },
+        "resolveWinningPlay": 0
+      });
+      expect(spiedGetTrumpBidHeader).toHaveBeenCalledTimes(1);
+      expect(spiedGetHandLeaderMessage).toHaveBeenCalledTimes(1);
+    });
+    it('Current player loses off suit', () => {
+      const spiedGetTrumpBidHeader = jest.spyOn(helpers, 'getTrumpBidHeader')
+        .mockReturnValue({'header': 'trumpHeader'});
+      const spiedGetHandLeaderMessage = jest.spyOn(helpers, 'getHandLeaderMessage')
+        .mockReturnValue('HandLeaderMessage');
+      const returned = gamePlayLogic.resolvePlay(
+        ['a','b','c'],
+        [{suit: 'C', value: 'J'}, {suit: 'S', value: 'A'}, null],
+        'H',
+        1,
+        0,
+        0,
+        0,
+        28,
+        [[],[],[]]
+      );
+      expect(returned).toEqual({
+        "resolvePlayedCards": [
+          [],
+          [
+            {"suit": "S", "value": "A"}
+          ],
+          []
+        ],
+        "resolvePromptModal": {
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "trumpHeader",
+          "height": 140,
+          "message": <div>HandLeaderMessage</div>,
+          "shown": true,
+          "width": 210,
+          "zoom": 100
+        },
+        "resolveWinningPlay": 0
+      });
+      expect(spiedGetTrumpBidHeader).toHaveBeenCalledTimes(1);
+      expect(spiedGetHandLeaderMessage).toHaveBeenCalledTimes(1);
+    });
+  });
+  describe('displayPlayWinner', () => {
+    it('Calculates and displays winner', () => {
+      const returned = gamePlayLogic.displayPlayWinner(
+        'H',
+        ['a', 'b', 'c'],
+        [{suit: 'C', value: 'A'}, {suit: 'C', value: '9'}, {suit: 'S', value: '9'}],
+        0,
+        {},
+        0,
+        [[],[],[]]
+      );
+      expect(returned).toEqual({
+        "calculateWinnerOffSuits": [
+          [],
+          [],
+          ["C"]
+        ],
+        "calculateWinnerPlayPile": [
+          {"frontColor": "#eea", "suit": "C", "value": "A"},
+          {"suit": "C", "value": "9"},
+          {"suit": "S", "value": "9"}
+        ],
+        "calculateWinnerPromptModal": {
+          "message": <div style={{"display": "inline-flex"}}><b>a</b> wins <b>A</b><span style={{"display": "inline-flex", "width": 24}}><Clubs /></span></div>
+        }
+      });
+    });
+  });
+  describe('setUpNextPlay', () => {
+    it('Sets up next play', () => {
+      const returned = gamePlayLogic.setUpNextPlay(
+        [[{value:'A', suit: 'S'}], [], []],
+        {},
+        0,
+        0
+      );
+      expect(returned).toEqual({
+        "nextPlayDealToPlayer": 0,
+        "nextPlayGameState": "startNextPlay",
+        "nextPlayPromptMessage": {}
+      });
+    });
+    it('Set up end of hand', () => {
+      const returned = gamePlayLogic.setUpNextPlay(
+        [[], [], []],
+        {},
+        0,
+        0
+      );
+      expect(JSON.stringify(returned)).toEqual( "{\"nextPlayGameState\":\"tallyCounts\",\"nextPlayPromptMessage\":{\"message\":{\"type\":\"div\",\"key\":null,\"ref\":null,\"props\":{\"children\":[null,{\"type\":\"br\",\"key\":null,\"ref\":null,\"props\":{},\"_owner\":null,\"_store\":{}},{\"type\":\"div\",\"key\":null,\"ref\":null,\"props\":{\"children\":\"+1 for last trick\"},\"_owner\":null,\"_store\":{}}]},\"_owner\":null,\"_store\":{}}},\"nextPlayDealToPlayer\":1}");
+    });
+  });
+  describe('movePlayPileToDiscard', () => {
+    it('Team one winner', () => {
+      const spiedGetCardLocation = jest.spyOn(helpers, 'getCardLocation').mockReturnValue(['a']);
+      const state = {
+        winningPlay: 0,
+        players: ['a','b','c','d'],
+        tookBid: 0,
+        playPile: [{suit: 'H', value: 'Q'}, {suit: 'H', value: 'A'}, {suit: 'H', value: '9'}, {suit: 'H', value: '9'}]
+      };
+      const returned = gamePlayLogic.movePlayPileToDiscard(state);
+      expect(JSON.stringify(returned)).toEqual(  "{\"playToDiscardMovingCards\":[{\"id\":\"P0toD0\",\"keyId\":\"P0toD0undefined\",\"suit\":\"H\",\"value\":\"Q\",\"shown\":false,\"speed\":1,\"source\":[\"a\"],\"target\":[\"a\"]},{\"id\":\"P1toD0\",\"keyId\":\"P1toD0undefined\",\"suit\":\"H\",\"value\":\"A\",\"shown\":false,\"speed\":1,\"source\":[\"a\"],\"target\":[\"a\"]},{\"id\":\"P2toD0\",\"keyId\":\"P2toD0undefined\",\"suit\":\"H\",\"value\":\"9\",\"shown\":false,\"speed\":1,\"source\":[\"a\"],\"target\":[\"a\"]},{\"id\":\"P3toD0\",\"keyId\":\"P3toD0undefined\",\"suit\":\"H\",\"value\":\"9\",\"shown\":false,\"speed\":1,\"source\":[\"a\"],\"target\":[\"a\"]}],\"playToDiscardPlayPile\":[null,null,null,null]}");
+      expect(spiedGetCardLocation).toBeCalledTimes(8);
+    });
+    it('Team two winner', () => {
+      const spiedGetCardLocation = jest.spyOn(helpers, 'getCardLocation').mockReturnValue(['a']);
+      const state = {
+        winningPlay: 1,
+        players: ['a','b','c','d'],
+        tookBid: 0,
+        playPile: [{suit: 'H', value: 'Q'}, {suit: 'H', value: 'A'}, {suit: 'H', value: '9'}, {suit: 'H', value: 'Q'}]
+      };
+      const returned = gamePlayLogic.movePlayPileToDiscard(state);
+      expect(JSON.stringify(returned)).toEqual( "{\"playToDiscardMovingCards\":[{\"id\":\"P0toD1\",\"keyId\":\"P0toD1undefined\",\"suit\":\"H\",\"value\":\"Q\",\"shown\":false,\"speed\":1,\"source\":[\"a\"],\"target\":[\"a\"]},{\"id\":\"P1toD1\",\"keyId\":\"P1toD1undefined\",\"suit\":\"H\",\"value\":\"A\",\"shown\":false,\"speed\":1,\"source\":[\"a\"],\"target\":[\"a\"]},{\"id\":\"P2toD1\",\"keyId\":\"P2toD1undefined\",\"suit\":\"H\",\"value\":\"9\",\"shown\":false,\"speed\":1,\"source\":[\"a\"],\"target\":[\"a\"]},{\"id\":\"P3toD1\",\"keyId\":\"P3toD1undefined\",\"suit\":\"H\",\"value\":\"Q\",\"shown\":false,\"speed\":1,\"source\":[\"a\"],\"target\":[\"a\"]}],\"playToDiscardPlayPile\":[null,null,null,null]}");
+      expect(spiedGetCardLocation).toBeCalledTimes(8);
+    });
+  });
+  describe('discardToMeldTally', () => {
+    it('Move tally to meb pile for 3 handed', () => {
+      const spiedGetCardLocation = jest.spyOn(helpers, 'getCardLocation').mockReturnValue(['a']);
+      const state = {
+        discardPiles: [
+          [],
+          [],
+          [{suit: 'H', value: 'Q'}, {suit: 'H', value: 'A'}, {suit: 'H', value: '9'}, {suit: 'H', value: 'Q'}]
+        ],
+        dealToPlayer: 2,
+        players: ['a','b','c'],
+        tookBid: 2
+      };
+      const returned = gamePlayLogic.discardToMeldTally(state);
+      expect(JSON.stringify(returned)).toEqual("{\"tallyMovingCards\":[{\"id\":\"D23toM2\",\"keyId\":\"D23toM2undefined\",\"suit\":\"H\",\"value\":\"Q\",\"shown\":true,\"frontColor\":\"#eee\",\"speed\":2,\"source\":[\"a\"],\"target\":[\"a\"]}],\"tallyDiscardPiles\":[[],[],[{\"suit\":\"H\",\"value\":\"Q\"},{\"suit\":\"H\",\"value\":\"A\"},{\"suit\":\"H\",\"value\":\"9\"}]],\"tallyDealToPlayer\":2,\"tallyGameState\":\"moveDiscardToMeldTally\"}");
+      expect(spiedGetCardLocation).toBeCalledTimes(2);
+    });
+    it('Move tally to meb pile for 4 handed bid taker', () => {
+      const spiedGetCardLocation = jest.spyOn(helpers, 'getCardLocation').mockReturnValue(['a']);
+      const state = {
+        discardPiles: [
+          [],
+          [],
+          [{suit: 'H', value: 'Q'}, {suit: 'H', value: 'A'}, {suit: 'H', value: '9'}, {suit: 'H', value: 'Q'}],
+          []
+        ],
+        dealToPlayer: 2,
+        players: ['a','b','c','d'],
+        tookBid: 2
+      };
+      const returned = gamePlayLogic.discardToMeldTally(state);
+      expect(JSON.stringify(returned)).toEqual("{\"tallyMovingCards\":[{\"id\":\"D23toM2\",\"keyId\":\"D23toM2undefined\",\"suit\":\"H\",\"value\":\"Q\",\"shown\":true,\"frontColor\":\"#eee\",\"speed\":2,\"source\":[\"a\"],\"target\":[\"a\"]}],\"tallyDiscardPiles\":[[],[],[{\"suit\":\"H\",\"value\":\"Q\"},{\"suit\":\"H\",\"value\":\"A\"},{\"suit\":\"H\",\"value\":\"9\"}],[]],\"tallyDealToPlayer\":2,\"tallyGameState\":\"moveDiscardToMeldTally\"}");
+      expect(spiedGetCardLocation).toBeCalledTimes(2);
+    });
+    it('Move tally to meb pile for 4 handed non-bid taker', () => {
+      const spiedGetCardLocation = jest.spyOn(helpers, 'getCardLocation').mockReturnValue(['a']);
+      const state = {
+        discardPiles: [
+          [],
+          [],
+          [{suit: 'H', value: 'Q'}, {suit: 'H', value: 'A'}, {suit: 'H', value: '9'}, {suit: 'H', value: 'Q'}],
+          []
+        ],
+        dealToPlayer: 2,
+        players: ['a','b','c','d'],
+        tookBid: 1
+      };
+      const returned = gamePlayLogic.discardToMeldTally(state);
+      expect(JSON.stringify(returned)).toEqual( "{\"tallyMovingCards\":[{\"id\":\"D23toM2\",\"keyId\":\"D23toM2undefined\",\"suit\":\"H\",\"value\":\"Q\",\"shown\":true,\"frontColor\":\"#eee\",\"speed\":2,\"source\":[\"a\"],\"target\":[\"a\"]}],\"tallyDiscardPiles\":[[],[],[{\"suit\":\"H\",\"value\":\"Q\"},{\"suit\":\"H\",\"value\":\"A\"},{\"suit\":\"H\",\"value\":\"9\"}],[]],\"tallyDealToPlayer\":2,\"tallyGameState\":\"moveDiscardToMeldTally\"}");
+      expect(spiedGetCardLocation).toBeCalledTimes(2);
+    });
+    it('On a skip for tally', () => {
+      const spiedGetCardLocation = jest.spyOn(helpers, 'getCardLocation').mockReturnValue(['a']);
+      const state = {
+        discardPiles: [
+          [],
+          [],
+          [{suit: 'H', value: 'Q'}, {suit: 'H', value: 'A'}, {suit: 'H', value: '9'}, {suit: 'H', value: 'Q'}],
+          []
+        ],
+        dealToPlayer: 3,
+        players: ['a','b','c','d'],
+        tookBid: 1
+      };
+      const returned = gamePlayLogic.discardToMeldTally(state);
+      expect(JSON.stringify(returned)).toEqual("{\"tallyMovingCards\":[],\"tallyDiscardPiles\":[[],[],[{\"suit\":\"H\",\"value\":\"Q\"},{\"suit\":\"H\",\"value\":\"A\"},{\"suit\":\"H\",\"value\":\"9\"},{\"suit\":\"H\",\"value\":\"Q\"}],[]],\"tallyDealToPlayer\":3,\"tallyGameState\":\"doneCounting\"}");
+      expect(spiedGetCardLocation).toBeCalledTimes(0);
+    });
+  });
+  describe('addCountToTally', () => {
+    it('Tally 3 handed with tally player wins last', () => {
+      const returned = gamePlayLogic.addCountToTally(
+        [{},{},{}],
+        [[{value: 'K'},{value: 'Q'},{value: 'K'},{value: 'K'}], [], []],
+        0,
+        0
+      );
+      expect(returned).toEqual({
+        "addCountBidModals": [
+          {
+            "hasCloseButton": false,
+            "hasHeaderSeparator": false,
+            "header": "4",
+            "height": 44,
+            "message": expect.any(Object),
+            "shown": true,
+            "width": 80,
+            "zoom": 100
+          },
+          {},
+          {}
+        ]
+      });
+    });
+    it('Tally 3 handed with tally player does not wins last', () => {
+      const returned = gamePlayLogic.addCountToTally(
+        [{},{},{}],
+        [[{value: 'K'},{value: 'Q'},{value: 'K'},{value: 'K'}], [], []],
+        1,
+        0
+      );
+      expect(returned).toEqual({
+        "addCountBidModals": [
+          {
+            "hasCloseButton": false,
+            "hasHeaderSeparator": false,
+            "header": "3",
+            "height": 44,
+            "message": expect.any(Object),
+            "shown": true,
+            "width": 80,
+            "zoom": 100
+          },
+          {},
+          {}
+        ]
+      });
+    });
+    it('Tally 4 handed with tally team wins last', () => {
+      const returned = gamePlayLogic.addCountToTally(
+        [{},{},{},{}],
+        [[{value: 'K'},{value: 'Q'},{value: 'K'},{value: 'K'}], [], [], []],
+        2,
+        0
+      );
+      expect(returned).toEqual({
+        "addCountBidModals": [
+          {
+            "hasCloseButton": false,
+            "hasHeaderSeparator": false,
+            "header": "4",
+            "height": 44,
+            "message": expect.any(Object),
+            "shown": true,
+            "width": 80,
+            "zoom": 100
+          },
+          {},
+          {},
+          {}
+        ]
+      });
+    });
+    it('Tally 4 handed with tally player does not wins last', () => {
+      const returned = gamePlayLogic.addCountToTally(
+        [{},{},{},{}],
+        [[{value: 'K'},{value: 'Q'},{value: 'K'},{value: 'K'}], [], []],
+        1,
+        0
+      );
+      expect(returned).toEqual({
+        "addCountBidModals": [
+          {
+            "hasCloseButton": false,
+            "hasHeaderSeparator": false,
+            "header": "3",
+            "height": 44,
+            "message": expect.any(Object),
+            "shown": true,
+            "width": 80,
+            "zoom": 100
+          },
+          {},
+          {},
+          {}
+        ]
+      });
+    });
+  });
+  describe('addCountToScore', () => {
+    it('Bidder fails bid and player gets cabbageed', () => {
+      const returned = gamePlayLogic.addCountToScore(
+        ['a','b'],
+        ['c','d','e','f'],
+        [[{meld:5}],[{meld: 2}]],
+        [[],[],[],[]],
+        [{},{},{},{}],
+        0,
+        28
+      );
+      expect(returned).toEqual({
+        "addScoreGameWon": "",
+        "addScorePlayScore": [
+          [
+            {"counts": "", "gotSet": true, meld: 5, "score": -28}
+          ],
+          [
+            {"counts": "", "gotSet": true, meld: 2, "score": "0"}
+          ]
+        ],
+        "addScorePlayerModal": {
+          "buttons": [
+            {"label": "End Hand", "returnMessage": "endOfHand", "status": "warning"}
+          ],
+          "hasBox": true,
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 105,
+          "message":  expect.any(Object),
+          "shown": true,
+          "width": 500,
+          "zoom": 100
+        },
+        "addScorePromptModal": {
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 140,
+          "message": expect.any(Object),
+          "shown": true,
+          "width": 210,
+          "zoom": 100
+        }
+      });
+    });
+    it('Bidder makes bid and player gets cabbaged', () => {
+      const returned = gamePlayLogic.addCountToScore(
+        ['a','b'],
+        ['c','d','e','f'],
+        [[{meld:5}],[{meld: 2}]],
+        [[{}],[{}],[{}],[{}]],
+        [{header: "28"},{header: "2"},{},{}],
+        0,
+        28
+      );
+      expect(returned).toEqual({
+        "addScoreGameWon": "",
+        "addScorePlayScore": [
+          [{"counts": "28", "meld": 5, "score": "33"}],
+          [{"counts": "2", "meld": 2, "score": "4"}]
+        ],
+        "addScorePlayerModal": {
+          "buttons": [
+            {"label": "End Hand", "returnMessage": "endOfHand", "status": "warning"}
+          ],
+          "hasBox": false,
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 105,
+          "message": expect.any(Object),
+          "shown": true,
+          "width": 500,
+          "zoom": 100
+        },
+        "addScorePromptModal": {
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 140,
+          "message": expect.any(Object),
+          "shown": true,
+          "width": 210,
+          "zoom": 100
+        }
+      });
+    });
+  });
+  describe('resolveEndHand', () => {
+    it('Resolve hand and continue game', () => {
+      const returned = gamePlayLogic.resolveEndHand(
+        ['a','b'],
+        ['c','d','e','f'],
+        [[{score:78}],[{score: 79}]],
+        0,
+        0
+      );
+      expect(returned).toEqual({
+        "endHandDealer": 1,
+        "endHandGameState": "moveDeckToDealer",
+        "endHandGameWon": "",
+        "endHandPlayerModal": {"shown": false},
+        "endHandPromptModal": {
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 140,
+          "message": expect.any(Object),
+          "shown": true,
+          "width": 210,
+          "zoom": 100
+        }
+      });
+    });
+    it('Team 1 won', () => {
+      const returned = gamePlayLogic.resolveEndHand(
+        ['a','b'],
+        ['c','d','e','f'],
+        [[{score:128}],[{score: 79}]],
+        0,
+        0
+      );
+      expect(returned).toEqual( {
+        "endHandDealer": 1,
+        "endHandGameState": "waitEndOfGame",
+        "endHandGameWon": "a",
+        "endHandPlayerModal": {
+          "buttons": [
+            {"label": "End Game", "returnMessage": "endOfGame", "status": "warning"}
+          ],
+          "hasBox": false,
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 140,
+          "message": expect.any(Object),
+          "shown": true,
+          "width": 500,
+          "zoom": 100
+        },
+        "endHandPromptModal": {
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 140,
+          "message": (<div><span><b>a</b> won the game!</span></div>),
+          "shown": true,
+          "width": 210,
+          "zoom": 100
+        }
+      });
+    });
+    it('Team 2 won because of bid', () => {
+      const returned = gamePlayLogic.resolveEndHand(
+        ['a','b'],
+        ['c','d','e','f'],
+        [[{score:138}],[{score: 129}]],
+        1,
+        0
+      );
+      expect(returned).toEqual( {
+        "endHandDealer": 1,
+        "endHandGameState": "waitEndOfGame",
+        "endHandGameWon": "b",
+        "endHandPlayerModal": {
+          "buttons": [
+            {"label": "End Game", "returnMessage": "endOfGame", "status": "warning"}
+          ],
+          "hasBox": true,
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 140,
+          "message": <div><span><b>b</b> won by taking the bid.</span></div>,
+          "shown": true,
+          "width": 500,
+          "zoom": 100
+        },
+        "endHandPromptModal": {
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 140,
+          "message": <div><span><b>b</b> won the game!</span></div>,
+          "shown": true,
+          "width": 210,
+          "zoom": 100
+        }
+      });
+    });
+    it('3 handed non-bidding team wins', () => {
+      const returned = gamePlayLogic.resolveEndHand(
+        ['a','b','c'],
+        ['c','d','e'],
+        [[{score:138}],[{score: 60}],[{score: 129}]],
+        1,
+        0
+      );
+      expect(returned).toEqual( {
+        "endHandDealer": 1,
+        "endHandGameState": "waitEndOfGame",
+        "endHandGameWon": "a",
+        "endHandPlayerModal": {
+          "buttons": [
+            {"label": "End Game", "returnMessage": "endOfGame", "status": "warning"}
+          ],
+          "hasBox": false,
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 140,
+          "message": expect.any(Object),
+          "shown": true,
+          "width": 500,
+          "zoom": 100
+        },
+        "endHandPromptModal": {
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 140,
+          "message": <div><span><b>a</b> won the game!</span></div>,
+          "shown": true,
+          "width": 210,
+          "zoom": 100
+        }
+      });
+    });
+    it('3 handed non-bidding team wins, second team', () => {
+      const returned = gamePlayLogic.resolveEndHand(
+        ['a','b','c'],
+        ['c','d','e'],
+        [[{score:138}],[{score: 60}],[{score: 149}]],
+        1,
+        0
+      );
+      expect(returned).toEqual( {
+        "endHandDealer": 1,
+        "endHandGameState": "waitEndOfGame",
+        "endHandGameWon": "c",
+        "endHandPlayerModal": {
+          "buttons": [
+            {"label": "End Game", "returnMessage": "endOfGame", "status": "warning"}
+          ],
+          "hasBox": false,
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 140,
+          "message": expect.any(Object),
+          "shown": true,
+          "width": 500,
+          "zoom": 100
+        },
+        "endHandPromptModal": {
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 140,
+          "message": <div><span><b>c</b> won the game!</span></div>,
+          "shown": true,
+          "width": 210,
+          "zoom": 100
+        }
+      });
+    });
+    it('3 handed non-bidding teams tie', () => {
+      const returned = gamePlayLogic.resolveEndHand(
+        ['a', 'b', 'c'],
+        ['c', 'd', 'e'],
+        [[{score: 140}], [{score: 60}], [{score: 140}]],
+        1,
+        0
+      );
+      expect(returned).toEqual({
+        "endHandDealer": 1,
+        "endHandGameState": "moveDeckToDealer",
+        "endHandGameWon": "",
+        "endHandPlayerModal": {"shown": false},
+        "endHandPromptModal": {
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 140,
+          "message": expect.any(Object),
+          "shown": true,
+          "width": 210,
+          "zoom": 100
+        }
+      });
+    });
+    it('3 handed non-bidding team wins', () => {
+      const returned = gamePlayLogic.resolveEndHand(
+        ['a', 'b', 'c'],
+        ['c', 'd', 'e'],
+        [[{score: 140}], [{score: 60}], [{score: 70}]],
+        1,
+        0
+      );
+      expect(returned).toEqual( {
+        "endHandDealer": 1,
+        "endHandGameState": "waitEndOfGame",
+        "endHandGameWon": "a",
+        "endHandPlayerModal": {
+          "buttons": [
+            {"label": "End Game", "returnMessage": "endOfGame", "status": "warning"}
+          ],
+          "hasBox": false,
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 140,
+          "message": expect.any(Object),
+          "shown": true,
+          "width": 500,
+          "zoom": 100
+        },
+        "endHandPromptModal": {
+          "hasCloseButton": false,
+          "hasHeaderSeparator": false,
+          "header": "",
+          "height": 140,
+          "message": <div><span><b>a</b> won the game!</span></div>,
+          "shown": true,
+          "width": 210,
+          "zoom": 100
+        }
+      });
     });
   });
 });

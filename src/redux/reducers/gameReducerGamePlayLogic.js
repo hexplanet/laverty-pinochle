@@ -506,27 +506,6 @@ export const computerLeadPlay = (state) => {
     computerPlayMovingCards
   };
 };
-
-const giveUnitTestVariables = (state, nextPlayer, unplayedCards) => {
-  console.log('---------------------');
-  console.log(JSON.stringify({
-    hands: state.hands,
-    players: state.players,
-    playPile: state.playPile,
-    tookPlay: state.tookPlay,
-    tookBid: state.tookBid,
-    offSuits: state.offSuits,
-    trumpSuit: state.trumpSuit,
-    winningPlay: state.winningPlay,
-    playedCards: state.playedCards,
-    discardPiles: state.discardPiles
-  }));
-  console.log(nextPlayer);
-  console.log(JSON.stringify(unplayedCards));
-  console.log('---------------------');
-};
-
-
 /**
  * Calculates the card the computer player should follow with and starts its movement to the play pile
  * @param state {object} Pointer to reducer state
@@ -767,7 +746,15 @@ export const resolvePlay = (
  * @returns {{calculateWinnerPromptModal, calculateWinnerPlayPile: *[], calculateWinnerOffSuits: *[]}}
  *          Replacements for playPile, promptModal, and offSuits in the reducer
  */
-export const displayPlayWinner = (trumpSuit, players, playPile, winningPlay, promptModal, tookPlay, offSuits) => {
+export const displayPlayWinner = (
+  trumpSuit,
+  players,
+  playPile,
+  winningPlay,
+  promptModal,
+  tookPlay,
+  offSuits
+) => {
   const calculateWinnerOffSuits = [...offSuits];
   // This loop updates offSuit basic on the cards played
   for (let i = 0; i < players.length; i++) {
@@ -976,7 +963,15 @@ export const addCountToTally = (bidModals, melds, tookPlay, dealToPlayer) => {
  *          zoom: number, message: *, hasHeaderSeparator: boolean, height: number}, addScorePlayScore: *[]}}
  *          Replacements for playScore, playerModal, promptModal, and gameWon in the reducer
  */
-export const addCountToScore = (teams, players, playScore, melds, bidModals, tookBid, bidAmount) => {
+export const addCountToScore = (
+  teams,
+  players,
+  playScore,
+  melds,
+  bidModals,
+  tookBid,
+  bidAmount
+) => {
   const addScorePlayScore = [...playScore];
   let cabbageMessage = '';
   let hasBox = false;
@@ -1109,10 +1104,10 @@ export const resolveEndHand = (teams, players, playScore, tookBid, dealer) => {
   if (won === -1 && winners.length > 0) {
     if (winners.length === 2) {
       // multiple winning teams
-      if (winners[0] > winners[1]) {
+      if (scores[winners[0]] > scores[winners[1]]) {
         // First winning team is higher, they win
         won = winners[0];
-      } else if (winners[1] > winners[0]) {
+      } else if (scores[winners[1]] > scores[winners[0]]) {
         // Second winning team is higher, they win
         won = winners[1];
       } else {

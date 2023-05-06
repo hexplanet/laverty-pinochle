@@ -1,5 +1,5 @@
 import * as bidMeldLogic from './gameReducerBidMeldLogic';
-import * as helpers from '../../utils/helpers';
+import * as helpers from '../../../utils/helpers';
 
 describe('gameReducerBidMeldLogic', () => {
   afterEach(() => {

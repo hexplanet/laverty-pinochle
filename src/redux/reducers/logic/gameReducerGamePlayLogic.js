@@ -15,10 +15,10 @@ import {
   getWinningCards,
   setValidCardIndexes,
   throwCardIntoMiddle
-} from "../../utils/helpers";
-import * as GAME_STATE from "../../utils/gameStates";
-import * as colors from "../../utils/colors";
-import * as CARD_ORDER from "../../utils/cardOrder";
+} from "../../../utils/helpers";
+import * as GAME_STATE from "../../../utils/gameStates";
+import * as colors from "../../../utils/colors";
+import * as CARD_ORDER from "../../../utils/cardOrder";
 
 /**
  * Moves all meld pile cards back the the player's hands. Clear outs meld pile. Clear prompt down to trump header.
@@ -868,9 +868,9 @@ export const discardToMeldTally = (state) => {
   let tallyDealToPlayer = state.dealToPlayer;
   if (valuePile.length === 0) {
     // Moves onto the next player if the current player is out of cards to tally
-    tallyGameState = GAME_STATE.NEXT_TALLY;
+    tallyGameState = `${GAME_STATE.NEXT_TALLY}${tallyDealToPlayer}`;
     if (state.players.length === 3) {
-      tallyDealToPlayer = (state.dealToPlayer + 1) % state.players.length;
+      tallyDealToPlayer = (state.dealToPlayer + 1) % 3;
       if (tallyDealToPlayer === (state.tookBid + 1) % 3) {
         // All players tallied
         tallyGameState = GAME_STATE.DONE_COUNTING;

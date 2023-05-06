@@ -291,6 +291,10 @@ function GamePlay() {
         dispatch(gameActions.addCountToScore())
         break;
       default:
+        if (gameState.indexOf(GAME_STATE.NEXT_TALLY) > -1) {
+          // This tallies of the next player count at the end of the hand game play
+          dispatch(gameActions.tallyCounts());
+        }
     }
   }, [gameState]);
   const handleModalInput = (type, event, message) => {

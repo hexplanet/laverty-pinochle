@@ -6,8 +6,8 @@ import {
   createLandingCard,
   sortCardHand,
   getHandBid,
-} from '../../utils/helpers';
-import * as GAME_STATE from '../../utils/gameStates';
+} from '../../../utils/helpers';
+import * as GAME_STATE from '../../../utils/gameStates';
 
 /**
  * Returns the location of the game components based on width, height, and number of players.

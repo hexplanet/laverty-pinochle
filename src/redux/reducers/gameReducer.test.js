@@ -1,7 +1,7 @@
 import gameReducer from './gameReducer';
-import * as preBidLogic from './gameReducerPreBidLogic';
-import * as bidMeldLogic from './gameReducerBidMeldLogic';
-import * as gamePlayLogic from './gameReducerGamePlayLogic';
+import * as preBidLogic from './logic/gameReducerPreBidLogic';
+import * as bidMeldLogic from './logic/gameReducerBidMeldLogic';
+import * as gamePlayLogic from './logic/gameReducerGamePlayLogic';
 import * as actionTypes from '../actions/gameActionTypes';
 import * as GAME_STATE from '../../utils/gameStates';
 

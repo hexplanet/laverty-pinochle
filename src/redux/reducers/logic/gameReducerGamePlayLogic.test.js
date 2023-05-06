@@ -1,5 +1,5 @@
-import * as gamePlayLogic from './gameReducerGamePLayLogic';
-import * as helpers from '../../utils/helpers';
+import * as gamePlayLogic from './gameReducerGamePlayLogic';
+import * as helpers from '../../../utils/helpers';
 import {
   computerFollowPlayOffCounter,
   computerFollowUnplayOffCounter,
@@ -26,7 +26,7 @@ import {
   computerFollowUnplayGiveNonCount,
   computerFollowResultGiveNonCount
 } from './gameReducerGamePlayLogicTestData';
-import { Clubs } from '../../components/PlayingCard/svg/Clubs';
+import { Clubs } from '../../../components/PlayingCard/svg/Clubs';
 
 describe('gameReducerGamePLayLogic', () => {
   afterEach(() => {

@@ -8,10 +8,10 @@ import {
   getWinValue,
   getTrumpBidHeader,
   suitIconSelector,
-} from '../../utils/helpers';
-import * as colors from '../../utils/colors.js';
-import * as GAME_STATE from '../../utils/gameStates';
-import * as CARD_ORDER from '../../utils/cardOrder';
+} from '../../../utils/helpers';
+import * as colors from '../../../utils/colors.js';
+import * as GAME_STATE from '../../../utils/gameStates';
+import * as CARD_ORDER from '../../../utils/cardOrder';
 
 /**
  * Changes prompt modal for bidding message

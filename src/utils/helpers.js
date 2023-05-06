@@ -145,18 +145,20 @@ export const getCardLocation = (id, state, xAdjust = 0, yAdjust = 0) => {
  * @param step {number} The step of the numbers between min and mox
  * @returns {number} The randomized number
  */
-export const getRandomRange = (min, max, step) => {
+export const getRandomRange = (min, max, step= 1) => {
   if (min === max) {
     // if min and max are the same, return min
     return min;
   }
-  const range = ((max - min) + 1) * (step / 1);
+  const randomStep = (step <= 0) ? 1 : step;
+  const range = ((max - min) + 1) * (1 / randomStep);
   let randomNumber = Math.floor(Math.random() * range);
   // safety checks to make sure range is not overstepped
+  randomNumber = (min + (randomNumber * randomStep));
   if (randomNumber < min) { randomNumber = min; }
   if (randomNumber > max) { randomNumber = max; }
   // return final random number
-  return (min + (randomNumber * step));
+  return randomNumber;
 };
 /**
  * Creates a card that can be used in a hand or pile from a moving card.
@@ -277,7 +279,7 @@ export const getHandMeld = (hand, trump) => {
         totalMatches = match;
       }
     });
-    if (totalMatches === 0 && misses === 1 && (meldIndex < 6 || meldIndex !== 1)) {
+    if (totalMatches === 0 && misses === 1 && (meldIndex < pinochleIndex || meldIndex !== 1)) {
       // calculate near miss value for bidding
       nearMiss = nearMiss + (meldCombination.value * .125);
     }
@@ -575,7 +577,15 @@ export const getTrumpBidHeader = (trumpSuit, tookBid, bidAmount, players) => {
  * @param winningPlayer {number} index into players for the player that is currently winning the trick
  * @returns {JSX.Element} Formatting body message for a modal
  */
-export const getHandLeaderMessage = (suitLed, ledValue, suitWin, winValue, players, tookPlay, winningPlayer) => {
+export const getHandLeaderMessage = (
+  suitLed,
+  ledValue,
+  suitWin,
+  winValue,
+  players,
+  tookPlay,
+  winningPlayer
+) => {
   const ledSuit = suitIconSelector(suitLed);
   const winSuit = suitIconSelector(suitWin);
   const suitStyle = {width: 24, display: 'inline-flex'};
@@ -695,7 +705,14 @@ export const getUnplayedCards = (validHand, playedCards, widowDiscards) => {
  * @param firstPlay {boolean} Is this the first trick of the hand?
  * @returns {array} Cards that the player expects to win with, for AI usage
  */
-export const getWinningCards = (hands, unplayedCards, offSuits, trumpSuit, tookPlay, firstPlay) => {
+export const getWinningCards = (
+  hands,
+  unplayedCards,
+  offSuits,
+  trumpSuit,
+  tookPlay,
+  firstPlay
+) => {
   const winners = [];
   const suits = CARD_ORDER.SUITS;
   const values = CARD_ORDER.LOW_TO_HIGH;
@@ -836,7 +853,13 @@ export const getTrumpPullingSuits = (offSuits, trumpSuit, tookPlay) => {
  * @param seenCards {array} array, by player, of cards of that player that have been seen on the table
  * @returns {array} The suits with which a player can try to pass to their partner with
  */
-export const getPartnerPassSuits = (offSuits, trumpSuit, tookPlay, unplayedCards, seenCards) => {
+export const getPartnerPassSuits = (
+  offSuits,
+  trumpSuit,
+  tookPlay,
+  unplayedCards,
+  seenCards
+) => {
   const partner = (tookPlay + 2) % 4;
   const blocker = (tookPlay + 1) % 4;
   const suits = CARD_ORDER.SUITS;
@@ -923,9 +946,9 @@ export const getWinner = (playScore, tookBid) => {
   // get winners for over 120 list
   if (won === -1 && winners.length > 0) {
     if (winners.length === 2) {
-      if (winners[0] > winners[1]) {
+      if (scores[winners[0]] > scores[winners[1]]) {
         won = winners[0];
-      } else if (winners[1] > winners[0]) {
+      } else if (scores[winners[1]] > scores[winners[0]]) {
         won = winners[1];
       }
     } else {

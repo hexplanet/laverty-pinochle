@@ -247,8 +247,9 @@ export const resolveCardMovement = (
     const playerIndex = landingSpot.length > 1 ? Number(landingSpot[1]) : -1;
     // remove the moving card from the array
     const newMovingCards = [...movingCards];
-    changedValues.movingCards = newMovingCards;
-    newMovingCards.splice(moveCardIndex, 1);
+    //changedValues.movingCards = newMovingCards;
+    //newMovingCards.splice(moveCardIndex, 1);
+    newMovingCards[moveCardIndex].doneMoving = true;
     changedValues.movingCards = [...newMovingCards];
     // Create new card to the added to a container
     const landingCard = createLandingCard(stoppedCard, objectType);

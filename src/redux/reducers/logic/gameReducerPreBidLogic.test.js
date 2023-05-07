@@ -192,10 +192,14 @@ describe('gameReducerPreBidLogic', () => {
         ],
         "movingCards": [
           {"keyId": "unknown"},
+          {
+             "doneMoving": true,
+             "keyId": "abc",
+           },
           {"keyId": "unknown2"}
         ]
       });
-      expect(spiedCreateLandingCard).toBeCalledWith( {"keyId": "abc"}, "H");
+      expect(spiedCreateLandingCard).toBeCalledWith( {"keyId": "abc", "doneMoving": true}, "H");
       expect(spiedSortCardHand).toBeCalledWith(['a']);
     });
     it('card resolved into meld', () => {
@@ -224,10 +228,14 @@ describe('gameReducerPreBidLogic', () => {
         ],
         "movingCards": [
           {"keyId": "unknown"},
+          {
+            "doneMoving": true,
+            "keyId": "abc"
+          },
           {"keyId": "unknown2"}
         ]
       });
-      expect(spiedCreateLandingCard).toBeCalledWith( {"keyId": "abc"}, "M");
+      expect(spiedCreateLandingCard).toBeCalledWith( {"keyId": "abc", "doneMoving": true}, "M");
     });
     it('card resolved into discard piles', () => {
       const spiedCreateLandingCard = jest.spyOn(helpers, 'createLandingCard').mockReturnValue('a');
@@ -255,10 +263,14 @@ describe('gameReducerPreBidLogic', () => {
         ],
         "movingCards": [
           {"keyId": "unknown"},
+          {
+            "doneMoving": true,
+            "keyId": "abc"
+          },
           {"keyId": "unknown2"}
         ]
       });
-      expect(spiedCreateLandingCard).toBeCalledWith( {"keyId": "abc"}, "D");
+      expect(spiedCreateLandingCard).toBeCalledWith( {"keyId": "abc", "doneMoving": true}, "D");
     });
     it('card resolved into play pile at player location', () => {
       const spiedCreateLandingCard = jest.spyOn(helpers, 'createLandingCard').mockReturnValue('a');
@@ -282,10 +294,14 @@ describe('gameReducerPreBidLogic', () => {
         "playPile": [null, 'a', null],
         "movingCards": [
           {"keyId": "unknown"},
+          {
+            "doneMoving": true,
+            "keyId": "abc"
+          },
           {"keyId": "unknown2"}
         ]
       });
-      expect(spiedCreateLandingCard).toBeCalledWith( {"keyId": "abc"}, "P");
+      expect(spiedCreateLandingCard).toBeCalledWith( {"keyId": "abc", "doneMoving": true}, "P");
     });
     it('card resolved into play pile at generic location', () => {
       const spiedCreateLandingCard = jest.spyOn(helpers, 'createLandingCard').mockReturnValue('a');
@@ -309,10 +325,14 @@ describe('gameReducerPreBidLogic', () => {
         "playPile": ['b', 'a'],
         "movingCards": [
           {"keyId": "unknown"},
+          {
+            "doneMoving": true,
+            "keyId": "abc"
+          },
           {"keyId": "unknown2"}
         ]
       });
-      expect(spiedCreateLandingCard).toBeCalledWith( {"keyId": "abc"}, "P");
+      expect(spiedCreateLandingCard).toBeCalledWith( {"keyId": "abc", "doneMoving": true}, "P");
     });
   });
   describe('setGameValuesForNewGame', () => {

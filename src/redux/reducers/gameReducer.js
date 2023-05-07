@@ -122,8 +122,21 @@ const gameReducer = (state = initialState, action) => {
         state.discardPiles,
         state.playPile
       );
+      let noMovementLeft = false;
       if (modifiedValues.movingCards?.length === 0) {
-        modifiedValues.gameState = `${state.gameState}:complete`;
+        noMovementLeft = true;
+      } else {
+        noMovementLeft = true;
+        modifiedValues.movingCards.forEach(card => {
+          if (!card.doneMoving) {
+            noMovementLeft = false;
+          }
+        });
+      }
+      if (noMovementLeft) {
+        if (state.gameState.indexOf(':complete') === -1) {
+          modifiedValues.gameState = `${state.gameState}:complete`;
+        }
       }
       return {
         ...state,

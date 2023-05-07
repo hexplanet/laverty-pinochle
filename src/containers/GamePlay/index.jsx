@@ -632,6 +632,7 @@ function GamePlay() {
           source={movingCard.source}
           target={movingCard.target}
           movementDone={cardFinishedMovement}
+          doneMoving={movingCard.doneMoving}
         />
       );
     });

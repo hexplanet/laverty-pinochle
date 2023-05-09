@@ -891,7 +891,8 @@ export const postMeldLaydown = (
     const blankTeam = (!thrownHand ? -1 : (players.length === 4 ? tookBid % 2 : tookBid));
     // the below loop adds the meld to the scorepad if the team involved did not throw the hand
     for(let i = 0; i < teams.length; i++) {
-      const previousScore = meldPlayScore[i].length === 1 ? 0 : meldPlayScore[i][meldPlayScore[i].length - 2].score;
+      const previousScore = meldPlayScore[i].length === 1
+        ? 0 : Number(meldPlayScore[i][meldPlayScore[i].length - 2].score);
       if (blankTeam !== i) {
         const meldScore = meldScores[i] + (teams.length === 2 ? meldScores[i + 2] : 0);
         meldPlayScore[i][meldPlayScore[i].length - 1].meld = meldScore;

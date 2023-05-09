@@ -55,6 +55,12 @@ const initialState = {
 const gameReducer = (state = initialState, action) => {
   // The below massive switch statement operates all actions for the gameReducer
   switch (action.type) {
+    case actionTypes.SET_TEAM_PLAYERS:
+      return {
+        ...state,
+        players: action.players,
+        teams: action.teams
+      };
     case actionTypes.SET_CARD_TABLE_LAYOUT:
       // This action sets the layout of the card table for the given width and height
       const {

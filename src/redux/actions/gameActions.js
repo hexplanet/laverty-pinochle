@@ -431,3 +431,15 @@ export const moveRestToDiscard = () => {
     type: actionTypes.MOVE_REST_TO_DISCARD
   };
 }
+
+/**
+ * Action set the teams and players for the game
+ * @returns {{type: string}} The action
+ */
+export const setTeamPlayers = (teams, players) => {
+  return {
+    type: actionTypes.SET_TEAM_PLAYERS,
+    teams,
+    players
+  };
+}

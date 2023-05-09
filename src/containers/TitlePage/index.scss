@@ -1,0 +1,14 @@
+@import '../../utils/colors.scss';
+
+.lavpin-title-page {
+  .type-buttons-container {
+    .inactive {
+      background-color: $title-active-type-background;
+      color: $title-active-type-color;
+    }
+    .inactive:hover {
+      background-color: $title-active-type-background;
+      color: $title-active-type-color;
+    }
+  }
+}

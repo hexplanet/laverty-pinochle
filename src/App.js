@@ -1,5 +1,5 @@
 import React from 'react';
-import GamePlay from "./containers/GamePlay";
+import TitlePage from "./containers/TitlePage";
 import './App.scss';
 
 /**
@@ -9,7 +9,7 @@ import './App.scss';
 function App() {
   return (
     <div className="laverty-pinocle-app">
-      <GamePlay />
+      <TitlePage />
     </div>
   );
 }

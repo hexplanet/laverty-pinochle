@@ -144,7 +144,6 @@ function Modal({
               <div className={'header-separator'}><hr/></div>}
             <div className={'message-area'}>{message}</div>
             {
-              // Below Input components are operated from where they were originally created
               textInputs.length > 0 && <div className={'text-inputs'}>{textInputs}</div>
             }
             {

@@ -57,7 +57,7 @@ const gameReducer = (state = initialState, action) => {
   switch (action.type) {
     case actionTypes.SET_TEAM_PLAYERS:
       return {
-        ...state,
+        ...initialState,
         players: action.players,
         teams: action.teams
       };
@@ -213,9 +213,11 @@ const gameReducer = (state = initialState, action) => {
       );
       const newShowHands = [];
       const newOffSuits = [];
+      const newBidArray = [];
       for(let i = 0; i < state.players.length; i++) {
         newShowHands.push(false);
         newOffSuits.push([]);
+        newBidArray.push(0);
       }
       return {
         ...state,
@@ -224,7 +226,8 @@ const gameReducer = (state = initialState, action) => {
         showHands: newShowHands,
         promptModal: clearPlayerPrompt,
         handFanOut: -1,
-        offSuits: newOffSuits
+        offSuits: newOffSuits,
+        bids: newBidArray
       };
     case actionTypes.DEAL_CARDS:
       // This action sets up a deal of the cards to the players

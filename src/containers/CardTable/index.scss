@@ -8,4 +8,22 @@
   left: 0;
   top: 0;
   overflow: hidden;
+  .quit-button-container {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+  }
+  .quit-modal {
+    .buttons-line {
+      .inner-button {
+        width: 140px;
+      }
+    }
+    .message-area {
+      margin-top: 40px !important;
+      font-weight: 600;
+      font-size: 32px !important;
+      text-align: center;
+    }
+  }
 }

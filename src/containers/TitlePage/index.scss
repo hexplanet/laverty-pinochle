@@ -1,6 +1,17 @@
 @import '../../utils/colors.scss';
 
 .lavpin-title-page {
+  position: fixed;
+  background-color: $card-table-background;
+  width: 100vw;
+  height: 100vh;
+  .title-label {
+    font-size: 48px;
+    font-weight: 600;
+    text-align: center;
+    margin-top: 36px;
+    margin-bottom: 36px;
+  }
   .type-buttons-container {
     .inactive {
       background-color: $title-active-type-background;
@@ -9,6 +20,57 @@
     .inactive:hover {
       background-color: $title-active-type-background;
       color: $title-active-type-color;
+    }
+  }
+  .game-type-container {
+    width: 100%;
+    .centered-buttons {
+      width: 207px;
+      margin-left: auto;
+      margin-right: auto;
+      .lavpin-button {
+        margin-bottom: 10px;
+      }
+    }
+  }
+  .names-container {
+    margin-top: 30px;
+    width: 100%;
+    .names-inputs-container {
+      width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+      .lavpin-input {
+        margin-bottom: 10px;
+        margin-left: 120px;
+      }
+      .lavpin-input:last-child {
+        margin-bottom: 20px;
+      }
+      .four-handed-container {
+        width: 480px;
+        display: inline-flex;
+        .lavpin-input {
+          margin-left: 0;
+        }
+        .lavpin-input:last-child {
+          margin-bottom: 0;
+        }
+        .team-user-column {
+          width:230px;
+          margin-right: 20px;
+        }
+        margin-bottom: 0;
+      }
+    }
+  }
+  .game-play-button-container {
+    width: 207px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 80px;
+    .inner-button {
+      width: 205px;
     }
   }
 }

@@ -1,5 +1,7 @@
-import React from 'react';
+import React, {useState} from 'react';
 import PropTypes from 'prop-types';
+import Button from '../../components/Button';
+import Modal from '../../components/Modal';
 import './index.scss';
 
 /**
@@ -12,6 +14,7 @@ import './index.scss';
  * @prop displayScorePad {array} This is the scarePad component to display.
  * @prop displayPlayerModal {array} This is all of the Modal components to display.
  * @prop displayMovingCards {array} This is all of the moving cards to display.
+ * @prop handleQuitGame {function} Callback for when the player quits the game.
  */
 function CardTable({
   displayHands,
@@ -20,10 +23,38 @@ function CardTable({
   displayGameArea,
   displayScorePad,
   displayPlayerModal,
-  displayMovingCards
+  displayMovingCards,
+  handleQuitGame
 }) {
+  const [showQuitModal, setShowQuitModal] = useState(false);
+  const toggleQuitModal = () => {
+    setShowQuitModal(!showQuitModal);
+  };
+  const handleModalButtons = (object, action, message) => {
+    if (message === 'quit') {
+      handleQuitGame();
+    } else {
+      toggleQuitModal();
+    }
+  };
+  const quitModal = (
+    <Modal
+      zLocation={2000}
+      hasBlocker={true}
+      hasCloseButton={true}
+      zoom={100}
+      message={'Quit the current game?'}
+      buttons={[
+        {label:'Continue Playing', returnMessage: 'continue'},
+        {label:'Quit Playing', returnMessage: 'quit'}
+      ]}
+      boxStyleClass={'quit-modal'}
+      handleCloseModal={toggleQuitModal}
+      handleModalInput={handleModalButtons}
+    />
+  );
   return (
-    <div className='lavpin-card-table'>
+    <div className={'lavpin-card-table'}>
       {displayDiscards}
       {displayMelds}
       {displayGameArea}
@@ -31,6 +62,13 @@ function CardTable({
       {displayPlayerModal}
       {displayHands}
       {displayMovingCards}
+      <div className={'quit-button-container'}>
+        <Button
+          label={'X'}
+          handleClick={toggleQuitModal}
+        />
+      </div>
+      {showQuitModal && quitModal}
     </div>
   );
 }
@@ -43,6 +81,7 @@ CardTable.propTypes = {
   displayScorePad: PropTypes.array,
   displayPlayerModal: PropTypes.array,
   displayMovingCards: PropTypes.array,
+  handleQuitGame: PropTypes.func,
 };
 
 CardTable.defaultProps = {
@@ -53,6 +92,7 @@ CardTable.defaultProps = {
   displayScorePad: [],
   displayPlayerModal: [],
   displayMovingCards: [],
+  handleQuitGame: () => {}
 };
 
 export default CardTable;

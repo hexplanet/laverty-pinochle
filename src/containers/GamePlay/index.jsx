@@ -10,6 +10,7 @@ import Modal from "../../components/Modal";
 import { getRandomRange }  from "../../utils/helpers";
 import * as CONSTANT from "../../utils/constants";
 import * as GAME_STATE from "../../utils/gameStates";
+import {setAppState} from "../../redux/actions/appActions";
 
 /**
  * This houses the game state based router for actions, the click actions from UI,
@@ -379,6 +380,9 @@ function GamePlay() {
         dispatch(gameActions.clearPlayerModal());
         dispatch(gameActions.endHand());
         break;
+      case GAME_STATE.END_OF_GAME:
+        dispatch(setAppState('title'));
+        break;
       case GAME_STATE.WIN_REST_CONTINUE:
         // Clear player modal and start movement of rest of cards to winner's discard pile after user clicks continue
         dispatch(gameActions.clearPlayerModal());
@@ -638,6 +642,10 @@ function GamePlay() {
     });
     setGameMovingCard([...newGameMovingCards]);
   }, [movingCards]);
+  // Executes quit of the game by the user
+  const quitGame = () => {
+    dispatch(setAppState('title'));
+  }
   // Renders all game components through the CardTable component
   return (
     <div>
@@ -649,6 +657,7 @@ function GamePlay() {
         displayScorePad={gameScorePad}
         displayMovingCards={gameMovingCard}
         displayPlayerModal={gamePlayerModal}
+        handleQuitGame={quitGame}
       />
     </div>
   );

@@ -60,10 +60,6 @@ function MoveCard({
   const [rotationNow, setRotationNow] = useState(source.rotation);
   // The current zoon of the card
   const [zoomNow, setZoomNow] = useState(source.zoom);
-  // Set the start time if not previously set
-  if (!keyTimes[keyId]) {
-    keyTimes[keyId] = Date.now();
-  }
   // Get the difference of the travel distances
   const xDifference = target.x - source.x;
   const yDifference = target.y - source.y;
@@ -101,6 +97,11 @@ function MoveCard({
       }
     }
   };
+  // Set the start time if not previously set
+  if (!keyTimes[keyId]) {
+    keyTimes[keyId] = Date.now();
+    calculateCardMovement();
+  }
   // Sets interval for card movement
   useEffect(() => {
     calculateCardMovement();

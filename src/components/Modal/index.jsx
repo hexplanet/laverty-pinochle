@@ -193,7 +193,7 @@ Modal.defaultProps = {
   textInputs: [],
   buttons: [],
   handleCloseModal: () => {},
-  handleModalInput: PropTypes.func,
+  handleModalInput: () => {},
 };
 
 export default Modal;
